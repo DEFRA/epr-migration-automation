@@ -1,6 +1,6 @@
 
 parameters:
-- name: JobBaseName
+- name: JobName
   type: string
   default: SyncRepoPipelinesJob
 - name: HostedAgentPool
@@ -31,7 +31,7 @@ parameters:
   default: '$(System.AccessToken)'
 
 jobs:
-- job: ${{ parameters.JobBaseName }}${{ replace( parameters.Repo, '-', '') }}
+- job: ${{ parameters.JobName }}
   displayName: Sync Repo Pipelines - ${{ parameters.Repo }}
   dependsOn: ${{ parameters.DependsOn }}
   pool: 

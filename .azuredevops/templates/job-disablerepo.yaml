@@ -12,6 +12,10 @@ parameters:
   default: ''
 - name: Repo
   type: string
+- name: WhatIf
+  displayName: What If
+  type: boolean
+  default: true
 - name: AdoOrganizationUrl
   type: string
   default: '$(System.CollectionUri)'

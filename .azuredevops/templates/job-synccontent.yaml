@@ -1,6 +1,6 @@
 
 parameters:
-- name: JobBaseName
+- name: JobName
   type: string
   default: SyncContentJob
 - name: HostedAgentPool
@@ -22,7 +22,7 @@ parameters:
   default: ''
 
 jobs:
-- job: ${{ parameters.JobBaseName }}${{ replace( parameters.Repo, '-', '') }}
+- job: ${{ parameters.JobName }}
   dependsOn: ${{ parameters.DependsOn }}
   pool: 
     vmImage: ${{ parameters.HostedAgentPool }}

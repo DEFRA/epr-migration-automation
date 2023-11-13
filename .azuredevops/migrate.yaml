@@ -9,6 +9,14 @@ parameters:
     - epr-migration-test2
     - epr-migration-automation
 
+- name: Mode
+  displayName: Operating mode
+  type: string
+  default: Synchronize
+  values: 
+  - Synchronize
+  - Migrate
+
 - name: WhatIf
   displayName: WhatIf
   type: boolean
@@ -53,7 +61,11 @@ extends:
   template: templates/pipeline-migration.yaml
   parameters: 
     Repos: ${{ parameters.Repos }}
-    Mode: Synchronize
+    Mode: ${{ parameters.Mode }}
     GitHubOrganizationName: ${{ variables.GitHubOrganizationName }}
     GitHubServiceConnection: ${{ variables.GitHubServiceConnection }}
+    AdoOrganizationUrl: $(System.CollectionUri)
+    AdoTeamProject: $(System.TeamProject)
+    AdoAccessToken: $(System.AccessToken)
     WhatIf: ${{ parameters.WhatIf }}
+

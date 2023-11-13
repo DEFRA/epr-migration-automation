@@ -43,30 +43,44 @@ parameters:
   type: string
   default: AllPipelines
 
+- name: AdoOrganizationUrl
+  type: string
+  default: '$(System.CollectionUri)'
+- name: AdoTeamProject
+  type: string
+  default: '$(System.TeamProject)'
+- name: AdoAccessToken
+  type: string
+  default: '$(System.AccessToken)'
+
 stages:
-- stage: DisableSourceReposStage
-  condition: ${{ eq (parameters.Mode, 'Migration') }}
-  displayName: Lock Source
-  dependsOn: ''
-  jobs: 
-  - ${{ each repo in parameters.Repos }}:
-    - template: job-disablerepos.yaml
-      parameters:
-        JobBaseName: DisableRepoJob
-        DependsOn: ''
-        HostedAgentPool: ${{ parameters.ubuntuHostedAgentPool }}
-        Repo: ${{ repo }}
-        WhatIf: ${{ parameters.WhatIf }}
+- ${{ if eq(parameters.Mode, 'Migration') }}:
+  - stage: DisableSourceReposStage
+    displayName: Lock Source
+    dependsOn: ''
+    jobs: 
+    - ${{ each repo in parameters.Repos }}:
+      - template: job-disablerepo.yaml
+        parameters:
+          JobName: DisableRepoJob${{ replace( repo, '-', '') }}
+          DependsOn: ''
+          HostedAgentPool: ${{ parameters.ubuntuHostedAgentPool }}
+          AdoOrganizationUrl: ${{ parameters.AdoOrganizationUrl }}
+          AdoTeamProject: ${{ parameters.AdoTeamProject }}
+          AdoAccessToken: ${{ parameters.AdoAccessToken }}
+          Repo: ${{ repo }}
+          WhatIf: ${{ parameters.WhatIf }}
 
 - stage: SyncRepoContentsStage
   displayName: Sync Repo Contents
   dependsOn: 
-  - MigrationStartStage
+  - ${{ if eq(parameters.Mode, 'Migration') }}:
+    - DisableSourceReposStage
   jobs: 
   - ${{ each repo in parameters.Repos }}:
     - template: job-synccontent.yaml
       parameters:
-        JobBaseName: SyncContentJob
+        JobName: SyncContentJob${{ replace( repo, '-', '') }}
         DependsOn: ''
         HostedAgentPool: ${{ parameters.windowsHostedAgentPool }}
         Repo: ${{ repo }}
@@ -75,16 +89,18 @@ stages:
 
 - stage: GetPipelineInfoStage
   displayName: "Gather Pipeline Info"
-  dependsOn: ''
+  dependsOn: 
+  - ${{ if eq(parameters.Mode, 'Migration') }}:
+    - DisableSourceReposStage
   jobs:
   - template: job-getpipelines.yaml
     parameters:
       JobName: GetPipelinesJsonJob
       DependsOn: ''
       HostedAgentPool: ${{ parameters.UbuntuHostedAgentPool }}
-      AdoOrganizationUrl: $(System.CollectionUri)
-      AdoTeamProject: $(System.TeamProject)
-      AdoAccessToken: $(System.AccessToken)
+      AdoOrganizationUrl: ${{ parameters.AdoOrganizationUrl }}
+      AdoTeamProject: ${{ parameters.AdoTeamProject }}
+      AdoAccessToken: ${{ parameters.AdoAccessToken }}
       PipelinesJsonArtifactName: ${{ parameters.AllPipelinesJsonArtifactName }}
       Type2Only: true
       EnabledOnly: true
@@ -98,48 +114,49 @@ stages:
   - ${{ each repo in parameters.Repos }}:
     - template: job-syncrepopipelines.yaml
       parameters:
+        JobName: SyncPipelinesJob${{ replace( repo, '-', '') }}
         DependsOn: ''
         HostedAgentPool: ${{ parameters.ubuntuHostedAgentPool }}
-        AdoOrganizationUrl: $(System.CollectionUri)
-        AdoTeamProject: $(System.TeamProject)
-        AdoAccessToken: $(System.AccessToken)
+        AdoOrganizationUrl: ${{ parameters.AdoOrganizationUrl }}
+        AdoTeamProject: ${{ parameters.AdoTeamProject }}
+        AdoAccessToken: ${{ parameters.AdoAccessToken }}
         PipelinesJsonArtifactName: ${{ parameters.AllPipelinesJsonArtifactName }}
         GitHubOrganizationName: ${{ parameters.GitHubOrganizationName }}
         GitHubServiceConnection: ${{ parameters.GitHubServiceConnection }}
         Repo: ${{ repo }}
         WhatIf: ${{ parameters.WhatIf }}
 
-- stage: DisablePipelinesStage
-  condition: ${{ eq (parameters.Mode, 'Migration') }}
-  displayName: Disable Pipelines
-  dependsOn: 
-  - GetPipelineInfoStage
-  - SyncPipelinesStage
-  jobs: 
-  - ${{ each repo in parameters.Repos }}:
-    - template: job-disablepipelines.yaml
-      parameters:
-        JobBaseName: DisablePipelinesJob
-        DependsOn: ''
-        HostedAgentPool: ${{ parameters.ubuntuHostedAgentPool }}
-        Repo: ${{ repo }}
-        WhatIf: ${{ parameters.WhatIf }}
+- ${{ if eq(parameters.Mode, 'Migration') }}:
+  - stage: DisablePipelinesStage
+    displayName: Disable Pipelines
+    dependsOn: 
+    - GetPipelineInfoStage
+    - SyncPipelinesStage
+    jobs: 
+    - ${{ each repo in parameters.Repos }}:
+      - template: job-disablepipelines.yaml
+        parameters:
+          JobName: DisablePipelinesJob${{ replace( repo, '-', '') }}
+          DependsOn: ''
+          HostedAgentPool: ${{ parameters.ubuntuHostedAgentPool }}
+          Repo: ${{ repo }}
+          WhatIf: ${{ parameters.WhatIf }}
 
-- stage: RenameReposStage
-  condition: ${{ eq (parameters.Mode, 'Migration') }}
-  displayName: Rename Repos
-  dependsOn: 
-  - SyncRepoContentsStage
-  - SyncPipelinesStage
-  jobs: 
-  - ${{ each repo in parameters.Repos }}:
-    - template: job-renamerepo.yaml
-      parameters:
-        JobBaseName: RenameRepoJob
-        DependsOn: ''
-        HostedAgentPool: ${{ parameters.ubuntuHostedAgentPool }}
-        Repo: ${{ repo }}
-        WhatIf: ${{ parameters.WhatIf }}
+  - stage: RenameReposStage
+    condition: ${{ eq (parameters.Mode, 'Migration') }}
+    displayName: Rename Repos
+    dependsOn: 
+    - SyncRepoContentsStage
+    - SyncPipelinesStage
+    jobs: 
+    - ${{ each repo in parameters.Repos }}:
+      - template: job-renamerepo.yaml
+        parameters:
+          JobName: RenameRepoJob${{ replace( repo, '-', '') }}
+          DependsOn: ''
+          HostedAgentPool: ${{ parameters.ubuntuHostedAgentPool }}
+          Repo: ${{ repo }}
+          WhatIf: ${{ parameters.WhatIf }}
 
 # need to generate reports
 # - report the presence of secrets on the target pipeline (because these will not be populated by the automation)
