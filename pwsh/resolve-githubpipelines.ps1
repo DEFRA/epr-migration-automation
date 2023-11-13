@@ -65,11 +65,11 @@ try {
 
   [array]$pipelines = Get-Content -Path $inputFile.FullName | ConvertFrom-Json -Depth 99 
 
-  Write-Host "Loaded details of $($pipelines.Length) pipelines"
+  Write-Host "Loaded details of $($pipelines.Count) pipelines"
 
   [array]$repoPipelines = $pipelines | Where-Object -FilterScript { $_.repository -ne $null -and $_.repository.name -eq $Repo }
 
-  Write-Host "There are $($repoPipelines.Length) pipelines associated with $repo"
+  Write-Host "There are $($repoPipelines.Count) pipelines associated with $repo"
 
   [array]$adoPipelineInfos = $repoPipelines | ConvertTo-PipelineInfo -OrganizationUrl $OrganizationUri -Project $Project | Add-PipelineVariables -PassThru
 

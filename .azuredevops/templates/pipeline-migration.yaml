@@ -1,6 +1,6 @@
 parameters:
 - name: Repos
-  displayName: Repos to sync
+  displayName: Repos to migrate/sync
   type: object
 
 - name: Mode
@@ -20,16 +20,6 @@ parameters:
 
 - name: WhatIf
   displayName: What If
-  type: boolean
-  default: true
-
-- name: SyncRepos
-  displayName: Sync Repos
-  type: boolean
-  default: true
-
-- name: SyncPipelines
-  displayName: Sync Pipelines
   type: boolean
   default: true
 
@@ -54,10 +44,24 @@ parameters:
   default: AllPipelines
 
 stages:
+- stage: DisableSourceReposStage
+  condition: ${{ eq (parameters.Mode, 'Migration') }}
+  displayName: Lock Source
+  dependsOn: ''
+  jobs: 
+  - ${{ each repo in parameters.Repos }}:
+    - template: job-disablerepos.yaml
+      parameters:
+        JobBaseName: DisableRepoJob
+        DependsOn: ''
+        HostedAgentPool: ${{ parameters.ubuntuHostedAgentPool }}
+        Repo: ${{ repo }}
+        WhatIf: ${{ parameters.WhatIf }}
+
 - stage: SyncRepoContentsStage
-  condition: ${{ eq( parameters.SyncRepos, true) }}
   displayName: Sync Repo Contents
-  dependsOn: ""
+  dependsOn: 
+  - MigrationStartStage
   jobs: 
   - ${{ each repo in parameters.Repos }}:
     - template: job-synccontent.yaml
@@ -70,9 +74,8 @@ stages:
         Trunk: ${{ parameters.Trunk }}
 
 - stage: GetPipelineInfoStage
-  condition: ${{ eq( parameters.SyncPipelines, true) }}
   displayName: "Gather Pipeline Info"
-  dependsOn: ""
+  dependsOn: ''
   jobs:
   - template: job-getpipelines.yaml
     parameters:
@@ -88,7 +91,6 @@ stages:
       HostingRepoType: TfsGit
 
 - stage: SyncPipelinesStage
-  condition: ${{ eq( parameters.SyncPipelines, true) }}
   displayName: "Sync Pipelines"
   dependsOn: 
   - GetPipelineInfoStage
@@ -107,6 +109,37 @@ stages:
         Repo: ${{ repo }}
         WhatIf: ${{ parameters.WhatIf }}
 
+- stage: DisablePipelinesStage
+  condition: ${{ eq (parameters.Mode, 'Migration') }}
+  displayName: Disable Pipelines
+  dependsOn: 
+  - GetPipelineInfoStage
+  - SyncPipelinesStage
+  jobs: 
+  - ${{ each repo in parameters.Repos }}:
+    - template: job-disablepipelines.yaml
+      parameters:
+        JobBaseName: DisablePipelinesJob
+        DependsOn: ''
+        HostedAgentPool: ${{ parameters.ubuntuHostedAgentPool }}
+        Repo: ${{ repo }}
+        WhatIf: ${{ parameters.WhatIf }}
+
+- stage: RenameReposStage
+  condition: ${{ eq (parameters.Mode, 'Migration') }}
+  displayName: Rename Repos
+  dependsOn: 
+  - SyncRepoContentsStage
+  - SyncPipelinesStage
+  jobs: 
+  - ${{ each repo in parameters.Repos }}:
+    - template: job-renamerepo.yaml
+      parameters:
+        JobBaseName: RenameRepoJob
+        DependsOn: ''
+        HostedAgentPool: ${{ parameters.ubuntuHostedAgentPool }}
+        Repo: ${{ repo }}
+        WhatIf: ${{ parameters.WhatIf }}
 
 # need to generate reports
 # - report the presence of secrets on the target pipeline (because these will not be populated by the automation)
