@@ -1,0 +1,94 @@
+
+parameters:
+- name: JobName
+  type: string
+  default: GetPipelinesJsonJob
+- name: HostedAgentPool
+  displayName: Hosted agent pool to run on
+  type: string
+  default: ubuntu-latest
+- name: PipelinesJsonArtifactName
+  type: string
+  default: Pipelines
+- name: PipelineNameExclusionFilter
+  type: string
+  default: ''
+- name: DependsOn 
+  type: string
+  default: ''
+- name: Type2Only
+  type: boolean
+  default: false
+- name: EnabledOnly
+  type: boolean
+  default: false
+- name: HostingRepoType
+  type: string
+  default: ''
+- name: AdoOrganizationUrl
+  type: string
+  default: '$(System.CollectionUri)'
+- name: AdoTeamProject
+  type: string
+  default: '$(System.TeamProject)'
+- name: AdoAccessToken
+  type: string
+  default: '$(System.AccessToken)'
+
+jobs:
+- job: ${{ parameters.JobName }}
+  displayName: Get All Pipeline Info
+  dependsOn: ${{ parameters.DependsOn }}
+  pool: 
+    vmImage: ${{ parameters.HostedAgentPool }}
+
+  variables: 
+  - name: PipelinesOutputPath
+    value: $(Build.StagingDirectory)/pipelines.json
+  - ${{ if eq( parameters.EnabledOnly, true )}}:
+    - name: EnabledOnlyForPwsh
+      value: '$true'
+  - ${{ else }}:
+    - name: EnabledOnlyForPwsh
+      value: '$false'
+  - ${{ if eq( parameters.Type2Only, true )}}:
+    - name: Type2OnlyForPwsh
+      value: '$true'
+  - ${{ else }}:
+    - name: Type2OnlyForPwsh
+      value: '$false'
+
+  steps: 
+  - checkout: self
+    clean: true
+
+  - task: PowerShell@2
+    displayName: 'Get Pipelines'
+    retryCountOnTaskFailure: 1
+    inputs:
+      targetType: filePath
+      filePath: $(Build.SourcesDirectory)/pwsh/get-pipelines.ps1
+      pwsh: true
+      arguments: >
+        -OrganizationUri '${{ parameters.AdoOrganizationUrl }}'
+        -Project '${{ parameters.AdoTeamProject }}'
+        -OutputPath '${{ variables.PipelinesOutputPath }}'
+        -EnabledOnly:${{ variables.EnabledOnlyForPwsh }}
+        -Type2Only:${{ variables.Type2OnlyForPwsh }}
+        -HostingRepoType '${{ parameters.HostingRepoType }}'
+        -ExclusionFilter '${{ parameters.PipelineNameExclusionFilter }}'
+    env:
+      AZURE_DEVOPS_EXT_PAT: ${{ parameters.AdoAccessToken }}
+
+  - pwsh: | 
+      dir $(Pipeline.Workspace) -Recurse | Sort-Object -Property FullName | ForEach-Object { Write-Host $_.FullName }
+    displayName: diags
+
+  - publish: ${{ variables.PipelinesOutputPath }}
+    artifact: ${{ parameters.PipelinesJsonArtifactName }}
+    displayName: Publish generated files
+    condition: always()
+
+  - pwsh: | 
+      dir ENV:
+    displayName: diags

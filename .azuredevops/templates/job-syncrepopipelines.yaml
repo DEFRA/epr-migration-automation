@@ -1,0 +1,100 @@
+
+parameters:
+- name: JobBaseName
+  type: string
+  default: SyncRepoPipelinesJob
+- name: HostedAgentPool
+  type: string
+  default: ubuntu-latest
+- name: GitHubServiceConnection
+  type: string
+- name: GitHubOrganizationName
+  type: string
+- name: Repo
+  type: string
+- name: PipelinesJsonArtifactName
+  type: string
+- name: WhatIf
+  type: boolean
+  default: true
+- name: DependsOn 
+  type: string
+  default: ''
+- name: AdoOrganizationUrl
+  type: string
+  default: '$(System.CollectionUri)'
+- name: AdoTeamProject
+  type: string
+  default: '$(System.TeamProject)'
+- name: AdoAccessToken
+  type: string
+  default: '$(System.AccessToken)'
+
+jobs:
+- job: ${{ parameters.JobBaseName }}${{ replace( parameters.Repo, '-', '') }}
+  displayName: Sync Repo Pipelines - ${{ parameters.Repo }}
+  dependsOn: ${{ parameters.DependsOn }}
+  pool: 
+    vmImage: ${{ parameters.HostedAgentPool }}
+
+  variables: 
+  - name: AllPipelinesJsonFile
+    value: $(Pipeline.Workspace)/${{ parameters.PipelinesJsonArtifactName }}/pipelines.json
+  - ${{ if eq( parameters.WhatIf, true )}}:
+    - name: WhatIfForPwsh
+      value: '$true'
+  - ${{ else }}:
+    - name: WhatIfForPwsh
+      value: '$false'
+
+  steps: 
+  - checkout: self
+    clean: true
+
+  - pwsh: | 
+      dir $(Pipeline.Workspace) -Recurse | Sort-Object -Property FullName | ForEach-Object { Write-Host $_.FullName }
+    displayName: diags
+
+  - download: current
+    artifact: ${{ parameters.PipelinesJsonArtifactName }}
+
+  - pwsh: | 
+      dir $(Pipeline.Workspace) -Recurse | Sort-Object -Property FullName | ForEach-Object { Write-Host $_.FullName }
+    displayName: diags
+
+  - task: PowerShell@2
+    displayName: 'Resolve GitHub Pipelines - ${{ parameters.Repo }}'
+    name: ResolveGitHubPipelinesStep
+    inputs:
+      targetType: filePath
+      filePath: $(Build.SourcesDirectory)/pwsh/resolve-githubpipelines.ps1
+      pwsh: true
+      arguments: >
+        -OrganizationUri '${{ parameters.AdoOrganizationUrl }}'
+        -Project '${{ parameters.AdoTeamProject }}'
+        -Repo '${{ parameters.Repo }}'
+        -GitHubOrganizationName '${{ parameters.GitHubOrganizationName }}'
+        -GitHubServiceConnection '${{ parameters.GitHubServiceConnection }}'
+        -InputPath '${{ variables.AllPipelinesJsonFile }}'
+        -ADOOutputVariableName 'GitHubPipelinesJson'
+    env:
+      AZURE_DEVOPS_EXT_PAT: ${{ parameters.AdoAccessToken }}
+
+  - pwsh: | 
+      dir $(Pipeline.Workspace) -Recurse | Sort-Object -Property FullName | ForEach-Object { Write-Host $_.FullName }
+      dir ENV:
+    displayName: diags
+
+  - task: PowerShell@2
+    displayName: 'Configure Pipelines - ${{ parameters.Repo }}'
+    inputs:
+      targetType: filePath
+      filePath: $(Build.SourcesDirectory)/pwsh/set-pipelines.ps1
+      pwsh: true
+      arguments: >
+        -OrganizationUri '${{ parameters.AdoOrganizationUrl }}'
+        -Project '${{ parameters.AdoTeamProject }}'
+        -InputJson '$(ResolveGitHubPipelinesStep.GitHubPipelinesJson)'
+        -WhatIf:${{ variables.WhatIfForPwsh }}
+    env:
+      AZURE_DEVOPS_EXT_PAT: ${{ parameters.AdoAccessToken }}

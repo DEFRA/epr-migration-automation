@@ -1,0 +1,126 @@
+trigger: none
+
+parameters:
+- name: Repos
+  displayName: Repos to sync
+  type: object
+  default: 
+    - epr-migration-test1
+    - epr-migration-test2
+    - epr-migration-automation
+
+- name: SyncRepos
+  displayName: Sync Repo Contents
+  type: boolean
+  default: true
+
+- name: SyncPipelines
+  displayName: Sync Repo Pipelines
+  type: boolean
+  default: true
+
+- name: WhatIf
+  displayName: WhatIf
+  type: boolean
+  default: true
+
+resources: 
+  repositories:
+  # epr-migration-test1
+  - repository: ado-epr-migration-test1
+    name: RWD-CPR-EPR4P-ADO/epr-migration-test1
+    type: git
+  - repository: github-epr-migration-test1
+    name: defra/epr-migration-test1
+    type: github
+    endpoint: defra
+
+  # epr-migration-test2
+  - repository: ado-epr-migration-test2
+    name: RWD-CPR-EPR4P-ADO/epr-migration-test2
+    type: git
+  - repository: github-epr-migration-test2
+    name: defra/epr-migration-test2
+    type: github
+    endpoint: defra
+
+  # epr-migration-automation
+  - repository: ado-epr-migration-automation
+    name: RWD-CPR-EPR4P-ADO/epr-migration-automation
+    type: git
+  - repository: github-epr-migration-automation
+    name: defra/epr-migration-automation
+    type: github
+    endpoint: defra
+
+variables:
+- name: windowsHostedAgentPool 
+  value: windows-latest
+- name: ubuntuHostedAgentPool 
+  value: ubuntu-latest
+- name: AllPipelinesJsonArtifactName
+  value: AllPipelines
+- name: GitHubOrganizationName
+  value: defra
+- name: GitHubServiceConnection
+  value: defra
+- name: Trunk
+  value: main
+
+stages:
+- stage: SyncRepoContentsStage
+  condition: ${{ eq( parameters.SyncRepos, true) }}
+  displayName: Sync Repo Contents
+  dependsOn: ""
+  jobs: 
+  - ${{ each repo in parameters.Repos }}:
+    - template: templates/job-synccontent.yaml
+      parameters:
+        JobBaseName: SyncContentJob
+        DependsOn: ''
+        HostedAgentPool: ${{ variables.windowsHostedAgentPool }}
+        Repo: ${{ repo }}
+        WhatIf: ${{ parameters.WhatIf }}
+        Trunk: ${{ variables.Trunk }}
+
+- stage: GetPipelineInfoStage
+  condition: ${{ eq( parameters.SyncPipelines, true) }}
+  displayName: "Gather Pipeline Info"
+  dependsOn: ""
+  jobs:
+  - template: templates/job-getpipelines.yaml
+    parameters:
+      JobName: GetPipelinesJsonJob
+      DependsOn: ''
+      HostedAgentPool: ${{ variables.ubuntuHostedAgentPool }}
+      AdoOrganizationUrl: $(System.CollectionUri)
+      AdoTeamProject: $(System.TeamProject)
+      AdoAccessToken: $(System.AccessToken)
+      PipelinesJsonArtifactName: ${{ variables.AllPipelinesJsonArtifactName }}
+      Type2Only: true
+      EnabledOnly: true
+      HostingRepoType: TfsGit
+
+- stage: SyncPipelinesStage
+  condition: ${{ eq( parameters.SyncPipelines, true) }}
+  displayName: "Sync Pipelines"
+  dependsOn: 
+  - GetPipelineInfoStage
+  jobs:
+  - ${{ each repo in parameters.Repos }}:
+    - template: templates/job-syncrepopipelines.yaml
+      parameters:
+        DependsOn: ''
+        HostedAgentPool: ${{ variables.ubuntuHostedAgentPool }}
+        AdoOrganizationUrl: $(System.CollectionUri)
+        AdoTeamProject: $(System.TeamProject)
+        AdoAccessToken: $(System.AccessToken)
+        PipelinesJsonArtifactName: ${{ variables.AllPipelinesJsonArtifactName }}
+        GitHubOrganizationName: ${{ variables.GitHubOrganizationName }}
+        GitHubServiceConnection: ${{ variables.GitHubServiceConnection }}
+        Repo: ${{ repo }}
+        WhatIf: ${{ parameters.WhatIf }}
+
+
+# need to generate reports
+# - report the presence of secrets on the target pipeline (because these will not be populated by the automation)

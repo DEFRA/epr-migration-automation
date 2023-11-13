@@ -1,0 +1,116 @@
+
+parameters:
+- name: JobBaseName
+  type: string
+  default: SyncContentJob
+- name: HostedAgentPool
+  displayName: Hosted agent pool to run on
+  type: string
+  default: windows-latest
+- name: Repo
+  displayName: Repo to sync
+  type: string
+- name: WhatIf
+  displayName: WhatIf
+  type: boolean
+  default: true
+- name: Trunk
+  type: string
+  default: main
+- name: DependsOn 
+  type: string
+  default: ''
+
+jobs:
+- job: ${{ parameters.JobBaseName }}${{ replace( parameters.Repo, '-', '') }}
+  dependsOn: ${{ parameters.DependsOn }}
+  pool: 
+    vmImage: ${{ parameters.HostedAgentPool }}
+  displayName: Sync Contents of ${{ parameters.repo }}
+  variables: 
+  - name: sourceRepoSubDir
+    value: s/ado-source
+  - name: targetRepoSubDir
+    value: s/github-target
+  - name: sourceRepoRoot
+    value: $(Pipeline.Workspace)/${{ variables.sourceRepoSubDir }}
+  - name: targetRepoRoot
+    value: $(Pipeline.Workspace)/${{ variables.targetRepoSubDir }}
+  steps: 
+  - checkout: self
+    clean: true
+
+  - checkout: ado-${{ parameters.Repo }}
+    path: ${{ variables.sourceRepoSubDir }}
+    clean: true
+
+  - checkout: github-${{ parameters.Repo }}
+    path: ${{ variables.targetRepoSubDir }}
+    clean: true
+    persistCredentials: true
+
+  - pwsh: |
+      dir $(Pipeline.Workspace) -recurse | ForEach-Object -Process {
+        Write-Host $_.FullName
+      }
+    displayName: "diags - before copy"
+
+  - pwsh: |
+      Push-Location -Path ${{ variables.targetRepoRoot }}
+      git fetch
+      git checkout ${{ parameters.Trunk }}
+      git pull
+      Pop-Location
+    displayName: Connect target repo
+
+  - pwsh: | 
+      Write-Host "Syncing changes from ${{ variables.sourceRepoRoot }} to ${{ variables.targetRepoRoot }}"
+      robocopy ${{ variables.sourceRepoRoot }} ${{ variables.targetRepoRoot }} /mir /xd .git /xd .github 
+      [int]$exitCode = $LASTEXITCODE
+      Write-Host "robocopy exit code $exitCode"
+      if ($exitCode -ge 8) {
+        throw "Robocopy returned error code $LASTEXITCODE"
+      }
+      else {
+        exit 0
+      }
+    displayName: Sync contents
+
+  - pwsh: |
+      dir $(Pipeline.Workspace) -recurse | ForEach-Object -Process {
+        Write-Host $_.FullName
+      }
+    displayName: "diags - after copy"
+
+  - ${{ if ne( parameters.WhatIf, false) }}:
+    - pwsh: | 
+        Write-Host "WhatIf: would push to github repo ${{ parameters.Repo }}"
+      displayName: "WhatIf: Push to ${{ parameters.Repo }}"
+  - ${{ else }}:
+    - pwsh: | 
+        Write-Host "Pushing to github repo ${{ parameters.Repo }}"
+        Push-Location -Path ${{ variables.targetRepoRoot }}
+        git config --global user.email "buildservice@dev.azure.com"
+        git config --global user.name "Build Service"
+        git stage .
+        if ($LASTEXITCODE -ne 0) {
+          Write-Host "git stage returned error code $LASTEXITCODE"
+          Write-Host "Assuming no changes to stage"
+        }
+        else {
+          git commit -m "Refreshed from ADO"
+          if ($LASTEXITCODE -eq 0) {
+            git push
+            if ($LASTEXITCODE -ne 0) {
+              throw "git push returned error code $LASTEXITCODE"
+            }
+          }
+          else {
+            Write-Host "git commit returned error code $LASTEXITCODE"
+            Write-Host "Assuming no changes to push"
+          }
+        }
+        Pop-Location
+        Write-Host "Done"
+        exit 0
+      displayName: Push to ${{ parameters.Repo }}
