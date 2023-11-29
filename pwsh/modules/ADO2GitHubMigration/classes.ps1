@@ -2,6 +2,7 @@ class PipelineInfo {
   [string]$Organization
   [string]$Project
   [string]$Branch
+  [string]$Id
   [string]$Name
   [string]$Description
   [string]$ServiceConnection
