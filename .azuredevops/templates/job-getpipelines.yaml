@@ -14,7 +14,7 @@ parameters:
   type: string
   default: ''
 - name: DependsOn 
-  type: string
+  type: object
   default: ''
 - name: Type2Only
   type: boolean

@@ -1,0 +1,65 @@
+trigger: none
+
+parameters:
+- name: Repo
+  type: string
+  default: epr-migration-test2
+- name: State
+  type: string
+  values:
+  - locked
+  - unlocked
+  default: unlocked
+- name: AllBranches
+  displayName: Apply to all branches
+  type: boolean
+  default: true
+- name: Branch
+  displayName: Branch to lock/unlock (ignored if all branches is set)
+  type: string
+  default: refs/heads/main
+- name: WhatIf
+  displayName: What If
+  type: boolean
+  default: false
+
+variables:
+- name: HostedAgentPool 
+  value: ubuntu-latest
+- name: AdoOrganizationUrl
+  value: '$(System.CollectionUri)'
+- name: AdoTeamProject
+  value: '$(System.TeamProject)'
+- name: AdoAccessToken
+  value: '$(System.AccessToken)'
+- ${{ if eq( parameters.AllBranches, true ) }}:
+  - name: BranchRef
+    value: ''
+- ${{ else }}:
+  - name: BranchRef
+    value: $Branch
+
+resources: 
+  repositories:
+  # epr-migration-test2
+  - repository: epr-migration-test2
+    name: RWD-CPR-EPR4P-ADO/epr-migration-test2
+    type: git
+
+stages:
+- stage: SetRepoBranchStateStage  
+  displayName: Set branch state
+  dependsOn: ''
+  jobs: 
+  - template: templates/job-setbranchstate.yaml
+    parameters:
+      JobName: SetBranchStateJob
+      DependsOn: ''
+      HostedAgentPool: ${{ variables.HostedAgentPool }}
+      AdoOrganizationUrl: ${{ variables.AdoOrganizationUrl }}
+      AdoTeamProject: ${{ variables.AdoTeamProject }}
+      AdoAccessToken: ${{ variables.AdoAccessToken }}
+      Repo: ${{ parameters.Repo }}
+      State: ${{ parameters.State }}
+      Branch: '${{ variables.BranchRef }}'
+      WhatIf: ${{ parameters.WhatIf }}

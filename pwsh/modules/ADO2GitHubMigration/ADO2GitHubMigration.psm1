@@ -142,6 +142,45 @@ function ConvertTo-PipelineInfo {
 }
 
 
+function ConvertTo-AdoAcesDictionary {
+  param(
+    [Parameter(ValueFromPipeline)]
+    [PSCustomObject]$InputObject
+  )  
+
+  begin {
+    [string]$functionName = $MyInvocation.MyCommand
+    Write-Debug "${functionName}:begin:start"
+    [hashtable]$acesDictionary = @{}
+    Write-Debug "${functionName}:begin:end"
+  }
+
+  process {
+    Write-Debug "${functionName}:process:start"
+    [string]$inputType = $InputObject.GetType().Name
+    Write-Debug "${functionName}:process:inputType=$inputType"
+
+    [array]$noteProperties = @($InputObject.acesDictionary | Get-Member -MemberType NoteProperty)
+
+    Write-Debug "${functionName}:process:noteProperties.Count=$($noteProperties.Count)"
+
+    if ($noteProperties.Count -ne 1) { throw "Expected one NoteProperty, received $($noteProperties.Count)."}
+
+    [string]$name = $noteProperties[0].Name
+    Write-Debug "${functionName}:process:name=$name"
+
+    $acesDictionary.Add($InputObject.token, $InputObject.acesDictionary.$name)
+
+    Write-Debug "${functionName}:process:end"
+  }
+
+  end {
+    Write-Debug "${functionName}:end:start"
+    Write-Output $acesDictionary
+    Write-Debug "${functionName}:end:end"
+  }
+}
+
 function Get-AdoEndpoint {
   param(
     [Parameter(ValueFromPipeline)]
@@ -351,7 +390,6 @@ function Get-AdoPipelineModel {
   }
 }
 
-
 function Get-PipelineVariable {
   param(
     [Parameter(ValueFromPipeline)]
@@ -440,6 +478,224 @@ function Get-PipelineVariable {
 }
 
 
+function Get-AdoPullRequest {
+  param(
+    [Parameter(ValueFromPipeline)]
+    [int]$PullRequestId,
+    [Parameter()]
+    [string]$Repo,
+    [Parameter()]
+    [ValidateSet('active', 'abandoned', 'all', 'completed')]
+    [string]$Status = 'all'
+  )  
+
+  begin {
+    [string]$functionName = $MyInvocation.MyCommand
+    Write-Debug "${functionName}:begin:start"
+    Write-Debug "${functionName}:begin:Repo=$Repo"
+    Write-Debug "${functionName}:begin:Status=$Status"
+    Write-Debug "${functionName}:begin:end"
+  }
+
+  process {
+    Write-Debug "${functionName}:process:start"
+    Write-Debug "${functionName}:process:PullRequestId=$PullRequestId"
+
+    if ($PullRequestId -gt 0) {
+      [string]$command = "az repos pr show --id '$PullRequestId'"
+      Write-Debug "${functionName}:process:command=$command"
+      Invoke-CommandLine -Command $command | ConvertFrom-Json -Depth $MAX_JSON_DEPTH | Write-Output
+    }
+    elseif (-not [String]::IsNullOrWhiteSpace($Repo)) {
+      Write-Debug "${functionName}:process:processing all Active PRs in $Repo"
+
+      [System.Text.StringBuilder]$commandBuilder = [System.Text.StringBuilder]::new("az repos pr list ")
+      [void]$commandBuilder.Append(" --repository '$Repo' ")
+      [void]$commandBuilder.Append(" --status $Status ")
+  
+      [string]$command = $commandBuilder.ToString()
+      Write-Debug "${functionName}:process:command=$command"
+
+      [array]$pullRequests = Invoke-CommandLine -Command $command | ConvertFrom-Json -Depth $MAX_JSON_DEPTH 
+     
+      Write-Debug "${functionName}:process:there are $($pullRequests.Count) pull requests in $Repo"
+      Write-Output $pullRequests
+    }
+    else {
+      throw [System.ArgumentNullException]::new('Repo', 'Either PullRequestId or Repo must have a value.')
+    }
+
+    Write-Debug "${functionName}:process:end"
+  }
+
+  end {
+    Write-Debug "${functionName}:end:start"
+    Write-Debug "${functionName}:end:end"
+  }
+}
+
+function Get-AdoSecurityGroup {
+  param(
+    [Parameter(ValueFromPipeline)]
+    [string]$PrincipalName
+  )  
+
+  begin {
+    [string]$functionName = $MyInvocation.MyCommand
+    Write-Debug "${functionName}:begin:start"
+    
+    [string]$command = "az devops security group list"
+    [string]$securityGroupsJson = Invoke-CommandLine -Command $command
+    Write-Debug "${functionName}:begin:securityGroupsJson=$securityGroupsJson"
+
+    $securityGraphs = $securityGroupsJson | ConvertFrom-Json -Depth $MAX_JSON_DEPTH
+
+    [hashtable]$securityGroupDictionary = @{}
+    [array]$matchedGroups = @()
+
+    foreach($graphGroup in $securityGraphs.graphGroups) {
+      $securityGroupDictionary.Add($graphGroup.principalName, $graphGroup)
+    }
+
+    Write-Debug "${functionName}:begin:securityGroupDictionary.Count=$($securityGroupDictionary.Count)"
+    Write-Debug "${functionName}:begin:end"
+  }
+
+  process {
+    Write-Debug "${functionName}:process:start"
+    Write-Debug "${functionName}:process:PrincipalName=$PrincipalName"
+
+    if ([string]::IsNullOrWhiteSpace($PrincipalName)) {
+      $matchedGroups += @($securityGroupDictionary.Values)
+      Write-Debug "${functionName}:process:matching all $($matchedGroups.Count) items"
+    }
+    elseif ($securityGroupDictionary.ContainsKey($PrincipalName)) {
+      Write-Debug "${functionName}:process:matched $PrincipalName"
+      $matchedGroups += $securityGroupDictionary[$PrincipalName]
+    }
+    else {
+      Write-Debug "${functionName}:process:nothing matched $PrincipalName"
+    }
+
+    Write-Debug "${functionName}:process:end"
+  }
+
+  end {
+    Write-Debug "${functionName}:end:start"
+    Write-Debug "${functionName}:end:outputting $($matchedGroups.Count) matches"
+    Write-Output $matchedGroups
+    Write-Debug "${functionName}:end:end"
+  }
+}
+
+
+function Get-AdoSecurityPermission {
+  param(
+    [Parameter(Mandatory)]
+    [string]$NamespaceId,
+    [Parameter(Mandatory)]
+    [string]$Subject,
+    [Parameter(ValueFromPipeline)]
+    [string]$Token
+  )  
+
+  begin {
+    [string]$functionName = $MyInvocation.MyCommand
+    Write-Debug "${functionName}:begin:start"
+    Write-Debug "${functionName}:begin:NamespaceId=$NamespaceId"
+    Write-Debug "${functionName}:begin:Subject=$Subject"
+    Write-Debug "${functionName}:begin:end"
+  }
+
+  process {
+    Write-Debug "${functionName}:process:start"
+    Write-Debug "${functionName}:process:Token=$Token"
+
+    [System.Text.StringBuilder]$builder = [System.Text.StringBuilder]::new("az devops security permission ")
+
+    if (-not [string]::IsNullOrEmpty($Token)) {
+      [void]$builder.Append(" show ")
+    }
+    else { 
+      [void]$builder.Append(" list ")
+    }
+
+    [void]$builder.Append(" --id '$NamespaceId' --subject '$Subject' ")
+
+    if (-not [string]::IsNullOrEmpty($Token)) {
+      [void]$builder.Append(" --token '$Token' ")
+    }
+
+    [string]$command = $builder.ToString()
+    [string]$securityPermissionsJson = Invoke-CommandLine -Command $command
+    Write-Debug "${functionName}:process:securityPermissionsJson=$securityPermissionsJson"
+
+    $securityPermissionsJson | ConvertFrom-Json -Depth $MAX_JSON_DEPTH | Write-Output
+
+    Write-Debug "${functionName}:process:end"
+  }
+
+  end {
+    Write-Debug "${functionName}:end:start"
+    Write-Debug "${functionName}:end:end"
+  }
+}
+
+
+function Get-AdoRepo {
+  param(
+    [Parameter(ValueFromPipeline)]
+    [string]$RepoName
+  )  
+
+  begin {
+    [string]$functionName = $MyInvocation.MyCommand
+    Write-Debug "${functionName}:begin:start"
+    
+    [string]$command = "az repos list"
+    [string]$reposJson = Invoke-CommandLine -Command $command
+    Write-Debug "${functionName}:begin:reposJson=$reposJson"
+
+    $repos = $reposJson | ConvertFrom-Json -Depth $MAX_JSON_DEPTH
+
+    [hashtable]$repoDictionary = @{}
+    [array]$matchedRepos = @()
+
+    foreach($repo in $repos) {
+      $repoDictionary.Add($repo.name, $repo)
+    }
+
+    Write-Debug "${functionName}:begin:repoDictionary.Count=$($repoDictionary.Count)"
+    Write-Debug "${functionName}:begin:end"
+  }
+
+  process {
+    Write-Debug "${functionName}:process:start"
+    Write-Debug "${functionName}:process:RepoName=$RepoName"
+
+    if ([string]::IsNullOrWhiteSpace($RepoName)) {
+      $matchedRepos += @($repoDictionary.Values)
+      Write-Debug "${functionName}:process:matching all $($matchedRepos.Count) items"
+    }
+    elseif ($repoDictionary.ContainsKey($RepoName)) {
+      Write-Debug "${functionName}:process:matched $RepoName"
+      $matchedRepos += $repoDictionary[$RepoName]
+    }
+    else {
+      Write-Debug "${functionName}:process:nothing matched $RepoName"
+    }
+
+    Write-Debug "${functionName}:process:end"
+  }
+
+  end {
+    Write-Debug "${functionName}:end:start"
+    Write-Debug "${functionName}:end:outputting $($matchedRepos.Count) matches"
+    Write-Output $matchedRepos
+    Write-Debug "${functionName}:end:end"
+  }
+}
+
 function Get-AzCliExtension {
   param(
     [Parameter(ValueFromPipeline)]
@@ -453,7 +709,7 @@ function Get-AzCliExtension {
     [array]$soughtExtensions = @()
     [string]$command = "az extension list"
     [string]$extensionJson = Invoke-CommandLine -Command $command
-    [array]$extensions = $extensionJson | ConvertFrom-Json
+    [array]$extensions = $extensionJson | ConvertFrom-Json -Depth $MAX_JSON_DEPTH
     Write-Debug "${functionName}:begin:extensionJson=$extensionJson"
     Write-Debug "${functionName}:begin:extensions.Length=$($extensions.Length)"
 
@@ -648,6 +904,103 @@ function Invoke-CommandLine {
   Write-Debug "${functionName}:end"
 }
 
+
+function Get-AdoRepoBranch {
+  param(
+    [Parameter(ValueFromPipeline)]
+    [string]$Branch,
+    [Parameter(Mandatory)]
+    [string]$Repo
+  )  
+
+  begin {
+    [string]$functionName = $MyInvocation.MyCommand
+    Write-Debug "${functionName}:begin:start"
+    Write-Debug "${functionName}:begin:Repo=$Repo"
+
+    [hashtable]$branchDictionary = @{}
+    [System.Text.StringBuilder]$commandBuilder = [System.Text.StringBuilder]::new("az repos ref list ")
+    
+    [void]$commandBuilder.Append(" --repository '$Repo' ")
+
+    [string]$command = $commandBuilder.ToString()
+    [array]$branches = @(Invoke-CommandLine -Command $command | ConvertFrom-Json -Depth $MAX_JSON_DEPTH)
+
+    if ($branches.Count -gt 0) {
+      Write-Debug "${functionName}:begin:$Repo has $($branches.Count) branches."
+
+      foreach($branchItem in $branches) {
+        [string]$key = $branchItem.name
+        Write-Debug "${functionName}:begin:key=$key"
+        $branchDictionary.Add($key, $branchItem)
+      }
+    }
+    else {
+      Write-Warning "$Repo has no branches - expected at least 1"
+    }
+
+    Write-Debug "${functionName}:begin:end"
+  }
+
+  process {
+    Write-Debug "${functionName}:process:start"
+    Write-Debug "${functionName}:process:branch=$Branch"
+
+    if ([String]::IsNullOrWhiteSpace($Branch)) {
+      # output all the branches
+      Write-Debug "${functionName}:process:outputing all branches"
+      $branchDictionary.Values | Write-Output
+    }
+    elseif ($branchDictionary.ContainsKey($Branch)) {
+      Write-Debug "${functionName}:process:outputing branch $Branch"
+      Write-Output $branchDictionary[$Branch]
+    }
+    else {
+      Write-Warning "${functionName}:process:branch $Branch not found in repo $Repo"
+    }
+
+    Write-Debug "${functionName}:process:end"
+  }
+
+  end {
+    Write-Debug "${functionName}:end:start"
+    Write-Debug "${functionName}:end:end"
+  }
+}
+
+
+function Lock-AdoRepoBranch {
+  [CmdletBinding(SupportsShouldProcess)]
+  param(
+    [Parameter(ValueFromPipeline)]
+    [string]$Branch,
+    [Parameter(Mandatory)]
+    [string]$Repo
+  )  
+
+  begin {
+    [string]$functionName = $MyInvocation.MyCommand
+    Write-Debug "${functionName}:begin:start"
+    Write-Debug "${functionName}:begin:Repo=$Repo"
+    Write-Debug "${functionName}:begin:end"
+  }
+
+  process {
+    Write-Debug "${functionName}:process:start"
+    Write-Debug "${functionName}:process:Branch=$Branch"
+
+    Set-AdoRepoBranchState -Repo $Repo -Branch $Branch -Action lock | Write-Output
+
+    Write-Debug "${functionName}:process:end"
+  }
+
+  end {
+    Write-Debug "${functionName}:end:start"
+    Write-Debug "${functionName}:end:end"
+  }
+}
+
+
 function New-AdoPipeline {
   [CmdletBinding(SupportsShouldProcess)]
   param(
@@ -840,6 +1193,304 @@ function Remove-AdoPipelineVariable {
 }
 
 
+function Select-AdoSecurityPermissionDetail {
+  param(
+    [Parameter(Mandatory)]
+    [hashtable]$AcesDictionary,
+    [Parameter(Mandatory)]
+    [string]$Subject,
+    [Parameter(Mandatory)]
+    [string]$Token,
+    [Parameter(ValueFromPipeline, Mandatory)]
+    [string]$Permission
+  )  
+
+  begin {
+    [string]$functionName = $MyInvocation.MyCommand
+    Write-Debug "${functionName}:begin:start"
+    Write-Debug "${functionName}:begin:AcesDictionary.Count=$($AcesDictionary.Count)"
+    Write-Debug "${functionName}:begin:Subject=$Subject"
+    Write-Debug "${functionName}:begin:Token=$Token"
+    Write-Debug "${functionName}:begin:end"
+  }
+
+  process {
+    Write-Debug "${functionName}:process:start"
+    Write-Debug "${functionName}:process:Permission=$Permission"
+
+    $acesEntry = $AcesDictionary[$Token]
+
+    if ($null -eq $acesEntry) { throw "Could not find aces entry for $Token" }
+
+    $matchedPermission = $acesEntry.resolvedPermissions | Where-Object -FilterScript { $_.name -eq $Permission -or $_.displayName -eq $Permission }
+
+    if ($null -eq $matchedPermission) {
+      Write-Debug "${functionName}:process:Could not match permission $Permission"
+    } 
+    else {
+      Write-Debug "${functionName}:process:Matched permission $Permission"
+      Write-Output $matchedPermission
+    }
+
+    Write-Debug "${functionName}:process:end"
+  }
+
+  end {
+    Write-Debug "${functionName}:end:start"
+    Write-Debug "${functionName}:end:end"
+  }
+}
+
+
+function Set-AdoSecurityPermission {
+  [CmdletBinding(SupportsShouldProcess)]
+  param(
+    [Parameter(Mandatory)]
+    [string]$SecurityDescriptor,
+    [Parameter(Mandatory)]
+    [string]$NamespaceId,
+    [Parameter(Mandatory)]
+    [string]$Token,
+    [Parameter(Mandatory)][ValidateSet("Deny","Allow","NotSet")]
+    [string]$State,
+    [Parameter(ValueFromPipeline, Mandatory)]
+    [string]$PermissionBit
+  )  
+
+  begin {
+    [string]$functionName = $MyInvocation.MyCommand
+    Write-Debug "${functionName}:begin:start"
+    Write-Debug "${functionName}:begin:NamespaceId=$NamespaceId"
+    Write-Debug "${functionName}:begin:Token=$Token"
+    Write-Debug "${functionName}:begin:SecurityDescriptor=$SecurityDescriptor"
+    Write-Debug "${functionName}:begin:PermissionBit=$PermissionBit"
+    Write-Debug "${functionName}:begin:end"
+  }
+
+  process {
+    Write-Debug "${functionName}:process:start"
+    Write-Debug "${functionName}:process:PermissionBit=$PermissionBit"
+    
+    [System.Text.StringBuilder]$builder = [System.Text.StringBuilder]::new("az devops security permission ")
+
+    if ($State -eq "Allow") {
+      [void]$builder.Append(" update --allow-bit $PermissionBit ")
+    }
+    elseif ($State -eq "Deny") {
+      [void]$builder.Append(" update --deny-bit $PermissionBit ")
+    }
+    else {
+      [void]$builder.Append(" reset --permission-bit $PermissionBit ")
+    }
+
+    [void]$builder.Append(" --token $Token --subject '$SecurityDescriptor' --id $NamespaceId ")
+
+    [string]$command = $builder.ToString()
+
+    if ($PSCmdlet.ShouldProcess($command)) {
+      Invoke-CommandLine -Command $command | ConvertFrom-Json -Depth $MAX_JSON_DEPTH | Write-Output
+    }
+
+    Write-Debug "${functionName}:process:end"
+  }
+
+  end {
+    Write-Debug "${functionName}:end:start"
+    Write-Debug "${functionName}:end:end"
+  }
+}
+
+
+function Set-AdoRepoBranchState {
+  [CmdletBinding(SupportsShouldProcess)]
+  param(
+    [Parameter(ValueFromPipeline)]
+    [string]$Branch = '',
+    [Parameter(Mandatory)]
+    [string]$Repo,
+    [Parameter(Mandatory)]
+    [ValidateSet('locked','unlocked')]
+    [string]$State
+  )  
+
+  begin {
+    [string]$functionName = $MyInvocation.MyCommand
+    Write-Debug "${functionName}:begin:start"
+    Write-Debug "${functionName}:begin:Repo=$Repo"
+    Write-Debug "${functionName}:begin:State=$State"
+
+    [string]$action = ($State -eq 'locked') ? 'lock' : 'unlock'
+
+    Write-Debug "${functionName}:begin:action=$action"
+    Write-Debug "${functionName}:begin:end"
+  }
+
+  process {
+    Write-Debug "${functionName}:process:start"
+
+    if ([String]::IsNullOrWhiteSpace($Branch)) {
+      Write-Debug "${functionName}:process:processing all branches in $Repo"
+      [array]$branches = Get-AdoRepoBranch -Repo $Repo 
+      Write-Debug "${functionName}:process:processing there are $($branches.Count) branches in $Repo to process"
+      $branches | Select-Object -ExpandProperty name | Set-AdoRepoBranchState -Repo $Repo -State $State | Write-Output
+      Write-Debug "${functionName}:process:all $($branches.Count) branches in $Repo processed"
+    }
+    else {
+      [string]$branchParam = ($Branch.StartsWith('refs/')) ? $Branch.Substring(5) : $Branch
+      Write-Debug "${functionName}:begin:branchParam=$branchParam"
+
+      [System.Text.StringBuilder]$commandBuilder = [System.Text.StringBuilder]::new("az repos ref $action ")
+
+      [void]$commandBuilder.Append(" --repository '$Repo' ")
+      [void]$commandBuilder.Append(" --name '$branchParam' ")
+
+      [string]$command = $commandBuilder.ToString()
+      Write-Debug "${functionName}:process:command=$command"
+
+      Write-Verbose "Setting branch '$Branch' on '$Repo' to '$State'"
+
+      if ($PSCmdlet.ShouldProcess("Setting branch '$Branch' on '$Repo' to '$State'")) {
+        Invoke-CommandLine -Command $command | ConvertFrom-Json -Depth $MAX_JSON_DEPTH | Write-Output
+      }
+    }
+
+    Write-Debug "${functionName}:process:end"
+  }
+
+  end {
+    Write-Debug "${functionName}:end:start"
+    Write-Debug "${functionName}:end:end"
+  }
+}
+
+
+function Set-AdoRepoPermission {
+  [CmdletBinding(SupportsShouldProcess)]
+  param(
+    [Parameter(Mandatory)]
+    [string]$Subject,
+    [Parameter(Mandatory)]
+    [string]$Permission,
+    [Parameter(Mandatory)][ValidateSet("Deny","Allow","NotSet")]
+    [string]$State,
+    [Parameter(Mandatory,ValueFromPipeline)]
+    [string]$RepoName
+  )  
+
+  begin {
+    [string]$functionName = $MyInvocation.MyCommand
+    Write-Debug "${functionName}:begin:start"
+    Write-Debug "${functionName}:begin:Subject=$Subject"
+    Write-Debug "${functionName}:begin:Permission=$Permission"
+    Write-Debug "${functionName}:begin:State=$State"
+
+    [array]$principalNameParts = $subject.Split('\')
+    [string]$principalName = "[$($principalNameParts[0])]\$($principalNameParts[1])"
+    [string]$namespaceId = '2e9eb7ed-3c0a-47d4-87c1-0ffdd275fd87' # git repos namespace
+
+    Write-Debug "${functionName}:begin:principalName=$principalName"
+    Write-Debug "${functionName}:begin:namespaceId=$namespaceId"
+
+    # find the security descriptor for the identity (as that's needed for updating the security)
+    $securityGroup = Get-AdoSecurityGroup -PrincipalName $principalName
+
+    if ($null -eq $securityGroup) { throw "could not find security group $principalName" }
+  
+    [string]$securityDescriptor = $securityGroup.descriptor
+    Write-Debug "${functionName}:securityDescriptor=$securityDescriptor"
+
+    # get a list of permissions for the identity 
+    $permissionsSummaryModel = Get-AdoSecurityPermission -NamespaceId $namespaceId -Subject $subject
+
+    Write-Debug "${functionName}:begin:end"
+  }
+
+  process {
+    Write-Debug "${functionName}:process:start"
+    Write-Debug "${functionName}:process:RepoName=$RepoName"
+    
+    # get the repo list to get the guid for the repo
+    $repoInfo = Get-AdoRepo -RepoName $Repo
+  
+    if ($null -eq $repoInfo) { throw "could not find repo $Repo" }
+  
+    [string]$repoId = $repoInfo.id
+    Write-Debug "${functionName}:repoId=$repoId"
+  
+    # now filter the list of permissions to the repo we want to change the permissions on
+    $permissionSummary = $permissionsSummaryModel | Where-Object -FilterScript { $_.token.EndsWith($repoId) }
+  
+    if ($null -eq $permissionSummary) { throw "could not find permission entry for $repoId" }
+  
+    [string]$token = $permissionSummary.token
+    Write-Debug "${functionName}:token=$token"
+  
+    $acesDictionary = Get-AdoSecurityPermission -NamespaceId $namespaceId -Subject $subject -Token $token | ConvertTo-AdoAcesDictionary 
+  
+    $permissionDetail = Select-AdoSecurityPermissionDetail -AcesDictionary $acesDictionary -Subject $Identity -Token $token -Permission $Permission
+  
+    if ($null -eq $permissionDetail) { throw "could not find permission $Permission" }
+  
+    [string]$permissionBit = $permissionDetail.bit
+    Write-Debug "${functionName}:permissionBit=$permissionBit"
+  
+    if ([string]::IsNullOrWhiteSpace($permissionBit)) { throw "permission bit not set" }
+  
+    Set-AdoSecurityPermission -NamespaceId $namespaceId -SecurityDescriptor $securityDescriptor -Token $token -State $State -PermissionBit $permissionBit | Write-Output
+
+    Write-Debug "${functionName}:process:end"
+  }
+
+  end {
+    Write-Debug "${functionName}:end:start"
+    Write-Debug "${functionName}:end:end"
+  }
+}
+
+
+function Set-AdoPullRequestState {
+  [CmdletBinding(SupportsShouldProcess)]
+  param(
+    [Parameter(ValueFromPipeline, Mandatory)]
+    [string]$PullRequestId,
+    [Parameter(Mandatory)]
+    [ValidateSet('Abandoned','Active')]
+    [string]$State
+  )  
+
+  begin {
+    [string]$functionName = $MyInvocation.MyCommand
+    Write-Debug "${functionName}:begin:start"
+    Write-Debug "${functionName}:begin:State=$State"
+    Write-Debug "${functionName}:begin:end"
+  }
+
+  process {
+    Write-Debug "${functionName}:process:start"
+    Write-Debug "${functionName}:process:PullRequestId=$PullRequestId"
+
+    [System.Text.StringBuilder]$commandBuilder = [System.Text.StringBuilder]::new("az repos pr update ")
+    [void]$commandBuilder.Append(" --status $State ")
+    [void]$commandBuilder.Append(" --id $PullRequestId ")
+
+    [string]$command = $commandBuilder.ToString()
+    Write-Debug "${functionName}:process:command=$command"
+
+    Write-Verbose "Setting PR '$PullRequestId' to '$State'"
+
+    if ($PSCmdlet.ShouldProcess("Setting PR '$PullRequestId' to '$State'")) {
+      Invoke-CommandLine -Command $command | ConvertFrom-Json -Depth $MAX_JSON_DEPTH | Write-Output
+    }
+
+    Write-Debug "${functionName}:process:end"
+  }
+
+  end {
+    Write-Debug "${functionName}:end:start"
+    Write-Debug "${functionName}:end:end"
+  }
+}
+
 function Set-AdoPipeline {
   [CmdletBinding(SupportsShouldProcess)]
   param(
@@ -922,6 +1573,7 @@ function Set-AdoPipeline {
 }
 
 
+
 function Set-AdoPipelineVariable {
   [CmdletBinding(SupportsShouldProcess)]
   param(
@@ -967,6 +1619,142 @@ function Set-AdoPipelineVariable {
       Write-Debug "${functionName}:process:jsonResponse=$jsonResponse"
 
       $jsonResponse | ConvertFrom-Json -Depth $MAX_JSON_DEPTH | Write-Output
+    }
+
+    Write-Debug "${functionName}:process:end"
+  }
+
+  end {
+    Write-Debug "${functionName}:end:start"
+    Write-Debug "${functionName}:end:end"
+  }
+}
+
+function Set-AdoRepoState {
+  [CmdletBinding(SupportsShouldProcess)]
+  param(
+    [Parameter(ValueFromPipeline, Mandatory)]
+    [string]$Repo,
+    [string]$Organization,
+    [string]$Project,
+    [bool]$Enabled
+  )  
+
+  begin {
+    [string]$functionName = $MyInvocation.MyCommand
+    Write-Debug "${functionName}:begin:start"
+    Write-Debug "${functionName}:begin:Enabled=$Enabled"
+    Write-Debug "${functionName}:begin:end"
+  }
+
+  process {
+    Write-Debug "${functionName}:process:start"
+    Write-Debug "${functionName}:process:Repo=$Repo"
+     
+    [System.Text.StringBuilder]$commandBuilder = [System.Text.StringBuilder]::new("az repos update ")
+  
+    [void]$commandBuilder.Append(" --repository '$Repo' ")
+
+    if ($Enabled) {
+      [void]$commandBuilder.Append(" --enable ")
+    }
+    else {
+      [void]$commandBuilder.Append(" --disable ")
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($Organization)) {
+      [void]$commandBuilder.Append(" --org '$Organization' ")
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($Project)) {
+      [void]$commandBuilder.Append(" --project '$Project' ")
+    }
+
+    [string]$command = $commandBuilder.ToString()
+
+    [string]$message = $Enabled ? "Enabling repo $Repo" : "Disabling repo $Repo"
+    Write-Verbose $message
+
+    if ($PSCmdlet.ShouldProcess($message)) {
+
+      [string]$responseJson = Invoke-CommandLine -Command $command 
+
+      if ($AsJson) {
+        Write-Debug "${functionName}:process:return json string"
+        Write-Output $responseJson
+      }
+      else {
+        Write-Debug "${functionName}:process:return objects"
+        $responseJson | ConvertFrom-Json -Depth $MAX_JSON_DEPTH | Write-Output
+      }
+    }
+
+    Write-Debug "${functionName}:process:end"
+  }
+
+  end {
+    Write-Debug "${functionName}:end:start"
+    Write-Debug "${functionName}:end:end"
+  }
+}
+
+
+function Set-AdoRepoName {
+  [CmdletBinding(SupportsShouldProcess)]
+  param(
+    [Parameter(Mandatory)]
+    [string]$Repo,
+    [Parameter(Mandatory)]
+    [string]$NewName,
+    [string]$Organization,
+    [string]$Project,
+    [switch]$AsJson
+  )  
+
+  begin {
+    [string]$functionName = $MyInvocation.MyCommand
+    Write-Debug "${functionName}:begin:start"
+    Write-Debug "${functionName}:begin:Project=$Project"
+    Write-Debug "${functionName}:begin:Organization=$Organization"
+    Write-Debug "${functionName}:begin:AsJson=$AsJson"
+    Write-Debug "${functionName}:begin:end"
+  }
+
+  process {
+    Write-Debug "${functionName}:process:start"
+    Write-Debug "${functionName}:process:NewName=$NewName"
+    Write-Debug "${functionName}:process:Repo=$Repo"
+     
+    [System.Text.StringBuilder]$commandBuilder = [System.Text.StringBuilder]::new("az repos update ")
+  
+    [void]$commandBuilder.Append(" --repository '$Repo' ")
+    [void]$commandBuilder.Append(" --name '$NewName' ")
+
+    if (-not [string]::IsNullOrWhiteSpace($Organization)) {
+      [void]$commandBuilder.Append(" --org '$Organization' ")
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($Project)) {
+      [void]$commandBuilder.Append(" --project '$Project' ")
+    }
+
+    [string]$command = $commandBuilder.ToString()
+
+    [string]$message = "Rename $Repo to $NewName"
+    Write-Verbose $message
+
+    if ($PSCmdlet.ShouldProcess($message)) {
+
+      [string]$responseJson = Invoke-CommandLine -Command $command 
+
+      if ($AsJson) {
+        Write-Debug "${functionName}:process:return json string"
+        Write-Output $responseJson
+      }
+      else {
+        Write-Debug "${functionName}:process:return objects"
+        $responseJson | ConvertFrom-Json -Depth $MAX_JSON_DEPTH | Write-Output
+      }
     }
 
     Write-Debug "${functionName}:process:end"
@@ -1124,6 +1912,38 @@ function Test-AdoPipeline {
     Write-Debug "${functionName}:process:exists=$exists"
 
     Write-Output $exists
+
+    Write-Debug "${functionName}:process:end"
+  }
+
+  end {
+    Write-Debug "${functionName}:end:start"
+    Write-Debug "${functionName}:end:end"
+  }
+}
+
+
+function Unlock-AdoRepoBranch {
+  [CmdletBinding(SupportsShouldProcess)]
+  param(
+    [Parameter(ValueFromPipeline)]
+    [string]$Branch,
+    [Parameter(Mandatory)]
+    [string]$Repo
+  )  
+
+  begin {
+    [string]$functionName = $MyInvocation.MyCommand
+    Write-Debug "${functionName}:begin:start"
+    Write-Debug "${functionName}:begin:Repo=$Repo"
+    Write-Debug "${functionName}:begin:end"
+  }
+
+  process {
+    Write-Debug "${functionName}:process:start"
+    Write-Debug "${functionName}:process:Branch=$Branch"
+
+    Set-AdoRepoBranchState -Repo $Repo -Branch $Branch -Action unlock | Write-Output
 
     Write-Debug "${functionName}:process:end"
   }

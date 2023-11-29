@@ -1,0 +1,55 @@
+
+parameters:
+- name: JobName
+  type: string
+  default: BuildGitLeaks
+- name: HostedAgentPool
+  displayName: Hosted agent pool to run on
+  type: string
+  default: ubuntu-latest
+- name: DependsOn 
+  type: object
+  default: ''
+- name: ArtifactName
+  type: string
+  default: gitleaks-linux
+
+jobs:
+- job: ${{ parameters.JobName }}
+  displayName: Build GitLeaks - ${{ parameters.HostedAgentPool }}
+  dependsOn: ${{ parameters.DependsOn }}
+  pool: 
+    vmImage: ${{ parameters.HostedAgentPool }}
+
+  variables:
+  - ${{ if contains( parameters.HostedAgentPool, 'windows-') }}:
+    - name: binaryName
+      value: gitleaks.exe
+  - ${{ else }}:
+    - name: binaryName
+      value: gitleaks
+
+  steps: 
+  - checkout: gitleaks
+    clean: true
+
+  - pwsh: | 
+      dir ENV:
+      dir $(Pipeline.Workspace) -Recurse | Sort-Object -Property FullName | ForEach-Object { Write-Host $_.FullName }
+    displayName: diags before build
+
+  - task: Bash@3 
+    inputs: 
+      targetType: inline
+      workingDirectory: $(Build.SourcesDirectory)
+      script: 
+        make build
+    displayName: build gitleaks
+
+  - pwsh: | 
+      dir ENV:
+      dir $(Pipeline.Workspace) -Recurse | Sort-Object -Property FullName | ForEach-Object { Write-Host $_.FullName }
+    displayName: diags after build
+     
+  - publish: $(Build.SourcesDirectory)/${{ variables.binaryName }}
+    artifact: ${{ parameters.ArtifactName }}

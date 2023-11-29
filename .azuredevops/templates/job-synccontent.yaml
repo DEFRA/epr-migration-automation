@@ -7,9 +7,22 @@ parameters:
   displayName: Hosted agent pool to run on
   type: string
   default: windows-latest
-- name: Repo
-  displayName: Repo to sync
+- name: SourceAdoRepo
   type: string
+- name: TargetGitHubRepo
+  type: string
+- name: GitLeaksFailureAsWarning
+  type: boolean
+  default: false
+- name: GitLeaksReportPublishOnlyOnFail
+  type: boolean
+  default: true 
+- name: GitLeaksReportArtifactName
+  type: string
+  default: Report
+- name: GitLeaksSuppressHistoryCheck
+  type: boolean
+  default: false
 - name: WhatIf
   displayName: WhatIf
   type: boolean
@@ -18,7 +31,7 @@ parameters:
   type: string
   default: main
 - name: DependsOn 
-  type: string
+  type: object
   default: ''
 
 jobs:
@@ -26,7 +39,7 @@ jobs:
   dependsOn: ${{ parameters.DependsOn }}
   pool: 
     vmImage: ${{ parameters.HostedAgentPool }}
-  displayName: Sync Contents of ${{ parameters.repo }}
+  displayName: Sync ${{ parameters.SourceAdoRepo }} to ${{ parameters.TargetGitHubRepo }}
   variables: 
   - name: sourceRepoSubDir
     value: s/ado-source
@@ -36,24 +49,31 @@ jobs:
     value: $(Pipeline.Workspace)/${{ variables.sourceRepoSubDir }}
   - name: targetRepoRoot
     value: $(Pipeline.Workspace)/${{ variables.targetRepoSubDir }}
+  - name: ReportFile
+    value: $(Build.StagingDirectory)/reports/${{ parameters.SourceAdoRepo }}.json
+
   steps: 
-  - checkout: self
-    clean: true
-
-  - checkout: ado-${{ parameters.Repo }}
+  - checkout: ${{ parameters.SourceAdoRepo }}
     path: ${{ variables.sourceRepoSubDir }}
-    clean: true
-
-  - checkout: github-${{ parameters.Repo }}
-    path: ${{ variables.targetRepoSubDir }}
     clean: true
     persistCredentials: true
 
-  - pwsh: |
-      dir $(Pipeline.Workspace) -recurse | ForEach-Object -Process {
-        Write-Host $_.FullName
-      }
-    displayName: "diags - before copy"
+  - checkout: self
+    clean: true
+
+  - template: steps-gitleaksscan.yaml
+    parameters: 
+      GitLeaksReportArtifactName: gitleaks-${{ parameters.SourceAdoRepo }}
+      ReportFile: $(Build.StagingDirectory)/reports/${{ parameters.SourceAdoRepo }}.json
+      PublishOnlyOnFail: ${{ parameters.GitLeaksReportPublishOnlyOnFail }}
+      TreatFailureAsWarning: ${{ parameters.GitLeaksFailureAsWarning }}
+      ScanRootDir: ${{ variables.sourceRepoRoot }}
+      SuppressHistoryCheck: ${{ parameters.GitLeaksSuppressHistoryCheck }}
+
+  - checkout: github-${{ parameters.TargetGitHubRepo }}
+    path: ${{ variables.targetRepoSubDir }}
+    clean: true
+    persistCredentials: true
 
   - pwsh: |
       Push-Location -Path ${{ variables.targetRepoRoot }}
@@ -77,18 +97,16 @@ jobs:
     displayName: Sync contents
 
   - pwsh: |
-      dir $(Pipeline.Workspace) -recurse | ForEach-Object -Process {
-        Write-Host $_.FullName
-      }
+      dir $(Pipeline.Workspace) -Recurse | Sort-Object -Property FullName | ForEach-Object { Write-Host $_.FullName }
     displayName: "diags - after copy"
 
   - ${{ if ne( parameters.WhatIf, false) }}:
     - pwsh: | 
-        Write-Host "WhatIf: would push to github repo ${{ parameters.Repo }}"
-      displayName: "WhatIf: Push to ${{ parameters.Repo }}"
+        Write-Host "WhatIf: would push to github repo ${{ parameters.TargetGitHubRepo }}"
+      displayName: "WhatIf: Push to ${{ parameters.TargetGitHubRepo }}"
   - ${{ else }}:
     - pwsh: | 
-        Write-Host "Pushing to github repo ${{ parameters.Repo }}"
+        Write-Host "Pushing to github repo ${{ parameters.TargetGitHubRepo }}"
         Push-Location -Path ${{ variables.targetRepoRoot }}
         git config --global user.email "buildservice@dev.azure.com"
         git config --global user.name "Build Service"
@@ -113,4 +131,4 @@ jobs:
         Pop-Location
         Write-Host "Done"
         exit 0
-      displayName: Push to ${{ parameters.Repo }}
+      displayName: Push to ${{ parameters.TargetGitHubRepo }}

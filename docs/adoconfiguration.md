@@ -33,3 +33,16 @@ For "Project Collection Build Service (org name)", allow the following
 - View builds
 
 All but the first one should be there already as "Allow (system)".
+
+## Repos
+
+The "Project Collection Build Service" needs to be able to rename repos.
+
+Settings -> Repositories -> Security
+
+For "Project Collection Build Service (org name)", allow the following
+
+- Contribute
+- Pull Request Contribute
+- Manage Permissions
+- Rename repository

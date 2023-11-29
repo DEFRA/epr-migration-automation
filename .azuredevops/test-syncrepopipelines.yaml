@@ -1,0 +1,74 @@
+trigger: none
+
+parameters:
+- name: SourceAdoRepo
+  type: string
+  default: epr-migration-test2
+- name: TargetGitHubRepo
+  type: string
+  default: epr-migration-test2
+- name: WhatIf
+  displayName: WhatIf
+  type: boolean
+  default: true
+
+variables:
+- name: HostedAgentPool 
+  value: windows-latest
+- name: AdoOrganizationUrl
+  value: '$(System.CollectionUri)'
+- name: AdoTeamProject
+  value: '$(System.TeamProject)'
+- name: AdoAccessToken
+  value: '$(System.AccessToken)'
+- name: AllPipelinesJsonArtifactName
+  value: AllPipelinesJson
+- name: GitHubOrganizationName
+  value: defra
+- name: GitHubServiceConnection
+  value: defra
+
+resources: 
+  repositories:
+  # epr-migration-test2
+  - repository: epr-migration-test2
+    name: RWD-CPR-EPR4P-ADO/epr-migration-test2
+    type: git
+  - repository: github-epr-migration-test2
+    name: defra/epr-migration-test2
+    type: github
+    endpoint: defra
+
+stages:
+- stage: SyncContentsStage  
+  displayName: Sync repo contents
+  dependsOn: ''
+  jobs: 
+  - template: templates/job-getpipelines.yaml
+    parameters:
+      JobName: GetPipelinesJsonJob
+      DependsOn: ''
+      HostedAgentPool: ${{ variables.HostedAgentPool }}
+      AdoOrganizationUrl: ${{ variables.AdoOrganizationUrl }}
+      AdoTeamProject: ${{ variables.AdoTeamProject }}
+      AdoAccessToken: ${{ variables.AdoAccessToken }}
+      PipelinesJsonArtifactName: ${{ variables.AllPipelinesJsonArtifactName }}
+      Type2Only: true
+      EnabledOnly: true
+      HostingRepoType: TfsGit
+
+  - template: templates/job-syncrepopipelines.yaml
+    parameters:
+      JobName: SyncPipelinesJob
+      DependsOn: 
+      - GetPipelinesJsonJob
+      HostedAgentPool: ${{ variables.HostedAgentPool }}
+      AdoOrganizationUrl: ${{ variables.AdoOrganizationUrl }}
+      AdoTeamProject: ${{ variables.AdoTeamProject }}
+      AdoAccessToken: ${{ variables.AdoAccessToken }}
+      PipelinesJsonArtifactName: ${{ variables.AllPipelinesJsonArtifactName }}
+      GitHubOrganizationName: ${{ variables.GitHubOrganizationName }}
+      GitHubServiceConnection: ${{ variables.GitHubServiceConnection }}
+      SourceAdoRepo: ${{ parameters.SourceAdoRepo }}
+      TargetGitHubRepo: ${{ parameters.TargetGitHubRepo }}
+      WhatIf: ${{ parameters.WhatIf }}

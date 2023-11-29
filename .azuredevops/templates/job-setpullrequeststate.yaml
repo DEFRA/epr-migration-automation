@@ -1,0 +1,74 @@
+
+parameters:
+- name: JobName
+  type: string
+  default: DisableRepoJob
+- name: HostedAgentPool
+  displayName: Hosted agent pool to run on
+  type: string
+  default: ubuntu-latest
+- name: DependsOn 
+  type: object
+  default: ''
+- name: Repo
+  type: string
+- name: State
+  type: string
+  values: 
+  - abandoned
+  - active
+- name: PullRequestId
+  type: number
+  default: 0
+- name: WhatIf
+  displayName: What If
+  type: boolean
+  default: true
+- name: AdoOrganizationUrl
+  type: string
+  default: '$(System.CollectionUri)'
+- name: AdoTeamProject
+  type: string
+  default: '$(System.TeamProject)'
+- name: AdoAccessToken
+  type: string
+  default: '$(System.AccessToken)'
+
+jobs:
+- job: ${{ parameters.JobName }}
+  displayName: Update PR states - ${{ parameters.Repo }}
+  dependsOn: ${{ parameters.DependsOn }}
+  pool: 
+    vmImage: ${{ parameters.HostedAgentPool }}
+
+  variables:
+  - ${{ if eq( parameters.WhatIf, true )}}:
+    - name: WhatIfForPwsh
+      value: '$true'
+  - ${{ else }}:
+    - name: WhatIfForPwsh
+      value: '$false'
+
+  steps: 
+  - checkout: ${{ parameters.Repo }}
+    path: s/ado-source
+    clean: true
+
+  - checkout: self
+    clean: true
+
+  - task: PowerShell@2
+    displayName: "Set Pull Requests to '${{ parameters.State }}' in '${{ parameters.Repo }}'"
+    inputs:
+      targetType: filePath
+      filePath: $(Build.Repository.LocalPath)/$(Build.Repository.Name)/pwsh/set-pullrequeststate.ps1
+      pwsh: true
+      arguments: >
+        -OrganizationUri '${{ parameters.AdoOrganizationUrl }}'
+        -Project '${{ parameters.AdoTeamProject }}'
+        -Repo '${{ parameters.Repo }}'
+        -State '${{ parameters.State }}'
+        -PullRequestId ${{ parameters.PullRequestId }}
+        -WhatIf:${{ variables.WhatIfForPwsh }}
+    env:
+      AZURE_DEVOPS_EXT_PAT: ${{ parameters.AdoAccessToken }}

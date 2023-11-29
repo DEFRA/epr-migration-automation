@@ -1,0 +1,79 @@
+
+parameters:
+- name: JobName
+  type: string
+  default: LockRepoJob
+- name: HostedAgentPool
+  displayName: Hosted agent pool to run on
+  type: string
+  default: ubuntu-latest
+- name: DependsOn 
+  type: object
+  default: ''
+- name: Repo
+  type: string
+- name: Identity
+  type: string
+- name: Permissions
+  type: string
+  default: GenericContribute,PullRequestContribute
+- name: State
+  type: string
+  values:
+  - Deny
+  - Allow
+  - NotSet
+- name: WhatIf
+  displayName: What If
+  type: boolean
+  default: true
+- name: AdoOrganizationUrl
+  type: string
+  default: '$(System.CollectionUri)'
+- name: AdoTeamProject
+  type: string
+  default: '$(System.TeamProject)'
+- name: AdoAccessToken
+  type: string
+  default: '$(System.AccessToken)'
+
+jobs:
+- job: ${{ parameters.JobName }}
+  displayName: Lock repo ${{ parameters.Repo }}
+  dependsOn: ${{ parameters.DependsOn }}
+  pool: 
+    vmImage: ${{ parameters.HostedAgentPool }}
+
+  variables:
+    - ${{ if eq( parameters.WhatIf, true )}}:
+      - name: WhatIfForPwsh
+        value: '$true'
+    - ${{ else }}:
+      - name: WhatIfForPwsh
+        value: '$false'
+
+  steps: 
+  # need to check out the repo or the access token won't be able to see it on the API calls
+  - checkout: ${{ parameters.Repo }}
+    path: s/ado-source
+    clean: true
+
+  - checkout: self
+    clean: true
+
+  - task: PowerShell@2
+    displayName: 'Lock Repo ${{ parameters.Repo }}'
+    inputs:
+      targetType: filePath
+      filePath: $(Build.Repository.LocalPath)/$(Build.Repository.Name)/pwsh/set-repopermission.ps1
+      pwsh: true
+      arguments: >
+        -OrganizationUri '${{ parameters.AdoOrganizationUrl }}'
+        -Project '${{ parameters.AdoTeamProject }}'
+        -Repo '${{ parameters.Repo }}'
+        -Identity '${{ parameters.Identity }}'
+        -Permissions '${{ parameters.Permissions }}'
+        -State '${{ parameters.State }}'
+        -WhatIf:${{ variables.WhatIfForPwsh }}
+    env:
+      AZURE_DEVOPS_EXT_PAT: ${{ parameters.AdoAccessToken }}

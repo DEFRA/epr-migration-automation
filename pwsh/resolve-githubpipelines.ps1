@@ -8,7 +8,9 @@ param(
   [Parameter(Mandatory)]
   [string]$GitHubServiceConnection,
   [Parameter(Mandatory)]
-  [string]$Repo,
+  [string]$SourceAdoRepo,
+  [Parameter(Mandatory)]
+  [string]$TargetGitHubRepo,
   [Parameter(Mandatory)]
   [string]$InputPath,
   [Parameter()]
@@ -39,7 +41,8 @@ Write-Debug "${functionName}:OrganizationUri=$OrganizationUri"
 Write-Debug "${functionName}:Project=$Project"
 Write-Debug "${functionName}:GitHubOrganizationName=$GitHubOrganizationName"
 Write-Debug "${functionName}:GitHubServiceConnection=$GitHubServiceConnection"
-Write-Debug "${functionName}:Repo=$Repo"
+Write-Debug "${functionName}:SourceAdoRepo=$SourceAdoRepo"
+Write-Debug "${functionName}:TargetGitHubRepo=$TargetGitHubRepo"
 Write-Debug "${functionName}:InputPath=$InputPath"
 Write-Debug "${functionName}:ADOOutputVariableName=$ADOOutputVariableName"
 
@@ -67,16 +70,16 @@ try {
 
   Write-Host "Loaded details of $($pipelines.Count) pipelines"
 
-  [array]$repoPipelines = $pipelines | Where-Object -FilterScript { $_.repository -ne $null -and $_.repository.name -eq $Repo }
+  [array]$repoPipelines = $pipelines | Where-Object -FilterScript { $_.repository -ne $null -and $_.repository.name -eq $SourceAdoRepo }
 
-  Write-Host "There are $($repoPipelines.Count) pipelines associated with $repo"
+  Write-Host "There are $($repoPipelines.Count) pipelines associated with $SourceAdoRepo"
 
   [array]$adoPipelineInfos = $repoPipelines | ConvertTo-PipelineInfo -OrganizationUrl $OrganizationUri -Project $Project | Add-PipelineVariables -PassThru
 
   [array]$gitHubPipelineInfos = $adoPipelineInfos | ForEach-Object -Process {
     $_.Name = $_.Name + ' (GitHub)'
     $_.RepoType = "GitHub"
-    $_.RepoUrl = "https://github.com/$GitHubOrganizationName/$($_.repoName).git"
+    $_.RepoUrl = "https://github.com/$GitHubOrganizationName/$($TargetGitHubRepo).git"
     $_.ServiceConnection = $GitHubServiceConnection
     return $_
   }

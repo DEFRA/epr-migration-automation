@@ -1,24 +1,26 @@
 trigger: none
 
 parameters:
-- name: Repos
-  displayName: Repos to sync
+- name: MigrationData
+  displayName: Migration Data
   type: object
   default: 
-    - epr-migration-test1
-    - epr-migration-test2
-    - epr-migration-automation
+  - repo: 
+      SourceAdoRepo: epr-migration-test2
+      TargetGitHubRepo: epr-migration-test2
+      Action: migrate
+  - repo: 
+      SourceAdoRepo: epr-migration-automation
+      TargetGitHubRepo: epr-migration-automation
+      Action: synchronize
 
-- name: Mode
-  displayName: Operating mode
-  type: string
-  default: Synchronize
-  values: 
-  - Synchronize
-  - Migrate
+- name: GitLeaksFailureAsWarning
+  displayName: Treat Gitleaks failure as partial success
+  type: boolean
+  default: false
 
 - name: WhatIf
-  displayName: WhatIf
+  displayName: What If? (Simulate instead of do)
   type: boolean
   default: true
 
@@ -27,20 +29,19 @@ variables:
   value: defra
 - name: GitHubServiceConnection
   value: defra
+- name: WindowsHostedAgentPool
+  value: windows-latest
+- name: UbuntuHostedAgentPool
+  value: ubuntu-latest
+- name: AllPipelinesJsonArtifactName
+  value: AllPipelinesJson
+- name: RenamePrefix
+  value: 'ZZZ-Archive-'
 
 resources: 
   repositories:
-  # epr-migration-test1
-  - repository: ado-epr-migration-test1
-    name: RWD-CPR-EPR4P-ADO/epr-migration-test1
-    type: git
-  - repository: github-epr-migration-test1
-    name: defra/epr-migration-test1
-    type: github
-    endpoint: defra
-
   # epr-migration-test2
-  - repository: ado-epr-migration-test2
+  - repository: epr-migration-test2
     name: RWD-CPR-EPR4P-ADO/epr-migration-test2
     type: git
   - repository: github-epr-migration-test2
@@ -49,7 +50,7 @@ resources:
     endpoint: defra
 
   # epr-migration-automation
-  - repository: ado-epr-migration-automation
+  - repository: epr-migration-automation
     name: RWD-CPR-EPR4P-ADO/epr-migration-automation
     type: git
   - repository: github-epr-migration-automation
@@ -60,12 +61,16 @@ resources:
 extends: 
   template: templates/pipeline-migration.yaml
   parameters: 
-    Repos: ${{ parameters.Repos }}
-    Mode: ${{ parameters.Mode }}
+    MigrationData: ${{ parameters.MigrationData }}
+    RenamePrefix: ${{ variables.RenamePrefix }}
     GitHubOrganizationName: ${{ variables.GitHubOrganizationName }}
     GitHubServiceConnection: ${{ variables.GitHubServiceConnection }}
+    WindowsHostedAgentPool: ${{ variables.WindowsHostedAgentPool }}
+    UbuntuHostedAgentPool: ${{ variables.UbuntuHostedAgentPool }}
+    AllPipelinesJsonArtifactName: ${{ variables.AllPipelinesJsonArtifactName }}
+    GitLeaksFailureAsWarning: ${{ parameters.GitLeaksFailureAsWarning }}
     AdoOrganizationUrl: $(System.CollectionUri)
     AdoTeamProject: $(System.TeamProject)
     AdoAccessToken: $(System.AccessToken)
     WhatIf: ${{ parameters.WhatIf }}
-
+  

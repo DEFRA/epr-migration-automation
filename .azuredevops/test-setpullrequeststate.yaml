@@ -1,0 +1,55 @@
+trigger: none
+
+parameters:
+- name: Repo
+  type: string
+  default: epr-migration-test2
+- name: State
+  type: string
+  values: 
+  - abandoned
+  - active
+  default: active
+- name: PullRequestId
+  type: number
+  default: 0
+- name: WhatIf
+  displayName: What If
+  type: boolean
+  default: true
+
+variables:
+- name: HostedAgentPool 
+  value: ubuntu-latest
+- name: AdoOrganizationUrl
+  value: '$(System.CollectionUri)'
+- name: AdoTeamProject
+  value: '$(System.TeamProject)'
+- name: AdoAccessToken
+  value: '$(System.AccessToken)'
+
+resources: 
+  repositories:
+  # epr-migration-test2
+  - repository: epr-migration-test2
+    name: RWD-CPR-EPR4P-ADO/epr-migration-test2
+    type: git
+
+
+stages:
+- stage: SetPullRequestStateStage  
+  displayName: Set pull requests state to ${{ parameters.State }}
+  dependsOn: ''
+  jobs: 
+  - template: templates/job-setpullrequeststate.yaml
+    parameters:
+      JobName: SetPullRequestStateJob
+      DependsOn: ''
+      HostedAgentPool: ${{ variables.HostedAgentPool }}
+      AdoOrganizationUrl: ${{ variables.AdoOrganizationUrl }}
+      AdoTeamProject: ${{ variables.AdoTeamProject }}
+      AdoAccessToken: ${{ variables.AdoAccessToken }}
+      Repo: ${{ parameters.Repo }}
+      State: ${{ parameters.State }}
+      PullRequestId: '${{ parameters.PullRequestId }}'
+      WhatIf: ${{ parameters.WhatIf }}

@@ -64,4 +64,12 @@ resources:
 
 ### Resource Permissions
 
-The pipeline needs to be granted access to the new repo.  The easiest approach is to run the pipeline and click Permit for each resource.
+The pipeline needs to be granted access to the new repo.  
+
+The easiest approach is to set the repo as "open".  
+Settings -> Repositories -> ...repo... -> ... -> Open Access
+
+If however, the repo is not "open", there are two options
+
+1. Run the pipeline and click Permit for each resource.
+2. Settings -> Repositories -> ...repo... -> Pipeline Permissions -> + -> ...pipeline...

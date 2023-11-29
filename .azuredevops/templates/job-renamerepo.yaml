@@ -2,15 +2,17 @@
 parameters:
 - name: JobName
   type: string
-  default: DisableRepoJob
+  default: RenameRepoJob
 - name: HostedAgentPool
   displayName: Hosted agent pool to run on
   type: string
   default: ubuntu-latest
 - name: DependsOn 
-  type: string
+  type: object
   default: ''
-- name: Repo
+- name: OldRepoName
+  type: string
+- name: NewRepoName
   type: string
 - name: WhatIf
   displayName: What If
@@ -28,15 +30,49 @@ parameters:
 
 jobs:
 - job: ${{ parameters.JobName }}
-  displayName: Get All Pipeline Info
+  displayName: Rename repo ${{ parameters.OldRepoName }}
   dependsOn: ${{ parameters.DependsOn }}
   pool: 
     vmImage: ${{ parameters.HostedAgentPool }}
 
+  variables:
+    - ${{ if eq( parameters.WhatIf, true )}}:
+      - name: WhatIfForPwsh
+        value: '$true'
+    - ${{ else }}:
+      - name: WhatIfForPwsh
+        value: '$false'
+
   steps: 
+  - checkout: ${{ parameters.OldRepoName }}
+    path: s/ado-source
+    clean: true
+    #persistCredentials: true
+
   - checkout: self
     clean: true
 
   - pwsh: | 
       dir ENV:
+      Write-Host "Pipeline.Workspace=$(Pipeline.Workspace)"
+      Write-Host "Build.SourcesDirectory=$(Build.SourcesDirectory)"
+      Write-Host "Build.Repository.LocalPath=$(Build.Repository.LocalPath)"
+      Write-Host "Build.Repository.Name=$(Build.Repository.Name)"
+      dir $(Pipeline.Workspace) -Recurse | Sort-Object -Property FullName | ForEach-Object { Write-Host $_.FullName }
     displayName: diags
+
+
+  - task: PowerShell@2
+    displayName: 'Rename Repo ${{ parameters.OldRepoName }}'
+    inputs:
+      targetType: filePath
+      filePath: $(Build.Repository.LocalPath)/$(Build.Repository.Name)/pwsh/set-reponame.ps1
+      pwsh: true
+      arguments: >
+        -OrganizationUri '${{ parameters.AdoOrganizationUrl }}'
+        -Project '${{ parameters.AdoTeamProject }}'
+        -Repo '${{ parameters.OldRepoName }}'
+        -NewName '${{ parameters.NewRepoName }}'
+        -WhatIf:${{ variables.WhatIfForPwsh }}
+    env:
+      AZURE_DEVOPS_EXT_PAT: ${{ parameters.AdoAccessToken }}

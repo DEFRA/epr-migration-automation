@@ -1,0 +1,54 @@
+trigger: none
+
+parameters:
+- name: SourceAdoRepo
+  type: string
+  default: epr-migration-test2
+- name: TargetGitHubRepo
+  type: string
+  default: epr-migration-test2
+- name: GitLeaksFailureAsWarning
+  displayName: Treat Scan Failure As Warning
+  type: boolean
+  default: false
+- name: GitLeaksSuppressHistoryCheck
+  displayName: Suppress historic commit scanning
+  type: boolean
+  default: true
+- name: WhatIf
+  displayName: WhatIf
+  type: boolean
+  default: true
+
+variables:
+- name: HostedAgentPool 
+  value: windows-latest
+
+resources: 
+  repositories:
+  # epr-migration-test2
+  - repository: epr-migration-test2
+    name: RWD-CPR-EPR4P-ADO/epr-migration-test2
+    type: git
+  - repository: github-epr-migration-test2
+    name: defra/epr-migration-test2
+    type: github
+    endpoint: defra
+
+stages:
+- stage: SyncContentsStage  
+  displayName: Sync repo contents
+  dependsOn: ''
+  jobs: 
+  - template: templates/job-synccontent.yaml
+    parameters:
+      JobName: SyncContentJob
+      DependsOn: ''
+      HostedAgentPool: ${{ variables.HostedAgentPool }}
+      GitLeaksReportArtifactName: Gitleaks-${{ variables.Repo }}
+      GitLeaksFailureAsWarning: ${{ parameters.GitLeaksFailureAsWarning }}
+      GitLeaksSuppressHistoryCheck: ${{ parameters.GitLeaksSuppressHistoryCheck }}
+      SourceAdoRepo: ${{ parameters.SourceAdoRepo }}
+      TargetGitHubRepo: ${{ parameters.TargetGitHubRepo }}
+      WhatIf: ${{ parameters.WhatIf }}
+      Trunk: 'main'

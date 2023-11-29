@@ -10,7 +10,9 @@ parameters:
   type: string
 - name: GitHubOrganizationName
   type: string
-- name: Repo
+- name: SourceAdoRepo
+  type: string
+- name: TargetGitHubRepo
   type: string
 - name: PipelinesJsonArtifactName
   type: string
@@ -18,7 +20,7 @@ parameters:
   type: boolean
   default: true
 - name: DependsOn 
-  type: string
+  type: object
   default: ''
 - name: AdoOrganizationUrl
   type: string
@@ -32,7 +34,7 @@ parameters:
 
 jobs:
 - job: ${{ parameters.JobName }}
-  displayName: Sync Repo Pipelines - ${{ parameters.Repo }}
+  displayName: Sync Repo Pipelines - ${{ parameters.SourceAdoRepo }}
   dependsOn: ${{ parameters.DependsOn }}
   pool: 
     vmImage: ${{ parameters.HostedAgentPool }}
@@ -63,8 +65,8 @@ jobs:
     displayName: diags
 
   - task: PowerShell@2
-    displayName: 'Resolve GitHub Pipelines - ${{ parameters.Repo }}'
-    name: ResolveGitHubPipelinesStep
+    displayName: 'Resolve required pipelines - ${{ parameters.SourceAdoRepo }}'
+    name: ResolvePipelinesStep
     inputs:
       targetType: filePath
       filePath: $(Build.SourcesDirectory)/pwsh/resolve-githubpipelines.ps1
@@ -72,7 +74,8 @@ jobs:
       arguments: >
         -OrganizationUri '${{ parameters.AdoOrganizationUrl }}'
         -Project '${{ parameters.AdoTeamProject }}'
-        -Repo '${{ parameters.Repo }}'
+        -SourceAdoRepo '${{ parameters.SourceAdoRepo }}'
+        -TargetGitHubRepo '${{ parameters.TargetGitHubRepo }}'
         -GitHubOrganizationName '${{ parameters.GitHubOrganizationName }}'
         -GitHubServiceConnection '${{ parameters.GitHubServiceConnection }}'
         -InputPath '${{ variables.AllPipelinesJsonFile }}'
@@ -86,7 +89,7 @@ jobs:
     displayName: diags
 
   - task: PowerShell@2
-    displayName: 'Configure Pipelines - ${{ parameters.Repo }}'
+    displayName: 'Configure Pipelines - ${{ parameters.TargetGitHubRepo }}'
     inputs:
       targetType: filePath
       filePath: $(Build.SourcesDirectory)/pwsh/set-pipelines.ps1
@@ -94,7 +97,7 @@ jobs:
       arguments: >
         -OrganizationUri '${{ parameters.AdoOrganizationUrl }}'
         -Project '${{ parameters.AdoTeamProject }}'
-        -InputJson '$(ResolveGitHubPipelinesStep.GitHubPipelinesJson)'
+        -InputJson '$(ResolvePipelinesStep.GitHubPipelinesJson)'
         -WhatIf:${{ variables.WhatIfForPwsh }}
     env:
       AZURE_DEVOPS_EXT_PAT: ${{ parameters.AdoAccessToken }}

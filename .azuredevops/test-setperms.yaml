@@ -1,0 +1,59 @@
+trigger: none
+
+parameters:
+- name: Repo
+  type: string
+  default: epr-migration-test2
+- name: Identity
+  type: string
+  default: RWD-CPR-EPR4P-ADO\limited blast radius
+- name: Permission
+  type: string
+  default: GenericContribute,PullRequestContribute
+- name: State
+  type: string
+  values:
+  - Allow
+  - Deny
+  - NotSet
+  default: allow
+- name: WhatIf
+  displayName: What If
+  type: boolean
+  default: true
+
+variables:
+- name: HostedAgentPool 
+  value: ubuntu-latest
+- name: AdoOrganizationUrl
+  value: '$(System.CollectionUri)'
+- name: AdoTeamProject
+  value: '$(System.TeamProject)'
+- name: AdoAccessToken
+  value: '$(System.AccessToken)'
+
+resources: 
+  repositories:
+  # epr-migration-test2
+  - repository: epr-migration-test2
+    name: RWD-CPR-EPR4P-ADO/epr-migration-test2
+    type: git
+
+stages:
+- stage: SetRepoPermissionStage  
+  displayName: Set repo permissions
+  dependsOn: ''
+  jobs: 
+  - template: templates/job-setrepopermission.yaml
+    parameters:
+      JobName: SetRepoPermissionsJob
+      DependsOn: ''
+      HostedAgentPool: ${{ variables.HostedAgentPool }}
+      AdoOrganizationUrl: ${{ variables.AdoOrganizationUrl }}
+      AdoTeamProject: ${{ variables.AdoTeamProject }}
+      AdoAccessToken: ${{ variables.AdoAccessToken }}
+      Repo: ${{ parameters.Repo }}
+      Identity: ${{ parameters.Identity }}
+      Permissions: ${{ parameters.Permissions }}
+      State: ${{ parameters.State }}
+      WhatIf: ${{ parameters.WhatIf }}
