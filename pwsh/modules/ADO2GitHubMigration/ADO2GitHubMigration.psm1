@@ -1179,7 +1179,7 @@ function New-PipelineParamPart {
       }
       else {
         Write-Debug "${functionName}:process:PipelineInfo has no Id, using --pipeline-name"
-        $pipelineParam = " --pipeline-name '$Pipeline' "
+        $pipelineParam = " --pipeline-name '$($Pipeline.Name)' "
       }
     }
     elseif ($Pipeline -is [int]) {
@@ -1225,6 +1225,7 @@ function New-PipelineParamPart {
       throw [System.ArgumentException]::("Unsupported type $inputType", "Pipeline")
     }
 
+    Write-Debug "${functionName}:process:pipelineParam=$pipelineParam"
     Write-Output $pipelineParam
 
     Write-Debug "${functionName}:process:end"

@@ -8,17 +8,17 @@ parameters:
   - repo: 
       SourceAdoRepo: epr-anti-virus-function-app
       TargetGitHubRepo: epr-anti-virus-function-app
-      Action: ignore
+      Action: simulate
       Memo: Prepare
   - repo: 
       SourceAdoRepo: epr-event-dispatcher-function-app
       TargetGitHubRepo: epr-event-dispatcher-function-app
-      Action: ignore
+      Action: simulate
       Memo: Prepare
   - repo: 
       SourceAdoRepo: epr-migration-test1
       TargetGitHubRepo: epr-migration-test1
-      Action: simulate
+      Action: ignore
       Memo: In use for R&D - do not sync or migrate
   - repo: 
       SourceAdoRepo: epr-migration-test2
@@ -33,7 +33,7 @@ parameters:
   - repo: 
       SourceAdoRepo: epr-registration-validation-function-app
       TargetGitHubRepo: epr-registration-validation-function-app
-      Action: ignore
+      Action: simulate
       Memo: Prepare
 
 - name: GitLeaksFailureAsWarning
