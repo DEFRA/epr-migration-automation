@@ -50,7 +50,26 @@ try {
 
   Initialize-AdoCli -OrganizationUri $OrganizationUri -Project $Project -AccessToken $AccessToken
 
-  @(Get-AdoPullRequest -Repo $Repo -PullRequestId $PullRequestId -Status active) | Select-Object -ExpandProperty pullRequestId | Set-AdoPullRequestState -State $State | Out-Null
+  [array]$pullRequests = @(Get-AdoPullRequest -Repo $Repo -PullRequestId $PullRequestId -Status active)
+
+  if ($null -eq $pullRequests -or $pullRequests.Count -eq 0) {
+    if ($PullRequestId -eq 0) {
+        Write-Host "Repo $Repo has no active pull requests."
+    }
+    else {
+        Write-Host "Pull request $PullRequestId not found."
+    }
+  }
+  else {
+    if ($PullRequestId -eq 0) {
+        Write-Host "Repo $Repo has $($pullRequests.Count) active pull requests."
+    }
+    else {
+        Write-Host "Pull request $PullRequestId found."
+    }
+    
+    $pullRequests | Select-Object -ExpandProperty pullRequestId | Set-AdoPullRequestState -State $State | Out-Null
+  }
 
   $exitCode = 0
 }
