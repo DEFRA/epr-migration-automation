@@ -1207,18 +1207,7 @@ function New-PipelineParamPart {
     }
     elseif ($Pipeline -is [PSCustomObject]) {
       Write-Debug "${functionName}:process:Pipeline is [PSCustomObject]"
-      if ($Pipeline.ContainsKey('id')) {
-        Write-Debug "${functionName}:process:PSCustomObject has id - will use --pipeline-id"
-        $pipelineParam = " --pipeline-id $($Pipeline['id']) "
-      }
-      elseif ($Pipeline.ContainsKey('name')) {
-        Write-Debug "${functionName}:process:PSCustomObject has name - will use --pipeline-name"
-        $pipelineParam = " --pipeline-name $($Pipeline['name']) "
-      }
-      else {
-        Write-Debug "${functionName}:process:PSCustomObject has neither name nor id"
-        throw [System.ArgumentException]::("Invalid [PSCustomObject] - no id or name entry found", "Pipeline")
-      }
+      $pipelineParam = " --pipeline-id $($Pipeline.id) "
     }
     else {
       Write-Debug "${functionName}:process:Pipeline is $inputType" 

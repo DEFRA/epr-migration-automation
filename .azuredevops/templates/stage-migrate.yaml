@@ -151,6 +151,7 @@ stages:
           DependsOn: 
           - SyncPipelinesJob${{ replace( parameters.SourceAdoRepo, '-', '') }}
           - SyncContentJob${{ replace( parameters.SourceAdoRepo, '-', '') }}
+          - AbandonPullRequestsJob${{ replace( parameters.SourceAdoRepo, '-', '') }}
           AdoOrganizationUrl: ${{ parameters.AdoOrganizationUrl }}
           AdoTeamProject: ${{ parameters.AdoTeamProject }}
           AdoAccessToken: ${{ parameters.AdoAccessToken }}
