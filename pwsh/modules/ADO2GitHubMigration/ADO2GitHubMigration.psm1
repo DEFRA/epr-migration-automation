@@ -1155,71 +1155,84 @@ function New-PipelineParamPart {
     [Parameter(ValueFromPipeline, Mandatory)]
     $Pipeline
   )  
-  {
-    Write-Debug "${functionName}:start"
+
+  begin {
+    [string]$functionName = $MyInvocation.MyCommand
+    Write-Debug "${functionName}:begin:start"
+    Write-Debug "${functionName}:begin:end"
+  }
+
+  process {
+    [string]$functionName = $MyInvocation.MyCommand
+    Write-Debug "${functionName}:process:start"
 
     [string]$inputType = $Pipeline.GetType().Name
-    Write-Debug "${functionName}:inputType=$inputType"
+    Write-Debug "${functionName}:process:inputType=$inputType"
 
     [string]$pipelineParam = $null
 
     if ($Pipeline -is [PipelineInfo]) {
-      Write-Debug "${functionName}:Pipeline is [PipelineInfo]"
+      Write-Debug "${functionName}:process:Pipeline is [PipelineInfo]"
       if ($Pipeline.Id -gt 0) {
-        Write-Debug "${functionName}:PipelineInfo Id, using --pipeline-id"
+        Write-Debug "${functionName}:process:PipelineInfo Id, using --pipeline-id"
         $pipelineParam = " --pipeline-id $($Pipeline.Id) "
       }
       else {
-        Write-Debug "${functionName}:PipelineInfo has no Id, using --pipeline-name"
+        Write-Debug "${functionName}:process:PipelineInfo has no Id, using --pipeline-name"
         $pipelineParam = " --pipeline-name '$Pipeline' "
       }
     }
     elseif ($Pipeline -is [int]) {
-      Write-Debug "${functionName}:Pipeline is [int] - will use --pipeline-id"
+      Write-Debug "${functionName}:process:Pipeline is [int] - will use --pipeline-id"
       $pipelineParam = " --pipeline-id $Pipeline "
     }
     elseif ($Pipeline -is [string]) {
-      Write-Debug "${functionName}:Pipeline is [string] - will use --pipeline-name"
+      Write-Debug "${functionName}:process:Pipeline is [string] - will use --pipeline-name"
       $pipelineParam = " --pipeline-name '$Pipeline' "
     }
     elseif ($Pipeline -is [hashtable]) {
-      Write-Debug "${functionName}:Pipeline is [hashtable]"
+      Write-Debug "${functionName}:process:Pipeline is [hashtable]"
       if ($Pipeline.ContainsKey('id')) {
-        Write-Debug "${functionName}:hashtable has id - will use --pipeline-id"
+        Write-Debug "${functionName}:process:hashtable has id - will use --pipeline-id"
         $pipelineParam = " --pipeline-id $($Pipeline['id']) "
       }
       elseif ($Pipeline.ContainsKey('name')) {
-        Write-Debug "${functionName}:hashtable has name - will use --pipeline-name"
+        Write-Debug "${functionName}:process:hashtable has name - will use --pipeline-name"
         $pipelineParam = " --pipeline-name $($Pipeline['name']) "
       }
       else {
-        Write-Debug "${functionName}:hashtable has neither name nor id"
+        Write-Debug "${functionName}:process:hashtable has neither name nor id"
         throw [System.ArgumentException]::("Invalid [hashtable] - no id or name entry found", "Pipeline")
       }
     }
     elseif ($Pipeline -is [PSCustomObject]) {
-      Write-Debug "${functionName}:Pipeline is [PSCustomObject]"
+      Write-Debug "${functionName}:process:Pipeline is [PSCustomObject]"
       if ($Pipeline.ContainsKey('id')) {
-        Write-Debug "${functionName}:PSCustomObject has id - will use --pipeline-id"
+        Write-Debug "${functionName}:process:PSCustomObject has id - will use --pipeline-id"
         $pipelineParam = " --pipeline-id $($Pipeline['id']) "
       }
       elseif ($Pipeline.ContainsKey('name')) {
-        Write-Debug "${functionName}:PSCustomObject has name - will use --pipeline-name"
+        Write-Debug "${functionName}:process:PSCustomObject has name - will use --pipeline-name"
         $pipelineParam = " --pipeline-name $($Pipeline['name']) "
       }
       else {
-        Write-Debug "${functionName}:PSCustomObject has neither name nor id"
+        Write-Debug "${functionName}:process:PSCustomObject has neither name nor id"
         throw [System.ArgumentException]::("Invalid [PSCustomObject] - no id or name entry found", "Pipeline")
       }
     }
     else {
-      Write-Debug "${functionName}:Pipeline is $inputType" 
+      Write-Debug "${functionName}:process:Pipeline is $inputType" 
       throw [System.ArgumentException]::("Unsupported type $inputType", "Pipeline")
     }
 
     Write-Output $pipelineParam
 
-    Write-Debug "${functionName}:end"
+    Write-Debug "${functionName}:process:end"
+  }
+  
+  end {
+    Write-Debug "${functionName}:end:start"
+    Write-Debug "${functionName}:end:end"
   }
 }
 
