@@ -17,7 +17,8 @@ parameters:
   values: 
   - synchronize
   - migrate
-  default: synchronize
+  - simulate
+  default: simulate
 
 - name: RenamePrefix
   displayName: Pefix to use when renaming repos
@@ -31,11 +32,6 @@ parameters:
 - name: GitHubServiceConnection
   displayName: Service Connection to GitHub
   type: string
-
-- name: WhatIf
-  displayName: What If
-  type: boolean
-  default: true
 
 - name: Trunk
   displayName: Trunk name
@@ -80,10 +76,10 @@ parameters:
 
 stages:
 - stage: ${{ parameters.StageName }}
-  displayName: Migrate ${{ parameters.SourceAdoRepo }}
+  displayName: ${{ parameters.Mode }} ${{ parameters.SourceAdoRepo }}
   dependsOn: ${{ parameters.DependsOn }}
   jobs: 
-  - ${{ if eq(parameters.Mode, 'migrate') }}:
+  - ${{ if ne(parameters.Mode, 'synchronize') }}:
     - template: job-setbranchstate.yaml
       parameters:
         JobName: LockBranchesJob${{ replace( parameters.SourceAdoRepo, '-', '') }}
@@ -95,7 +91,7 @@ stages:
         Repo: ${{ parameters.SourceAdoRepo }}
         State: 'locked'
         Branch: ''
-        WhatIf: ${{ parameters.WhatIf }}
+        WhatIf: ${{ eq(parameters.Mode, 'simulate') }}
 
   - template: job-synccontent.yaml
     parameters:
@@ -111,13 +107,13 @@ stages:
       GitLeaksReportPublishOnlyOnFail: true
       SourceAdoRepo: ${{ parameters.SourceAdoRepo }}
       TargetGitHubRepo: ${{ parameters.TargetGitHubRepo }}
-      WhatIf: ${{ parameters.WhatIf }}
+      WhatIf: ${{ eq(parameters.Mode, 'simulate') }}
       Trunk: ${{ parameters.Trunk }}
 
   - template: job-syncrepopipelines.yaml
     parameters:
       JobName: SyncPipelinesJob${{ replace( parameters.SourceAdoRepo, '-', '') }}
-      ${{ if eq(parameters.Mode, 'migrate') }}:
+      ${{ if ne(parameters.Mode, 'synchronize') }}:
         DependsOn: LockBranchesJob${{ replace( parameters.SourceAdoRepo, '-', '') }}
       ${{ else }}:
         DependsOn: ''
@@ -130,9 +126,9 @@ stages:
       GitHubServiceConnection: ${{ parameters.GitHubServiceConnection }}
       SourceAdoRepo: ${{ parameters.SourceAdoRepo }}
       TargetGitHubRepo: ${{ parameters.TargetGitHubRepo }}
-      WhatIf: ${{ parameters.WhatIf }}
+      WhatIf: ${{ eq(parameters.Mode, 'simulate') }}
 
-  - ${{ if eq(parameters.Mode, 'migrate') }}:
+  - ${{ if ne(parameters.Mode, 'synchronize') }}:
     - template: job-setpullrequeststate.yaml
       parameters:
         JobName: AbandonPullRequestsJob${{ replace( parameters.SourceAdoRepo, '-', '') }}
@@ -146,7 +142,7 @@ stages:
         Repo: ${{ parameters.SourceAdoRepo }}
         State: abandoned
         PullRequestId: 0
-        WhatIf: ${{ parameters.WhatIf }}
+        WhatIf: ${{ eq(parameters.Mode, 'simulate') }}
 
     - ${{ if ne(parameters.RenamePrefix, '') }}:
       - template: job-renamerepo.yaml
@@ -161,7 +157,7 @@ stages:
           HostedAgentPool: ${{ parameters.ubuntuHostedAgentPool }}
           OldRepoName: '${{ parameters.SourceAdoRepo }}'
           NewRepoName: '${{ parameters.RenamePrefix }}${{ parameters.SourceAdoRepo }}'
-          WhatIf: ${{ parameters.WhatIf }}
+          WhatIf: ${{ eq(parameters.Mode, 'simulate') }}
 
     - template: job-setbranchstate.yaml
       parameters:
@@ -176,7 +172,7 @@ stages:
         Repo: ${{ parameters.SourceAdoRepo }}
         State: 'unlocked'
         Branch: ''
-        WhatIf: ${{ parameters.WhatIf }}
+        WhatIf: ${{ eq(parameters.Mode, 'simulate') }}
         Condition: failed()
 
 # need to generate reports

@@ -6,6 +6,18 @@ parameters:
   type: object
   default: 
   - repo: 
+      SourceAdoRepo: epr-anti-virus-function-app
+      TargetGitHubRepo: epr-anti-virus-function-app
+      Action: ignore
+  - repo: 
+      SourceAdoRepo: epr-event-dispatcher-function-app
+      TargetGitHubRepo: epr-event-dispatcher-function-app
+      Action: ignore
+  - repo: 
+      SourceAdoRepo: epr-migration-test1
+      TargetGitHubRepo: epr-migration-test1
+      Action: simulate
+  - repo: 
       SourceAdoRepo: epr-migration-test2
       TargetGitHubRepo: epr-migration-test2
       Action: migrate
@@ -13,16 +25,15 @@ parameters:
       SourceAdoRepo: epr-migration-automation
       TargetGitHubRepo: epr-migration-automation
       Action: synchronize
+  - repo: 
+      SourceAdoRepo: epr-registration-validation-function-app
+      TargetGitHubRepo: epr-registration-validation-function-app
+      Action: ignore
 
 - name: GitLeaksFailureAsWarning
   displayName: Treat Gitleaks failure as partial success
   type: boolean
   default: false
-
-- name: WhatIf
-  displayName: What If? (Simulate instead of do)
-  type: boolean
-  default: true
 
 variables:
 - name: GitHubOrganizationName
@@ -40,6 +51,33 @@ variables:
 
 resources: 
   repositories:
+  # epr-anti-virus-function-app
+  - repository: epr-anti-virus-function-app
+    name: RWD-CPR-EPR4P-ADO/epr-anti-virus-function-app
+    type: git
+  - repository: github-epr-anti-virus-function-app
+    name: defra/epr-anti-virus-function-app
+    type: github
+    endpoint: defra
+
+  # epr-event-dispatcher-function-app
+  - repository: epr-event-dispatcher-function-app
+    name: RWD-CPR-EPR4P-ADO/epr-event-dispatcher-function-app
+    type: git
+  - repository: github-epr-event-dispatcher-function-app
+    name: defra/epr-event-dispatcher-function-app
+    type: github
+    endpoint: defra
+
+  # epr-migration-test2
+  - repository: epr-migration-test1
+    name: RWD-CPR-EPR4P-ADO/epr-migration-test1
+    type: git
+  - repository: github-epr-migration-test1
+    name: defra/epr-migration-test1
+    type: github
+    endpoint: defra
+
   # epr-migration-test2
   - repository: epr-migration-test2
     name: RWD-CPR-EPR4P-ADO/epr-migration-test2
@@ -58,6 +96,15 @@ resources:
     type: github
     endpoint: defra
 
+  # epr-registration-validation-function-app
+  - repository: epr-registration-validation-function-app
+    name: RWD-CPR-EPR4P-ADO/epr-registration-validation-function-app
+    type: git
+  - repository: github-epr-registration-validation-function-app
+    name: defra/epr-registration-validation-function-app
+    type: github
+    endpoint: defra
+
 extends: 
   template: templates/pipeline-migration.yaml
   parameters: 
@@ -72,5 +119,4 @@ extends:
     AdoOrganizationUrl: $(System.CollectionUri)
     AdoTeamProject: $(System.TeamProject)
     AdoAccessToken: $(System.AccessToken)
-    WhatIf: ${{ parameters.WhatIf }}
   

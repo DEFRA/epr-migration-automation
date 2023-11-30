@@ -25,11 +25,6 @@ parameters:
   displayName: Service Connection to GitHub
   type: string
 
-- name: WhatIf
-  displayName: What If
-  type: boolean
-  default: true
-
 - name: Trunk
   displayName: Trunk name
   type: string
@@ -113,27 +108,26 @@ stages:
       HostingRepoType: TfsGit
 
 - ${{ each item in parameters.MigrationData }}:
-  - template: stage-migrate.yaml
-    parameters: 
-      StageName: Migrate${{ replace( item.repo.SourceAdoRepo, '-', '') }}Stage
-      DependsOn: 
-      - GetPipelineInfoStage
-      WindowsHostedAgentPool: ${{ parameters.WindowsHostedAgentPool }}
-      UbuntuHostedAgentPool: ${{ parameters.UbuntuHostedAgentPool }}
-      SourceAdoRepo: ${{ item.repo.SourceAdoRepo }}
-      TargetGitHubRepo: ${{ item.repo.TargetGitHubRepo }}
-      Mode: ${{ item.repo.Action }}
-      RenamePrefix: ${{ parameters.RenamePrefix }}
-      GitHubOrganizationName: ${{ parameters.GitHubOrganizationName }}
-      GitHubServiceConnection: ${{ parameters.GitHubServiceConnection }}
-      AdoOrganizationUrl: ${{ parameters.AdoOrganizationUrl }}
-      AdoTeamProject: ${{ parameters.AdoTeamProject }}
-      AdoAccessToken: ${{ parameters.AdoAccessToken }}
-      AllPipelinesJsonArtifactName: ${{ parameters.AllPipelinesJsonArtifactName }}
-      Trunk: ${{ parameters.Trunk }}
-      GitLeaksFailureAsWarning: ${{ parameters.GitLeaksFailureAsWarning }}
-      WhatIf: ${{ parameters.WhatIf }}
-
+  - ${{ if ne(item.repo.action, 'ignore') }}:
+    - template: stage-migrate.yaml
+      parameters: 
+        StageName: Migrate${{ replace( item.repo.SourceAdoRepo, '-', '') }}Stage
+        DependsOn: 
+        - GetPipelineInfoStage
+        WindowsHostedAgentPool: ${{ parameters.WindowsHostedAgentPool }}
+        UbuntuHostedAgentPool: ${{ parameters.UbuntuHostedAgentPool }}
+        SourceAdoRepo: ${{ item.repo.SourceAdoRepo }}
+        TargetGitHubRepo: ${{ item.repo.TargetGitHubRepo }}
+        RenamePrefix: ${{ parameters.RenamePrefix }}
+        GitHubOrganizationName: ${{ parameters.GitHubOrganizationName }}
+        GitHubServiceConnection: ${{ parameters.GitHubServiceConnection }}
+        AdoOrganizationUrl: ${{ parameters.AdoOrganizationUrl }}
+        AdoTeamProject: ${{ parameters.AdoTeamProject }}
+        AdoAccessToken: ${{ parameters.AdoAccessToken }}
+        AllPipelinesJsonArtifactName: ${{ parameters.AllPipelinesJsonArtifactName }}
+        Trunk: ${{ parameters.Trunk }}
+        GitLeaksFailureAsWarning: ${{ parameters.GitLeaksFailureAsWarning }}
+        Mode: ${{ item.repo.Action }}
 
 # need to generate reports
 # - report the presence of secrets on the target pipeline (because these will not be populated by the automation)
