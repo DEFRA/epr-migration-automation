@@ -517,7 +517,7 @@ function Get-AdoPullRequest {
       [string]$command = $commandBuilder.ToString()
       Write-Debug "${functionName}:process:command=$command"
 
-      [array]$pullRequests = Invoke-CommandLine -Command $command | ConvertFrom-Json -Depth $MAX_JSON_DEPTH 
+      [array]$pullRequests = @(Invoke-CommandLine -Command $command | ConvertFrom-Json -Depth $MAX_JSON_DEPTH)
      
       Write-Debug "${functionName}:process:there are $($pullRequests.Count) pull requests in $Repo"
       Write-Output $pullRequests
@@ -1229,7 +1229,7 @@ function New-PipelineParamPart {
 
     Write-Debug "${functionName}:process:end"
   }
-  
+
   end {
     Write-Debug "${functionName}:end:start"
     Write-Debug "${functionName}:end:end"

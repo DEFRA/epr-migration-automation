@@ -77,6 +77,7 @@ try {
   [array]$adoPipelineInfos = $repoPipelines | ConvertTo-PipelineInfo -OrganizationUrl $OrganizationUri -Project $Project | Add-PipelineVariables -PassThru
 
   [array]$gitHubPipelineInfos = $adoPipelineInfos | ForEach-Object -Process {
+    $_.Id = 0
     $_.Name = $_.Name + ' (GitHub)'
     $_.RepoType = "GitHub"
     $_.RepoUrl = "https://github.com/$GitHubOrganizationName/$($TargetGitHubRepo).git"
