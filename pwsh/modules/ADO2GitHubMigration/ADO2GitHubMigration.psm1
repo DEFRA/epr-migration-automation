@@ -1099,7 +1099,7 @@ function New-AdoPipelineVariable {
   [CmdletBinding(SupportsShouldProcess)]
   param(
     [Parameter(Mandatory)]
-    [string]$Pipeline,
+    $Pipeline,
     [Parameter(ValueFromPipeline, Mandatory)]
     [PipelineVariableInfo]$VariableInfo,
     [switch]$SuppressSecret
@@ -1108,8 +1108,9 @@ function New-AdoPipelineVariable {
   begin {
     [string]$functionName = $MyInvocation.MyCommand
     Write-Debug "${functionName}:begin:start"
-    Write-Debug "${functionName}:begin:Pipeline=$Pipeline"
     Write-Debug "${functionName}:begin:SuppressSecret=$SuppressSecret"
+    [string]$pipelineParam = New-PipelineParamPart -Pipeline $Pipeline
+    Write-Debug "${functionName}:begin:pipelineParam=$pipelineParam"
     Write-Debug "${functionName}:begin:end"
   }
 
@@ -1120,14 +1121,7 @@ function New-AdoPipelineVariable {
     Write-Debug "${functionName}:process:VariableInfo.Name=$VariableInfo.Name"
     Write-Debug "${functionName}:process:value=$value"
 
-    [System.Text.StringBuilder]$builder = [System.Text.StringBuilder]::new("az pipelines variable create ")
-    [Guid]$pipelineId = $null
-    if ([Guid]::TryParse($Pipelines, [ref]$pipelineId)) {
-      [void]$builder.Append(" --pipeline-name '$Pipeline'")
-    }
-    else {
-      [void]$builder.Append(" --pipeline-id '$Pipeline'")
-    }
+    [System.Text.StringBuilder]$builder = [System.Text.StringBuilder]::new("az pipelines variable create $pipelineParam")
     [void]$builder.Append(" --name '$($VariableInfo.Name)'")
     [void]$builder.Append(" --secret $($VariableInfo.IsSecret) ")
     [void]$builder.Append(" --allow-override $($VariableInfo.AllowOverride) ")
@@ -1156,11 +1150,84 @@ function New-AdoPipelineVariable {
   }
 }
 
+function New-PipelineParamPart {
+  param(
+    [Parameter(ValueFromPipeline, Mandatory)]
+    $Pipeline
+  )  
+  {
+    Write-Debug "${functionName}:start"
+
+    [string]$inputType = $Pipeline.GetType().Name
+    Write-Debug "${functionName}:inputType=$inputType"
+
+    [string]$pipelineParam = $null
+
+    if ($Pipeline -is [PipelineInfo]) {
+      Write-Debug "${functionName}:Pipeline is [PipelineInfo]"
+      if ($Pipeline.Id -gt 0) {
+        Write-Debug "${functionName}:PipelineInfo Id, using --pipeline-id"
+        $pipelineParam = " --pipeline-id $($Pipeline.Id) "
+      }
+      else {
+        Write-Debug "${functionName}:PipelineInfo has no Id, using --pipeline-name"
+        $pipelineParam = " --pipeline-name '$Pipeline' "
+      }
+    }
+    elseif ($Pipeline -is [int]) {
+      Write-Debug "${functionName}:Pipeline is [int] - will use --pipeline-id"
+      $pipelineParam = " --pipeline-id $Pipeline "
+    }
+    elseif ($Pipeline -is [string]) {
+      Write-Debug "${functionName}:Pipeline is [string] - will use --pipeline-name"
+      $pipelineParam = " --pipeline-name '$Pipeline' "
+    }
+    elseif ($Pipeline -is [hashtable]) {
+      Write-Debug "${functionName}:Pipeline is [hashtable]"
+      if ($Pipeline.ContainsKey('id')) {
+        Write-Debug "${functionName}:hashtable has id - will use --pipeline-id"
+        $pipelineParam = " --pipeline-id $($Pipeline['id']) "
+      }
+      elseif ($Pipeline.ContainsKey('name')) {
+        Write-Debug "${functionName}:hashtable has name - will use --pipeline-name"
+        $pipelineParam = " --pipeline-name $($Pipeline['name']) "
+      }
+      else {
+        Write-Debug "${functionName}:hashtable has neither name nor id"
+        throw [System.ArgumentException]::("Invalid [hashtable] - no id or name entry found", "Pipeline")
+      }
+    }
+    elseif ($Pipeline -is [PSCustomObject]) {
+      Write-Debug "${functionName}:Pipeline is [PSCustomObject]"
+      if ($Pipeline.ContainsKey('id')) {
+        Write-Debug "${functionName}:PSCustomObject has id - will use --pipeline-id"
+        $pipelineParam = " --pipeline-id $($Pipeline['id']) "
+      }
+      elseif ($Pipeline.ContainsKey('name')) {
+        Write-Debug "${functionName}:PSCustomObject has name - will use --pipeline-name"
+        $pipelineParam = " --pipeline-name $($Pipeline['name']) "
+      }
+      else {
+        Write-Debug "${functionName}:PSCustomObject has neither name nor id"
+        throw [System.ArgumentException]::("Invalid [PSCustomObject] - no id or name entry found", "Pipeline")
+      }
+    }
+    else {
+      Write-Debug "${functionName}:Pipeline is $inputType" 
+      throw [System.ArgumentException]::("Unsupported type $inputType", "Pipeline")
+    }
+
+    Write-Output $pipelineParam
+
+    Write-Debug "${functionName}:end"
+  }
+}
+
 function Remove-AdoPipelineVariable {
   [CmdletBinding(SupportsShouldProcess)]
   param(
     [Parameter(Mandatory)]
-    [string]$Pipeline,
+    $Pipeline,
     [Parameter(ValueFromPipeline, Mandatory)]
     [PipelineVariableInfo]$VariableInfo
   )  
@@ -1168,21 +1235,15 @@ function Remove-AdoPipelineVariable {
   begin {
     [string]$functionName = $MyInvocation.MyCommand
     Write-Debug "${functionName}:begin:start"
-    Write-Debug "${functionName}:begin:Pipeline=$Pipeline"
+    [string]$pipelineParam = New-PipelineParamPart -Pipeline $Pipeline
+    Write-Debug "${functionName}:begin:pipelineParam=$pipelineParam"
     Write-Debug "${functionName}:begin:end"
   }
 
   process {
     Write-Debug "${functionName}:process:start"
 
-    [System.Text.StringBuilder]$builder = [System.Text.StringBuilder]::new("az pipelines variable delete --yes ")
-    [Guid]$pipelineId = $null
-    if ([Guid]::TryParse($Pipelines, [ref]$pipelineId)) {
-      [void]$builder.Append(" --pipeline-name '$Pipeline'")
-    }
-    else {
-      [void]$builder.Append(" --pipeline-id '$Pipeline'")
-    }
+    [System.Text.StringBuilder]$builder = [System.Text.StringBuilder]::new("az pipelines variable delete --yes $pipelineParam")
     [void]$builder.Append(" --name '$($VariableInfo.Name)'")
 
     [string]$command = $builder.ToString()
@@ -1585,13 +1646,11 @@ function Set-AdoPipeline {
   }
 }
 
-
-
 function Set-AdoPipelineVariable {
   [CmdletBinding(SupportsShouldProcess)]
   param(
     [Parameter(Mandatory)]
-    [string]$Pipeline,
+    $Pipeline,
     [Parameter(ValueFromPipeline, Mandatory)]
     [PipelineVariableInfo]$VariableInfo,
     [switch]$SuppressSecret
@@ -1600,8 +1659,9 @@ function Set-AdoPipelineVariable {
   begin {
     [string]$functionName = $MyInvocation.MyCommand
     Write-Debug "${functionName}:begin:start"
-    Write-Debug "${functionName}:begin:Pipeline=$Pipeline"
     Write-Debug "${functionName}:begin:SuppressSecret=$SuppressSecret"
+    [string]$pipelineParam = New-PipelineParamPart -Pipeline $Pipeline
+    Write-Debug "${functionName}:begin:pipelineParam=$pipelineParam"
     Write-Debug "${functionName}:begin:end"
   }
 
@@ -1612,14 +1672,7 @@ function Set-AdoPipelineVariable {
     Write-Debug "${functionName}:process:VariableInfo.Name=$VariableInfo.Name"
     Write-Debug "${functionName}:process:value=$value"
 
-    [System.Text.StringBuilder]$builder = [System.Text.StringBuilder]::new("az pipelines variable update ")
-    [Guid]$pipelineId = $null
-    if ([Guid]::TryParse($Pipelines, [ref]$pipelineId)) {
-      [void]$builder.Append(" --pipeline-name '$Pipeline'")
-    }
-    else {
-      [void]$builder.Append(" --pipeline-id '$Pipeline'")
-    }
+    [System.Text.StringBuilder]$builder = [System.Text.StringBuilder]::new("az pipelines variable update $pipelineParam ")
     [void]$builder.Append(" --name '$($VariableInfo.Name)'")
     [void]$builder.Append(" --secret $($VariableInfo.IsSecret) ")
     [void]$builder.Append(" --allow-override $($VariableInfo.AllowOverride) ")
@@ -1840,9 +1893,9 @@ function Sync-AdoPipelineVariables {
       }
     }
 
-    $variablesToUpdate | Set-AdoPipelineVariable -Pipeline $Pipeline.Id -SuppressSecret | Write-Output
-    $variablesToCreate | New-AdoPipelineVariable -Pipeline $Pipeline.Id -SuppressSecret | Write-Output
-    $variablesToDelete | Remove-AdoPipelineVariable -Pipeline $Pipeline.Id | Out-Null
+    $variablesToUpdate | Set-AdoPipelineVariable -Pipeline $Pipeline -SuppressSecret | Write-Output
+    $variablesToCreate | New-AdoPipelineVariable -Pipeline $Pipeline -SuppressSecret | Write-Output
+    $variablesToDelete | Remove-AdoPipelineVariable -Pipeline $Pipeline | Out-Null
 
     Write-Debug "${functionName}:process:end"
   }
@@ -1901,6 +1954,8 @@ function Test-AdoPipeline {
 
   process {
     Write-Debug "${functionName}:process:start"
+    [string]$inputType = $InputObject.GetType().Name
+    Write-Debug "${functionName}:process:inputType=$inputType"
 
     [string]$pipelineName = $null
 
