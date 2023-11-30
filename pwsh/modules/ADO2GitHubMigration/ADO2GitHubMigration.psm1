@@ -22,7 +22,7 @@ function Add-PipelineVariables {
 
     if ($null -eq $Pipeline.Variables -or $Force) {
       Write-Debug "${functionName}:process:fetching pipeline variables for $($Pipeline.Name)"
-      $Pipeline.Variables = @(Get-PipelineVariable -Pipeline $Pipeline.Name)
+      $Pipeline.Variables = @(Get-PipelineVariable -PipelineName $Pipeline.Name)
     }
     else {
       Write-Debug "${functionName}:process:Pipeline $($Pipeline.Name) already has associated variables."
@@ -1853,6 +1853,7 @@ function Set-AdoRepoName {
 }
 
 function Sync-AdoPipelineVariables {
+  [CmdletBinding(SupportsShouldProcess)]
   param(
     [Parameter(ValueFromPipeline, Mandatory)]
     [PipelineInfo]$Pipeline
@@ -1869,47 +1870,54 @@ function Sync-AdoPipelineVariables {
     Write-Debug "${functionName}:process:Pipeline.Name=$($Pipeline.Name)"
     Write-Debug "${functionName}:process:Pipeline.Id=$($Pipeline.Id)"
 
-    [hashtable]$existingVariables = Get-PipelineVariable -PipelineName $Pipeline.Name -AsHashtable
-    [array]$variablesToCreate = @()
-    [array]$variablesToUpdate = @()
-    [array]$variablesToDelete = @()
+    if ($PSCmdlet.ShouldProcess("Sync Pipeline Variables")) {
 
-    Write-Debug "${functionName}:process:Previously $($existingVariables.Count) variables associated with $($Pipeline.Name)"
+      [hashtable]$existingVariables = Get-PipelineVariable -PipelineName $Pipeline.Name -AsHashtable
+      [array]$variablesToCreate = @()
+      [array]$variablesToUpdate = @()
+      [array]$variablesToDelete = @()
 
-    if ($null -eq $Pipeline.Variables -or $Pipeline.Variables.Count -eq 0) {
-      Write-Debug "${functionName}:process:Now no variables associated with $($Pipeline.Name)"
-      $variablesToDelete += @($existingVariables.Values)
-      Write-Debug "$($variablesToDelete.Count) existing variables to delete on pipeline $($Pipeline.Name)"
-    }
-    else {
-      [array]$variableNamesInUse = @()
-      Write-Debug "${functionName}:process:Now $($Pipeline.Variables.Count) variables associated with $($Pipeline.Name)"
+      Write-Debug "${functionName}:process:Previously $($existingVariables.Count) variables associated with $($Pipeline.Name)"
 
-      foreach($entry in $Pipeline.Variables){
+      if ($null -eq $Pipeline.Variables -or $Pipeline.Variables.Count -eq 0) {
+        Write-Debug "${functionName}:process:Now no variables associated with $($Pipeline.Name)"
+        $variablesToDelete += @($existingVariables.Values)
+        Write-Debug "$($variablesToDelete.Count) existing variables to delete on pipeline $($Pipeline.Name)"
+      }
+      else {
+        [array]$variableNamesInUse = @()
+        Write-Debug "${functionName}:process:Now $($Pipeline.Variables.Count) variables associated with $($Pipeline.Name)"
 
-        if ($existingVariables.ContainsKey($entry.Name)) {
-          Write-Debug "${functionName}:process:$($entry.Name) needs updated"
-          $variablesToUpdate += $entry
-          $variableNamesInUse += $entry.Name
+        foreach($entry in $Pipeline.Variables){
+
+          if ($existingVariables.ContainsKey($entry.Name)) {
+            Write-Debug "${functionName}:process:$($entry.Name) needs updated"
+            $variablesToUpdate += $entry
+            $variableNamesInUse += $entry.Name
+          }
+          else {
+            Write-Debug "${functionName}:process:$($entry.Name) needs added"
+            $variablesToCreate += $entry
+            $variableNamesInUse += $entry.Name
+          }
         }
-        else {
-          Write-Debug "${functionName}:process:$($entry.Name) needs added"
-          $variablesToCreate += $entry
-          $variableNamesInUse += $entry.Name
+
+        foreach($key in $existingVariables.Keys) {
+          if (-not $variableNamesInUse.Contains($key) ) {
+            Write-Debug "${functionName}:process:$key needs removed"
+            $variablesToDelete += $existingVariables[$key]
+          }
         }
       }
 
-      foreach($key in $existingVariables.Keys) {
-        if (-not $variableNamesInUse.Contains($key) ) {
-          Write-Debug "${functionName}:process:$key needs removed"
-          $variablesToDelete += $existingVariables[$key]
-        }
+      if ($variablesToUpdate.Count -gt 0 -or $variablesToCreate.Count -gt 0 -or $variablesToDelete.Count -gt 0) {
+        $pipelineModel = Get-AdoPipelineModel -Pipeline $Pipeline.Name
+
+        $variablesToUpdate | Set-AdoPipelineVariable -Pipeline $pipelineModel -SuppressSecret | Write-Output
+        $variablesToCreate | New-AdoPipelineVariable -Pipeline $pipelineModel -SuppressSecret | Write-Output
+        $variablesToDelete | Remove-AdoPipelineVariable -Pipeline $pipelineModel | Out-Null
       }
     }
-
-    $variablesToUpdate | Set-AdoPipelineVariable -Pipeline $Pipeline -SuppressSecret | Write-Output
-    $variablesToCreate | New-AdoPipelineVariable -Pipeline $Pipeline -SuppressSecret | Write-Output
-    $variablesToDelete | Remove-AdoPipelineVariable -Pipeline $Pipeline | Out-Null
 
     Write-Debug "${functionName}:process:end"
   }
