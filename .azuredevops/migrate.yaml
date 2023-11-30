@@ -9,26 +9,32 @@ parameters:
       SourceAdoRepo: epr-anti-virus-function-app
       TargetGitHubRepo: epr-anti-virus-function-app
       Action: ignore
+      Memo: Prepare
   - repo: 
       SourceAdoRepo: epr-event-dispatcher-function-app
       TargetGitHubRepo: epr-event-dispatcher-function-app
       Action: ignore
+      Memo: Prepare
   - repo: 
       SourceAdoRepo: epr-migration-test1
       TargetGitHubRepo: epr-migration-test1
       Action: simulate
+      Memo: In use for R&D - do not sync or migrate
   - repo: 
       SourceAdoRepo: epr-migration-test2
       TargetGitHubRepo: epr-migration-test2
       Action: migrate
+      Memo: Test bed
   - repo: 
       SourceAdoRepo: epr-migration-automation
       TargetGitHubRepo: epr-migration-automation
       Action: synchronize
+      Memo: Not ready to migrate yet
   - repo: 
       SourceAdoRepo: epr-registration-validation-function-app
       TargetGitHubRepo: epr-registration-validation-function-app
       Action: ignore
+      Memo: Prepare
 
 - name: GitLeaksFailureAsWarning
   displayName: Treat Gitleaks failure as partial success

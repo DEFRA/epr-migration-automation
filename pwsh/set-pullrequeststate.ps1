@@ -50,7 +50,7 @@ try {
 
   Initialize-AdoCli -OrganizationUri $OrganizationUri -Project $Project -AccessToken $AccessToken
 
-  Get-AdoPullRequest -Repo $Repo -PullRequestId $PullRequestId -Status active | Select-Object -ExpandProperty pullRequestId | Set-AdoPullRequestState -State $State | Out-Null
+  @(Get-AdoPullRequest -Repo $Repo -PullRequestId $PullRequestId -Status active) | Select-Object -ExpandProperty pullRequestId | Set-AdoPullRequestState -State $State | Out-Null
 
   $exitCode = 0
 }
