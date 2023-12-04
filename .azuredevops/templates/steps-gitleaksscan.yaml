@@ -66,7 +66,8 @@ steps:
     [System.Text.StringBuilder]$builder = [System.Text.StringBuilder]::new("$($gitLeaksExe.FullName) detect ")
     [void]$builder.Append(" --config '$($configFile.FullName)' ")
     [void]$builder.Append(" --report-path '$($reportFile.FullName)' ")
-    [void]$builder.Append(" --verbose --redact ") 
+    [void]$builder.Append(" --verbose ") 
+    #[void]$builder.Append(" --redact ") 
     if ($suppressHistoryCheck) {
       [void]$builder.Append(" --no-git ") 
     }

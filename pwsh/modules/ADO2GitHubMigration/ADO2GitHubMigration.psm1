@@ -110,6 +110,8 @@ function ConvertTo-PipelineInfo {
     } 
     elseif ($InputObject -is [PSCustomObject]) {
       Write-Debug "${functionName}:process:InputObject is [PSCustomObject]"
+      Write-Debug "${functionName}:process:InputObject.name=$($InputObject.name)"
+      Write-Debug "${functionName}:process:InputObject.id=$($InputObject.id)"
 
       $pipelineInfo = [PipelineInfo]::new()
       $pipelineInfo.Organization = $OrganizationUrl
