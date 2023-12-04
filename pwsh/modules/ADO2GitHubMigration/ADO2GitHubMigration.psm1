@@ -1324,7 +1324,7 @@ function Resolve-Property {
         }
         else {
           Write-Debug "${functionName}:process:resolving remaining '$remaining' under '$currentPropertyName'"
-          $result = Resolve-Property -InputObject $currentItem -Property $remaining
+          $result = Resolve-Property -InputObject $currentItem -Property $remaining -Default $Default
         }
       }
       else {
