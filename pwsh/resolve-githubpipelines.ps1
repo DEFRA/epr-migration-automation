@@ -66,24 +66,24 @@ try {
   
   Write-Host "Importing pipeline info from $($inputFile.FullName)"
 
-  [array]$pipelines = Get-Content -Path $inputFile.FullName | ConvertFrom-Json -Depth 99 
+  [array]$pipelines = @(Get-Content -Path $inputFile.FullName | ConvertFrom-Json -Depth 99)
 
   Write-Host "Loaded details of $($pipelines.Count) pipelines"
 
-  [array]$repoPipelines = $pipelines | Where-Object -FilterScript { $_.repository -ne $null -and $_.repository.name -eq $SourceAdoRepo }
+  [array]$repoPipelines = @($pipelines | Where-Object -FilterScript { $_.repository -ne $null -and $_.repository.name -eq $SourceAdoRepo })
 
   Write-Host "There are $($repoPipelines.Count) pipelines associated with $SourceAdoRepo"
 
-  [array]$adoPipelineInfos = $repoPipelines | ConvertTo-PipelineInfo -OrganizationUrl $OrganizationUri -Project $Project | Add-PipelineVariables -PassThru
+  [array]$adoPipelineInfos = @($repoPipelines | ConvertTo-PipelineInfo -OrganizationUrl $OrganizationUri -Project $Project | Add-PipelineVariables -PassThru)
 
-  [array]$gitHubPipelineInfos = $adoPipelineInfos | ForEach-Object -Process {
+  [array]$gitHubPipelineInfos = @($adoPipelineInfos | ForEach-Object -Process {
     $_.Id = 0
     $_.Name = $_.Name + ' (GitHub)'
     $_.RepoType = "GitHub"
     $_.RepoUrl = "https://github.com/$GitHubOrganizationName/$($TargetGitHubRepo).git"
     $_.ServiceConnection = $GitHubServiceConnection
     return $_
-  }
+  })
 
   if ([string]::IsNullOrEmpty($ADOOutputVariableName)) {
     $gitHubPipelineInfos | ConvertTo-Json -Depth $MAX_JSON_DEPTH | Write-Output
