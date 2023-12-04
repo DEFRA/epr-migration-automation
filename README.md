@@ -2,12 +2,19 @@
 
 The "EPR Migration Automation" provides pipelines, templates and scripts used to automate the migration of EPR from ADO repos to GitHub repos.
 
-The migration automation does not fully support Type 1 (xaml based) pipelines.
+The migration automation does not support Type 1 (xaml based) pipelines.
 
 ## Prerequisites
 
 - [pwsh 7.3](https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell?view=powershell-7.3)
-
+- [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/)
+- [Azure Devops Extension for Azure CLI](https://learn.microsoft.com/en-us/azure/devops/cli/?view=azure-devops)
+- [VSCode](https://code.visualstudio.com/)
+  - Git Extension Pack
+  - PowerShell
+  - YAML
+  - Azure CLI Tools
+  
 ## Setup
 
 ### Development
