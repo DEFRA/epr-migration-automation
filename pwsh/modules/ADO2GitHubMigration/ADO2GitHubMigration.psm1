@@ -122,7 +122,7 @@ function ConvertTo-PipelineInfo {
       $pipelineInfo.RepoName = $InputObject.repository.name
       $pipelineInfo.RepoType = $InputObject.repository.type
       $pipelineInfo.RepoUrl = $InputObject.repository.url
-      $pipelineInfo.Branch = ($InputObject.repository.properties.defaultBranch).Split('/')[-1]
+      $pipelineInfo.Branch = (Resolve-Property -InputObject $InputObject -Property repository.properties.defaultBranch -Default 'refs/heads/main').Split('/')[-1]
       $pipelineInfo.QueueId =  $InputObject.queue.id
       $pipelineInfo.AdoPath = $InputObject.path
       $pipelineInfo.YamlPath = $InputObject.process.yamlFilename
@@ -1272,6 +1272,82 @@ function Remove-AdoPipelineVariable {
 }
 
 
+function Resolve-Property {
+  param(
+    [Parameter(Mandatory)]
+    $InputObject,
+    [Parameter(Mandatory)]
+    [string]$Property,
+    [Parameter()]
+    $Default = $null
+  )  
+
+  begin {
+    [string]$functionName = $MyInvocation.MyCommand
+    Write-Debug "${functionName}:begin:start"
+    Write-Debug "${functionName}:begin:Property=$Property"
+    Write-Debug "${functionName}:begin:end"
+  }
+
+  process {
+    Write-Debug "${functionName}:process:start"
+    [string]$inputType = $InputObject.GetType().Name
+    Write-Debug "${functionName}:process:inputType=$inputType"
+
+    $result = $Default
+
+    if ($InputObject -is [hashtable]) {
+      Write-Debug "${functionName}:process:InputObject is [hashtable]"
+      if ($InputObject.ContainsKey($Property)) {
+        $result = $InputObject[$Property]
+      }
+    } 
+    elseif ($InputObject -is [PSCustomObject]) {
+      Write-Debug "${functionName}:process:InputObject is [PSCustomObject]"
+      [System.Collections.Queue]$propertyPartsQueue = [System.Collections.Queue]::new($Property.Split('.'))
+      Write-Debug "${functionName}:process:propertyPartsQueue.Count=$($propertyPartsQueue.Count)"
+
+      [string]$currentPropertyName = $propertyPartsQueue.Dequeue()
+      [bool]$propertyExists = (Get-Member -InputObject $InputObject -Name $currentPropertyName)
+      Write-Debug "${functionName}:process:currentPropertyName=$currentPropertyName"
+      Write-Debug "${functionName}:process:propertyExists=$propertyExists"
+
+      if ($propertyExists) {
+        $currentItem = $InputObject.$currentPropertyName
+
+        [string]$remaining = $propertyPartsQueue.Count -gt 0 ? $propertyPartsQueue.ToArray() -Join '.' : ""
+        Write-Debug "${functionName}:process:remaining=$remaining"
+  
+        if ([string]::IsNullOrWhiteSpace($remaining)) {
+          Write-Debug "${functionName}:process:'$currentPropertyName' resolved"
+          $result = $currentItem
+        }
+        else {
+          Write-Debug "${functionName}:process:resolving remaining '$remaining' under '$currentPropertyName'"
+          $result = Resolve-Property -InputObject $currentItem -Property $remaining
+        }
+      }
+      else {
+        Write-Debug "${functionName}:process:$currentPropertyName not found on InputObject"
+      }
+    } 
+    else {
+      Write-Debug "${functionName}:process:InputObject is $inputType" 
+      throw [System.ArgumentException]::("Unsupported type $inputType", "InputObject")
+    }
+
+    Write-Output $result
+
+    Write-Debug "${functionName}:process:end"
+  }
+
+  end {
+    Write-Debug "${functionName}:end:start"
+    Write-Debug "${functionName}:end:end"
+  }
+}
+
+
 function Select-AdoSecurityPermissionDetail {
   param(
     [Parameter(Mandatory)]
@@ -1977,7 +2053,7 @@ function Test-AdoPipeline {
       $pipelineName = $InputObject.Name
     } 
     elseif ($InputObject -is [hashtable]) {
-      Write-Debug "${functionName}:process:InputObject is [PSCustomObject]"
+      Write-Debug "${functionName}:process:InputObject is [hashtable]"
       $pipelineName = $InputObject['name']
     } 
     elseif ($InputObject -is [PSCustomObject]) {
