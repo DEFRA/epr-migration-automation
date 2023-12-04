@@ -4,8 +4,8 @@ param(
     [string]$OrganizationUri,
     [Parameter(Mandatory)]
     [string]$Project,
-    [Parameter(Mandatory)]
-    [string]$InputJson,
+    [Parameter()]
+    [string]$InputJson = "",
     [Parameter()]
     [string]$OutputPath,
     [Parameter()]
@@ -41,39 +41,44 @@ try {
   [System.IO.DirectoryInfo]$moduleDir = Join-Path -Path $scriptDir.FullName -ChildPath "modules/ADO2GitHubMigration"
   Write-Debug "${functionName}:moduleDir.FullName=$($moduleDir.FullName)"
 
-  Import-Module $moduleDir.FullName -Force
-
-  Initialize-AdoCli -OrganizationUri $OrganizationUri -Project $Project -AccessToken $AccessToken
-
-  [array]$pipelinesToProcess = @($InputJson | ConvertFrom-Json -Depth $MAX_JSON_DEPTH)
-
-  Write-Host "Details of $($pipelinesToProcess.Length) pipelines supplied"
-  
-  if ($pipelinesToProcess.Count -eq 0) {
-    Write-Warning "There are no pipelines to process"
+  if ([string]::IsNullOrWhiteSpace($InputJson)) {
+    Write-Warning "There is no input data to process"
   }
   else {
-    [hashtable]$endpoints = Get-AdoEndpoint -AsHashtable
-    [array]$processedPipelines = @($pipelinesToProcess | Set-AdoPipeline -EndpointDictionary $endpoints)
-    [array]$processedVariables = @($pipelinesToProcess | Sync-AdoPipelineVariables)
+    Import-Module $moduleDir.FullName -Force
 
-    [array]$outputs = @()
-    $outputs += @($processedPipelines)
-    $outputs += @($processedVariables)
+    Initialize-AdoCli -OrganizationUri $OrganizationUri -Project $Project -AccessToken $AccessToken
 
-    if ($null -ne $outputs -and $outputs.Count -gt 0) {
+    [array]$pipelinesToProcess = @($InputJson | ConvertFrom-Json -Depth $MAX_JSON_DEPTH)
 
-      if (-not [string]::IsNullOrWhiteSpace($OutputPath)) {
-        [System.IO.FileInfo]$outputFile = $OutputPath
-        $outputs | ConvertTo-Json -Depth $MAX_JSON_DEPTH | Set-Content -Path $outputFile.FullName -Force 
-        Write-Host "Output file $($outputFile.FullName) created."
-      }
-      else {
-        $outputs | ConvertTo-Json -Depth $MAX_JSON_DEPTH | Write-Output
-      }
+    Write-Host "Details of $($pipelinesToProcess.Length) pipelines supplied"
+    
+    if ($pipelinesToProcess.Count -eq 0) {
+      Write-Warning "There are no pipelines to process"
     }
     else {
-      Write-Warning "no updates performed"
+      [hashtable]$endpoints = Get-AdoEndpoint -AsHashtable
+      [array]$processedPipelines = @($pipelinesToProcess | Set-AdoPipeline -EndpointDictionary $endpoints)
+      [array]$processedVariables = @($pipelinesToProcess | Sync-AdoPipelineVariables)
+
+      [array]$outputs = @()
+      $outputs += @($processedPipelines)
+      $outputs += @($processedVariables)
+
+      if ($null -ne $outputs -and $outputs.Count -gt 0) {
+
+        if (-not [string]::IsNullOrWhiteSpace($OutputPath)) {
+          [System.IO.FileInfo]$outputFile = $OutputPath
+          $outputs | ConvertTo-Json -Depth $MAX_JSON_DEPTH | Set-Content -Path $outputFile.FullName -Force 
+          Write-Host "Output file $($outputFile.FullName) created."
+        }
+        else {
+          $outputs | ConvertTo-Json -Depth $MAX_JSON_DEPTH | Write-Output
+        }
+      }
+      else {
+        Write-Warning "no updates performed"
+      }
     }
   }
 
