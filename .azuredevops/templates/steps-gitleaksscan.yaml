@@ -5,6 +5,9 @@ parameters:
   default: '$(Build.Repository.LocalPath)/$(Build.Repository.Name)/gitleaks/gitleaks.exe'
 - name: GitLeaksConfigFile
   type: string
+  default: ''
+- name: DefaultGitLeaksConfigFile
+  type: string
   default: '$(Build.Repository.LocalPath)/$(Build.Repository.Name)/gitleaks/gitleaks.toml'
 - name: GitLeaksReportArtifactName
   type: string
@@ -48,14 +51,18 @@ steps:
     Write-Host "suppressHistoryCheck=$suppressHistoryCheck"
 
     [System.IO.FileInfo]$gitLeaksExe = '${{ parameters.GitLeaksExe }}'
-    [System.IO.FileInfo]$configFile = '${{ parameters.GitLeaksConfigFile }}'
+    [System.IO.FileInfo]$defaultConfigFile = '${{ parameters.DefaultGitLeaksConfigFile }}'
     [System.IO.FileInfo]$reportFile = '${{ parameters.ReportFile }}'
+    [System.IO.FileInfo]$configFile = [string]::IsNullOrWhitespace('${{ parameters.GitLeaksConfigFile }}') ? '${{ parameters.DefaultGitLeaksConfigFile }}' : '${{ parameters.GitLeaksConfigFile }}'
     
     Write-Host "gitLeaksExe.FullName=$($gitLeaksExe.FullName)"
+    Write-Host "defaultConfigFile.FullName=$($defaultConfigFile.FullName)"
     Write-Host "configFile.FullName=$($configFile.FullName)"
     Write-Host "reportFile.FullName=$($reportFile.FullName)"
 
     if (-not $gitLeaksExe.Exists) { throw [System.IO.FileNotFoundException]::new($gitLeaksExe.FullName) }
+
+    $configFile = $configFile.Exists ? $configFile : $defaultConfigFile
     if (-not $configFile.Exists) { throw [System.IO.FileNotFoundException]::new($configFile.FullName) }
 
     if (-not $reportFile.Directory.Exists) {
@@ -67,7 +74,6 @@ steps:
     [void]$builder.Append(" --config '$($configFile.FullName)' ")
     [void]$builder.Append(" --report-path '$($reportFile.FullName)' ")
     [void]$builder.Append(" --verbose ") 
-    #[void]$builder.Append(" --redact ") 
     if ($suppressHistoryCheck) {
       [void]$builder.Append(" --no-git ") 
     }

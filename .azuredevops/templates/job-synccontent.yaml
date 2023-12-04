@@ -69,6 +69,7 @@ jobs:
       TreatFailureAsWarning: ${{ parameters.GitLeaksFailureAsWarning }}
       ScanRootDir: ${{ variables.sourceRepoRoot }}
       SuppressHistoryCheck: ${{ parameters.GitLeaksSuppressHistoryCheck }}
+      GitLeaksConfigFile: ${{ variables.sourceRepoRoot}}/.gitleaks/config.toml
 
   - checkout: github-${{ parameters.TargetGitHubRepo }}
     path: ${{ variables.targetRepoSubDir }}
