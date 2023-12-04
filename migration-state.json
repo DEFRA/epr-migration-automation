@@ -1,0 +1,199 @@
+{
+  "githubOrganization": "defra",
+  "githubServiceConnection": "defra",
+  "teamProject": "RWD-CPR-EPR4P-ADO",
+  "repos": [
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-anti-virus-function-app",
+      "Action": "simulate",
+      "SourceAdoRepo": "epr-anti-virus-function-app"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-app-config-settings",
+      "Action": "simulate",
+      "SourceAdoRepo": "epr-app-config-settings"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-backend-account-microservice",
+      "Action": "simulate",
+      "SourceAdoRepo": "backend-account-microservice"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-common",
+      "Action": "simulate",
+      "SourceAdoRepo": "epr_common"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-common-data-api",
+      "Action": "simulate",
+      "SourceAdoRepo": "epr-common-data-api"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-data-pbix-files",
+      "Action": "simulate",
+      "SourceAdoRepo": "epr-data-pbix-files"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-data-sqldb",
+      "Action": "simulate",
+      "SourceAdoRepo": "epr-data-sqldb"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-ops",
+      "Action": "simulate",
+      "SourceAdoRepo": "epr_ops"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-document-schema-job-runner-function-app",
+      "Action": "simulate",
+      "SourceAdoRepo": "epr-document-schema-job-runner-function-app"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-event-dispatcher-function-app",
+      "Action": "simulate",
+      "SourceAdoRepo": "epr-event-dispatcher-function-app"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-facade-account-microservice",
+      "Action": "simulate",
+      "SourceAdoRepo": "facade-account-microservice"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-frontend-accountcreation-microservice",
+      "Action": "simulate",
+      "SourceAdoRepo": "frontend-accountcreation-microservice"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-frontend-accountmanagement-microservice",
+      "Action": "simulate",
+      "SourceAdoRepo": "frontend-accountmanagement-microservice"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-obligationchecker-frontend",
+      "Action": "simulate",
+      "SourceAdoRepo": "epr-obligationchecker-frontend"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-logging-api",
+      "Action": "simulate",
+      "SourceAdoRepo": "epr-logging-api"
+    },
+    {
+      "Memo": "In use for R&D - do not sync or migrate",
+      "TargetGitHubRepo": "epr-migration-test1",
+      "Action": "ignore",
+      "SourceAdoRepo": "epr-migration-test1"
+    },
+    {
+      "Memo": "Test bed",
+      "TargetGitHubRepo": "epr-migration-test2",
+      "Action": "migrate",
+      "SourceAdoRepo": "epr-migration-test2"
+    },
+    {
+      "Memo": "Not ready to migrate yet",
+      "TargetGitHubRepo": "epr-migration-automation",
+      "Action": "synchronize",
+      "SourceAdoRepo": "epr-migration-automation"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-packaging-frontend",
+      "Action": "simulate",
+      "SourceAdoRepo": "epr_packaging_frontend"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-pom-api-submission-status",
+      "Action": "simulate",
+      "SourceAdoRepo": "epr_pom_api_submission_status"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-pom-api-web",
+      "Action": "simulate",
+      "SourceAdoRepo": "epr_pom_api_web"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-pom-func-producer-validation",
+      "Action": "simulate",
+      "SourceAdoRepo": "epr_pom_func_producer_validation"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-pom-func-submission-check-splitter",
+      "Action": "simulate",
+      "SourceAdoRepo": "epr_pom_func_submission_check_splitter"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-registration-validation-function-app",
+      "Action": "simulate",
+      "SourceAdoRepo": "epr-registration-validation-function-app"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-regulator-enrolment-frontend",
+      "Action": "simulate",
+      "SourceAdoRepo": "epr-regulator-enrolment-frontend"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-regulator-service",
+      "Action": "simulate",
+      "SourceAdoRepo": "epr_regulator_service"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-regulator-service-facade",
+      "Action": "simulate",
+      "SourceAdoRepo": "epr_regulator_service_facade"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-rpd-azure-ad-b2c-styling",
+      "Action": "simulate",
+      "SourceAdoRepo": "epr-rpd-azure-ad-b2c-styling"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-ui-wdio",
+      "Action": "simulate",
+      "SourceAdoRepo": "epr_ui_wdio"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-web-shutter-screen-pages",
+      "Action": "simulate",
+      "SourceAdoRepo": "epr-web-shutter-screen-pages"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-webapps-code-deploy-pipelines",
+      "Action": "simulate",
+      "SourceAdoRepo": "epr-webapps-code-deploy-pipelines"
+    },
+    {
+      "Memo": "Prepare",
+      "TargetGitHubRepo": "epr-webapps-code-deploy-templates",
+      "Action": "simulate",
+      "SourceAdoRepo": "epr-webapps-code-deploy-templates"
+    }
+  ]
+}

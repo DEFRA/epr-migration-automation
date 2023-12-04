@@ -1,0 +1,44 @@
+trigger: none
+
+parameters:
+- name: MigrationData
+  displayName: Migration Data
+  type: object
+
+- name: GitLeaksFailureAsWarning
+  displayName: Treat Gitleaks failure as partial success
+  type: boolean
+  default: false
+
+variables:
+- name: GitHubOrganizationName
+  value: defra
+- name: GitHubServiceConnection
+  value: defra
+- name: WindowsHostedAgentPool
+  value: windows-latest
+- name: UbuntuHostedAgentPool
+  value: ubuntu-latest
+- name: AllPipelinesJsonArtifactName
+  value: AllPipelinesJson
+- name: RenamePrefix
+  value: 'ZZZ-Archive-'
+
+resources: 
+  repositories:
+
+extends: 
+  template: templates/pipeline-migration.yaml
+  parameters: 
+    MigrationData: ${{ parameters.MigrationData }}
+    RenamePrefix: ${{ variables.RenamePrefix }}
+    GitHubOrganizationName: ${{ variables.GitHubOrganizationName }}
+    GitHubServiceConnection: ${{ variables.GitHubServiceConnection }}
+    WindowsHostedAgentPool: ${{ variables.WindowsHostedAgentPool }}
+    UbuntuHostedAgentPool: ${{ variables.UbuntuHostedAgentPool }}
+    AllPipelinesJsonArtifactName: ${{ variables.AllPipelinesJsonArtifactName }}
+    GitLeaksFailureAsWarning: ${{ parameters.GitLeaksFailureAsWarning }}
+    AdoOrganizationUrl: $(System.CollectionUri)
+    AdoTeamProject: $(System.TeamProject)
+    AdoAccessToken: $(System.AccessToken)
+  
