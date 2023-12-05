@@ -9,6 +9,8 @@ param(
     [Parameter(Mandatory)]
     [string]$NewName,
     [Parameter()]
+    [string]$AdoOutputVariableName,
+    [Parameter()]
     [string]$AccessToken
 )
 
@@ -34,6 +36,7 @@ Write-Debug "${functionName}:OrganizationUri=$OrganizationUri"
 Write-Debug "${functionName}:Project=$Project"
 Write-Debug "${functionName}:Repo=$Repo"
 Write-Debug "${functionName}:NewName=$NewName"
+Write-Debug "${functionName}:AdoOutputVariableName=$AdoOutputVariableName"
 
 [System.IO.DirectoryInfo]$scriptDir = $PSCommandPath | Split-Path -Parent
 Write-Debug "${functionName}:scriptDir.FullName=$scriptDir.FullName"
@@ -47,8 +50,20 @@ try {
   Initialize-AdoCli -OrganizationUri $OrganizationUri -Project $Project -AccessToken $AccessToken
 
   Write-Host "Renaming $Repo to $NewName"
-  Set-AdoRepoName -Repo $Repo -NewName $NewName | Write-Output
 
+  if ([string]::IsNullOrEmpty($AdoOutputVariableName)) {
+    Set-AdoRepoName -Repo $Repo -NewName $NewName | Write-Output
+  }
+  else {
+    [hashtable]$outputModel = @{
+        "oldName" = $Repo
+        "newName" = $NewName
+    }
+
+    [string]$output = $outputModel | ConvertTo-Json -Compress 
+
+    Write-Host "##vso[task.setvariable variable=$AdoOutputVariableName;isoutput=true]$output"
+}
   $exitCode = 0
 }
 catch {

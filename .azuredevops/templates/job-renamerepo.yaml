@@ -18,6 +18,9 @@ parameters:
   displayName: What If
   type: boolean
   default: true
+- name: AdoOutputVariableName
+  type: string
+  default: 'RenamedRepo'
 - name: AdoOrganizationUrl
   type: string
   default: '$(System.CollectionUri)'
@@ -73,6 +76,7 @@ jobs:
         -Project '${{ parameters.AdoTeamProject }}'
         -Repo '${{ parameters.OldRepoName }}'
         -NewName '${{ parameters.NewRepoName }}'
+        -AdoOutputVariableName '${{ parameters.AdoOutputVariableName }}'
         -WhatIf:${{ variables.WhatIfForPwsh }}
     env:
       AZURE_DEVOPS_EXT_PAT: ${{ parameters.AdoAccessToken }}

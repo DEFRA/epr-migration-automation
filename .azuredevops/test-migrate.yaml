@@ -1,0 +1,200 @@
+trigger: none
+
+parameters:
+- name: MigrationData
+  displayName: Migration Data
+  type: object
+  default:
+  - repo: 
+      SourceAdoRepo: epr-migration-test1
+      TargetGitHubRepo: epr-migration-test1
+      Action: simulate
+      Memo: In use for R&D - do not sync or migrate
+  - repo: 
+      SourceAdoRepo: epr-migration-test2
+      TargetGitHubRepo: epr-migration-test2
+      Action: migrate
+      Memo: Test bed
+  - repo: 
+      SourceAdoRepo: epr-migration-automation
+      TargetGitHubRepo: epr-migration-automation
+      Action: synchronize
+      Memo: Not ready to migrate yet
+
+- name: RenamePrefix
+  displayName: Pefix to use when renaming repos
+  type: string
+  default: 'ZZZ-Archive-'
+
+- name: GitHubOrganizationName
+  displayName: Target GitHub organisation
+  type: string
+  default: 'defra'
+
+- name: GitHubServiceConnection
+  displayName: Service Connection to GitHub
+  type: string
+  default: 'defra'
+
+- name: Trunk
+  displayName: Trunk name
+  type: string
+  default: main
+
+- name: WindowsHostedAgentPool 
+  displayName: Which Windows hosted agent pool to use
+  type: string
+  default: windows-latest
+
+- name: UbuntuHostedAgentPool 
+  displayName: Which Ubuntu hosted agent pool to use
+  type: string
+  default: ubuntu-latest
+
+- name: AllPipelinesJsonArtifactName
+  displayName: Name of artifact holding the information on the pipelines
+  type: string
+  default: AllPipelines
+
+- name: MigrationDataJsonArtifactName
+  type: string
+  default: MigrationData
+
+- name: GitLeaksFailureAsWarning
+  displayName: Treat GitLeaks Failure as Warning
+  type: boolean
+  default: false
+
+- name: AdoOrganizationUrl
+  type: string
+  default: '$(System.CollectionUri)'
+
+- name: AdoTeamProject
+  type: string
+  default: '$(System.TeamProject)'
+
+- name: AdoAccessToken
+  type: string
+  default: '$(System.AccessToken)'
+
+resources: 
+  repositories:
+  # epr-migration-test1
+  - repository: epr-migration-test1
+    name: RWD-CPR-EPR4P-ADO/epr-migration-test1
+    type: git
+  - repository: github-epr-migration-test1
+    name: defra/epr-migration-test1
+    type: github
+    endpoint: defra
+
+  # epr-migration-test2
+  - repository: epr-migration-test2
+    name: RWD-CPR-EPR4P-ADO/epr-migration-test2
+    type: git
+  - repository: github-epr-migration-test2
+    name: defra/epr-migration-test2
+    type: github
+    endpoint: defra
+
+  # epr-migration-automation
+  - repository: epr-migration-automation
+    name: RWD-CPR-EPR4P-ADO/epr-migration-automation
+    type: git
+  - repository: github-epr-migration-automation
+    name: defra/epr-migration-automation
+    type: github
+    endpoint: defra
+
+stages:
+- stage: GetPipelineInfoStage
+  displayName: Gather Pipeline Info
+  dependsOn: ''
+  jobs:
+  - template: templates/job-tracemigrationdata.yaml
+    parameters:
+      JobName: TraceMigrationDataJob
+      DependsOn: ''
+      HostedAgentPool: ${{ parameters.UbuntuHostedAgentPool }}
+      MigrationData: ${{ parameters.MigrationData }}
+      MigrationDataJsonArtifactName: ${{ parameters.MigrationDataJsonArtifactName }}
+
+  - template: templates/job-getpipelines.yaml
+    parameters:
+      JobName: GetPipelinesJsonJob
+      DependsOn: ''
+      HostedAgentPool: ${{ parameters.UbuntuHostedAgentPool }}
+      AdoOrganizationUrl: ${{ parameters.AdoOrganizationUrl }}
+      AdoTeamProject: ${{ parameters.AdoTeamProject }}
+      AdoAccessToken: ${{ parameters.AdoAccessToken }}
+      PipelinesJsonArtifactName: ${{ parameters.AllPipelinesJsonArtifactName }}
+      Type2Only: true
+      EnabledOnly: true
+      HostingRepoType: TfsGit
+
+- ${{ each item in parameters.MigrationData }}:
+  - ${{ if ne(item.repo.action, 'ignore') }}:
+    - template: templates/stage-migrate.yaml
+      parameters: 
+        StageName: Migrate${{ replace( item.repo.SourceAdoRepo, '-', '') }}Stage
+        DependsOn: 
+        - GetPipelineInfoStage
+        WindowsHostedAgentPool: ${{ parameters.WindowsHostedAgentPool }}
+        UbuntuHostedAgentPool: ${{ parameters.UbuntuHostedAgentPool }}
+        SourceAdoRepo: ${{ item.repo.SourceAdoRepo }}
+        TargetGitHubRepo: ${{ item.repo.TargetGitHubRepo }}
+        RenamePrefix: ${{ parameters.RenamePrefix }}
+        GitHubOrganizationName: ${{ parameters.GitHubOrganizationName }}
+        GitHubServiceConnection: ${{ parameters.GitHubServiceConnection }}
+        AdoOrganizationUrl: ${{ parameters.AdoOrganizationUrl }}
+        AdoTeamProject: ${{ parameters.AdoTeamProject }}
+        AdoAccessToken: ${{ parameters.AdoAccessToken }}
+        AllPipelinesJsonArtifactName: ${{ parameters.AllPipelinesJsonArtifactName }}
+        Trunk: ${{ parameters.Trunk }}
+        GitLeaksFailureAsWarning: ${{ parameters.GitLeaksFailureAsWarning }}
+        Mode: ${{ item.repo.Action }}
+
+- stage: PostTestStage
+  displayName: Post Test Stage
+  dependsOn: 
+  - ${{ each item in parameters.MigrationData }}:
+    - ${{ if eq(item.repo.action, 'migrate') }}:
+      - Migrate${{ replace( item.repo.SourceAdoRepo, '-', '') }}Stage  
+  jobs:
+  - job: PostDiagJob
+    displayName: Post Test Diagnostics
+    pool: 
+      vmImage: ${{ parameters.UbuntuHostedAgentPool }}
+    steps: 
+    - pwsh: |
+        dir ENV:
+        dir ENV: | ForEach-Object -Process { Write-Host "$($_.Key)='$($_.Value)'" }
+      displayName: Diags
+
+#  - ${{ each item in parameters.MigrationData }}:
+#    - ${{ if eq(item.repo.action, 'migrate') }}:
+#      - template: templates/job-renamerepo.yaml
+#        parameters:
+#          JobName: RestoreRepoNameJob${{ replace( item.repo.SourceAdoRepo, '-', '') }}
+#          DependsOn: ''
+#          AdoOrganizationUrl: ${{ parameters.AdoOrganizationUrl }}
+#          AdoTeamProject: ${{ parameters.AdoTeamProject }}
+#          AdoAccessToken: ${{ parameters.AdoAccessToken }}
+#          HostedAgentPool: ${{ parameters.ubuntuHostedAgentPool }}
+#          OldRepoName: '${{ parameters.RenamePrefix }}${{ item.repo.SourceAdoRepo }}'
+#          NewRepoName: '${{ item.repo.SourceAdoRepo }}'
+#          WhatIf: false
+#
+#      - template: templates/job-setbranchstate.yaml
+#        parameters:
+#          JobName: RestoreBranchesJob${{ replace( item.repo.SourceAdoRepo, '-', '') }}
+#          DependsOn: RestoreRepoNameJob${{ replace( item.repo.SourceAdoRepo, '-', '') }}
+#          HostedAgentPool: ${{ parameters.ubuntuHostedAgentPool }}
+#          AdoOrganizationUrl: ${{ parameters.AdoOrganizationUrl }}
+#          AdoTeamProject: ${{ parameters.AdoTeamProject }}
+#          AdoAccessToken: ${{ parameters.AdoAccessToken }}
+#          Repo: ${{ item.repo.SourceAdoRepo }}
+#          State: 'unlocked'
+#          Branch: ''
+#          WhatIf: false
+#

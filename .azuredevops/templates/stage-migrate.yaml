@@ -158,6 +158,7 @@ stages:
           HostedAgentPool: ${{ parameters.ubuntuHostedAgentPool }}
           OldRepoName: '${{ parameters.SourceAdoRepo }}'
           NewRepoName: '${{ parameters.RenamePrefix }}${{ parameters.SourceAdoRepo }}'
+          AdoOutputVariableName: "RENAMED_${{ upper(replace( parameters.SourceAdoRepo, '-', '_')) }}"
           WhatIf: ${{ eq(parameters.Mode, 'simulate') }}
 
     - template: job-setbranchstate.yaml

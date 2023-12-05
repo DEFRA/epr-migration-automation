@@ -1,0 +1,41 @@
+parameters:
+- name: JobName
+  type: string
+  default: TraceMigrationDataJob
+- name: HostedAgentPool
+  type: string
+  default: ubuntu-latest
+- name: DependsOn 
+  type: object
+  default: ''
+- name: MigrationData
+  type: object
+- name: MigrationDataJsonArtifactName
+  type: string
+  default: MigrationDataJson  
+
+jobs:
+- job: ${{ parameters.JobName }}
+  displayName: Trace MigrationData
+  dependsOn: ${{ parameters.DependsOn }}
+  pool: 
+    vmImage: ${{ parameters.HostedAgentPool }}
+
+  variables:
+  - name: MigrationDataPath
+    value: $(Build.StagingDirectory)/MigrationData.json
+
+  steps: 
+  - pwsh: |
+      [string]$migrationDataJson = '${{ convertToJson(parameters.MigrationData) }}'
+      [System.IO.FileInfo]$migrationDataFile = '${{ variables.MigrationDataPath }}'
+
+      Write-Host "migrationDataFile.FullName=$($migrationDataFile.FullName)"
+      Write-Host "migrationDataJson=$migrationDataJson"
+
+      $migrationDataJson | Set-Content -Path $migrationDataFile.FullName
+    displayName: Create Migration Data File 
+
+  - publish: ${{ variables.MigrationDataPath }}
+    artifact: ${{ parameters.MigrationDataJsonArtifactName }}
+    displayName: Publish ${{ parameters.MigrationDataJsonArtifactName }}
