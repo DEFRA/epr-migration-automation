@@ -836,6 +836,79 @@ function Initialize-AdoCli {
 }
 
 
+function Invoke-AdoPipeline {
+  param(
+    [Parameter()]
+    [string]$OrganizationUri,
+    [Parameter()]
+    [string]$Project,
+    [Parameter(Mandatory)]
+    [string]$Name,
+    [Parameter()]
+    [string]$Branch,
+    [hashtable]$PipelineParameters,
+    [switch]$Wait,
+    [int]$WaitPollInterval = 10
+  )  
+
+  begin {
+    [string]$functionName = $MyInvocation.MyCommand
+    Write-Debug "${functionName}:begin:start"
+    Write-Debug "${functionName}:begin:OrganizationUri=$OrganizationUri"
+    Write-Debug "${functionName}:begin:Project=$Project"
+    Write-Debug "${functionName}:begin:Wait=$Wait"
+    Write-Debug "${functionName}:begin:WaitPollInterval=$WaitPollInterval"
+
+    [string]$params = $null
+
+    if ($null -ne $PipelineParameters) {
+      [System.Text.StringBuilder]$paramsBuilder = [System.Text.StringBuilder]::new()
+      foreach($key in $PipelineParameters.Keys) {
+        Write-Debug "${functionName}:begin:key=$key"
+        [string]$value = $PipelineParameters[$key]
+        Write-Debug "${functionName}:begin:value=$value"
+        if ($paramsBuilder.Length -gt 0) {
+          [void]$paramsBuilder.Append(",")
+        }
+        [void]$paramsBuilder.Append("$key=$value")
+      }
+      $params = $paramsBuilder.ToString()
+    }
+
+    Write-Debug "${functionName}:begin:params=$params"
+    Write-Debug "${functionName}:begin:end"
+  }
+
+  process {
+    Write-Debug "${functionName}:process:start"
+    Write-Debug "${functionName}:process:Name=$Name"
+    Write-Debug "${functionName}:process:Branch=$Branch"
+
+    [System.Text.StringBuilder]$commandBuilder = [System.Text.StringBuilder]::new('az pipelines run ')
+    [void]$commandBuilder.Append(" --name '$Name' ")
+    if (-not [string]::IsNullOrWhiteSpace($Branch)) {
+      [void]$commandBuilder.Append(" --branch '$Branch' ")
+    }
+    if (-not [string]::IsNullOrWhiteSpace($params)) {
+      [void]$commandBuilder.Append(" --parameters '$params' ")
+    }
+
+    [string]$command = $commandBuilder.ToString()
+    Write-Debug "${functionName}:process:command=$command"
+    [string]$runJson = Invoke-CommandLine -Command $command -AsJson
+    Write-Debug "${functionName}:process:runJson=$runJson"
+
+    Write-Output $runJson
+
+    Write-Debug "${functionName}:process:end"
+  }
+
+  end {
+    Write-Debug "${functionName}:end:start"
+    Write-Debug "${functionName}:end:end"
+  }
+}
+
 function Invoke-CommandLine {
   param(
       [Parameter(Mandatory)]

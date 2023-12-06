@@ -170,6 +170,12 @@ stages:
         dir ENV:
         dir ENV: | ForEach-Object -Process { Write-Host "$($_.Key)='$($_.Value)'" }
       displayName: Diags
+      env:
+        ${{ each item in parameters.MigrationData }}:
+          ${{ if eq(item.repo.action, 'migrate') }}:
+            RENAMED_${{ replace( item.repo.SourceAdoRepo, '-', '_') }}: '[ "${{ item.repo.SourceAdoRepo }}": "${{ parameters.RenamePrefix }}${{ item.repo.SourceAdoRepo }}"]'
+
+#            RENAMED_${{ replace( item.repo.SourceAdoRepo, '-', '_') }}: '[ "${{ item.repo.SourceAdoRepo }}": "${{ parameters.RenamePrefix }}${{ item.repo.SourceAdoRepo }}"]'
 
 #  - ${{ each item in parameters.MigrationData }}:
 #    - ${{ if eq(item.repo.action, 'migrate') }}:
