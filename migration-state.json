@@ -97,7 +97,7 @@
       "SourceAdoRepo": "epr-migration-test2",
       "TargetGitHubRepo": "epr-migration-test2",
       "Action": "migrate",
-      "Memo": "Restored"
+      "Memo": "restored"
     },
     {
       "SourceAdoRepo": "epr-obligationchecker-frontend",
