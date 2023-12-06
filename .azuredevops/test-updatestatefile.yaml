@@ -1,0 +1,39 @@
+trigger: none
+
+parameters:
+- name: Repos
+  type: object
+  default: 
+  - epr-migration-test2
+- name: NewAction
+  type: string
+  default: 'migrate'
+- name: NewMemo
+  type: string
+  default: 'Pending'
+- name: WhatIf
+  displayName: WhatIf
+  type: boolean
+  default: true
+
+variables:
+- name: HostedAgentPool 
+  value: windows-latest
+
+stages:
+- stage: UpdateStateFileStage  
+  displayName: Update state file
+  dependsOn: ''
+  jobs: 
+  - template: templates/job-updatestatefile.yaml
+    parameters:
+      JobName: UpdateStateFileJob
+      DependsOn: ''
+      HostedAgentPool: ${{ variables.HostedAgentPool }}
+      NewAction: ${{ parameters.NewAction }}
+      NewMemo: ${{ parameters.NewMemo }}
+      Repos:
+      - ${{ each repo in parameters.Repos }}:
+          - ${{ repo }}
+      WhatIf: ${{ parameters.WhatIf }}
+

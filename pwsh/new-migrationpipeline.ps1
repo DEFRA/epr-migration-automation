@@ -57,7 +57,6 @@ function ConvertTo-MigrationData {
       $repoEntry['SourceAdoRepo'] = $InputObject.SourceAdoRepo
       $repoEntry['TargetGitHubRepo'] = $InputObject.TargetGitHubRepo
       $repoEntry['Action'] = $InputObject.Action
-      $repoEntry['Memo'] = $InputObject.Memo
 
       [hashtable]$wrapper = @{ "repo" = $repoEntry}
 

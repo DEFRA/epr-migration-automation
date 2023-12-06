@@ -72,10 +72,15 @@ function Format-StateData {
 
 
 try {
+
+  dir ENV: | ForEach-Object -Process { Write-Debug "${functionName}:ENV:$($_.Key)='$($_.Value)'" }
+
   [System.IO.FileInfo]$stateFile = $Path
   Write-Debug "${functionName}:stateFile.FullName=$($stateFile.FullName)"
   [array]$stateModel = Get-Content -Path $stateFile.FullName | ConvertFrom-Json 
   
+  Write-Debug "${functionName}:Loaded model, creating dictionary"
+
   [hashtable]$stateDictionary = @{}
   foreach($stateItem in $stateModel.repos) {
     [string]$key = $stateItem.SourceAdoRepo
@@ -83,20 +88,27 @@ try {
     $stateDictionary.Add($key, $stateItem)
   }
 
-  [array]$stateChangeModel = Get-ChildItem -Path $EnvVarPrefix* | ConvertFrom-Json
+  Write-Debug "${functionName}:Check environment variables"
 
-  foreach($changedItem in $stateChangeModel) {
-    [string]$key = $changedItem.SourceAdoRepo
-    Write-Debug "${functionName}:key=$key"
+  [array]$envVars = @(dir ENV:$EnvVarPrefix*)
+  Write-Debug "${functionName}:Found $($envVars.Count) items to process"
 
-    if ($stateDictionary.ContainsKey($key)) {
-      Write-Debug "${functionName}:Updating $key with '$($changedItem.Action)' and '$($changedItem.Memo)'"
-      $stateItem = $stateDictionary[$key]
-      $stateItem.Memo = $changedItem.Memo
-      $stateItem.Action = $changedItem.Action
-    }
-    else {
-      Write-Warning "State entry missing for '$($changedItem.SourceAdoRepo)'"
+  if ($envVars.Count -gt 0) {
+    [array]$stateChangeModel = @($envVars.Value | ConvertFrom-Json)
+
+    foreach($changedItem in $stateChangeModel) {
+      [string]$key = $changedItem.SourceAdoRepo
+      Write-Debug "${functionName}:key=$key"
+
+      if ($stateDictionary.ContainsKey($key)) {
+        Write-Debug "${functionName}:Updating $key with '$($changedItem.Action)' and '$($changedItem.Memo)'"
+        $stateItem = $stateDictionary[$key]
+        $stateItem.Memo = $changedItem.Memo
+        $stateItem.Action = $changedItem.Action
+      }
+      else {
+        Write-Warning "State entry missing for '$($changedItem.SourceAdoRepo)'"
+      }
     }
   }
 

@@ -28,6 +28,12 @@ parameters:
 - name: Repos
   type: object
   default: ''
+- name: NewAction
+  type: string
+  default: 'ignore'
+- name: NewMemo
+  type: string
+  default: 'Migrated'
 - name: WhatIf
   displayName: What If
   type: boolean
@@ -49,14 +55,6 @@ jobs:
     clean: true
     persistCredentials: true
 
-  - pwsh: | 
-      dir ENV:
-      dir ENV: | ForEach-Object -Process { Write-Host "$($_.Key)='$($_.Value)'" }
-    displayName: diags
-    env:
-      ${{ each repo in parameters.Repos }}:
-        ${{ variables.EnvVarPrefix }}${{ upper(repo) }}: '[ { "SourceAdoRepo": "${{ repo }}", "Action": "ignore", "Memo": "Migrated" } ]'
-
   - pwsh: |
       Push-Location -Path $(Build.Repository.LocalPath)
       git fetch
@@ -69,24 +67,24 @@ jobs:
     displayName: 'Update state file'
     inputs:
       targetType: filePath
-      filePath: $(Build.Repository.LocalPath)/$(Build.Repository.Name)/pwsh/merge-migrationstate.ps1
+      filePath: $(Build.Repository.LocalPath)/pwsh/merge-migrationstate.ps1
       pwsh: true
       arguments: >
         -Path '${{ parameters.StateFile }}'
         -EnvVarPrefix '${{ variables.EnvVarPrefix }}'
     env:
       ${{ each repo in parameters.Repos }}:
-        ${{ variables.EnvVarPrefix }}${{ upper(repo) }}: '[ "SourceAdoRepo": "${{ repo }}", "Action": "ignore", "Memo": "Migrated" ]'
+        ${{ variables.EnvVarPrefix }}${{ upper(repo) }}: '[ { "SourceAdoRepo": "${{ repo }}", "Action": "${{ parameters.NewAction }}", "Memo": "${{ parameters.NewMemo }}" } ]'
 
   - publish: ${{ parameters.StateFile }}
     artifact: ${{ parameters.StateFileArtifactName }}
-    displayName: Publishing ${{ parameters.StateFileArtifactName }}
+    displayName: Publish ${{ parameters.StateFileArtifactName }}
 
   - task: PowerShell@2
     displayName: 'Regenerate pipeline'
     inputs:
       targetType: filePath
-      filePath: $(Build.Repository.LocalPath)/$(Build.Repository.Name)/pwsh/new-migrationpipeline.ps1
+      filePath: $(Build.Repository.LocalPath)/pwsh/new-migrationpipeline.ps1
       pwsh: true
       arguments: >
         -TemplatePath '${{ parameters.TemplatePipelineYamlFile }}'
@@ -96,7 +94,7 @@ jobs:
 
   - publish: ${{ parameters.PipelineYamlFile }}
     artifact: ${{ parameters.BuildPipelineArtifactName }}
-    displayName: Publishing ${{ parameters.BuildPipelineArtifactName }}
+    displayName: Publish ${{ parameters.BuildPipelineArtifactName }}
 
   - ${{ if ne( parameters.WhatIf, false) }}:
     - pwsh: | 
@@ -129,4 +127,4 @@ jobs:
         Pop-Location
         Write-Host "Done"
         exit 0
-      displayName: Push to ${{ parameters.TargetGitHubRepo }}
+      displayName: Push to ${{ variables['Build.Repository.Name'] }}

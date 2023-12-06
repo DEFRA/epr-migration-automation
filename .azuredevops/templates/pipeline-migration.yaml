@@ -129,5 +129,23 @@ stages:
         GitLeaksFailureAsWarning: ${{ parameters.GitLeaksFailureAsWarning }}
         Mode: ${{ item.repo.Action }}
 
+- stage: PostMigrationStage
+  displayName: Post Migration Stage
+  dependsOn: 
+  - ${{ each item in parameters.MigrationData }}:
+    - ${{ if ne(item.repo.action, 'synchronise') }}:
+      - Migrate${{ replace( item.repo.SourceAdoRepo, '-', '') }}Stage  
+  jobs:
+  - template: job-updatestatefile.yaml
+    parameters:
+      JobName: UpdateStateFileJob
+      DependsOn: ''
+      HostedAgentPool: ${{ parameters.UbuntuHostedAgentPool }}
+      Repos:
+      - ${{ each item in parameters.MigrationData }}:
+        - ${{ if ne(item.repo.action, 'synchronise') }}::
+          - ${{ item.repo.SourceAdoRepo }}
+      WhatIf: ${{ if eq(item.repo.action, 'simulate') }}
+
 # need to generate reports
 # - report the presence of secrets on the target pipeline (because these will not be populated by the automation)

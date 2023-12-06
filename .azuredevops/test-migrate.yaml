@@ -172,20 +172,6 @@ stages:
           - ${{ item.repo.SourceAdoRepo }}
       WhatIf: true
 
-  - job: PostDiagJob
-    displayName: Post Test Diagnostics
-    pool: 
-      vmImage: ${{ parameters.UbuntuHostedAgentPool }}
-    steps: 
-    - pwsh: |
-        dir ENV:
-        dir ENV: | ForEach-Object -Process { Write-Host "$($_.Key)='$($_.Value)'" }
-      displayName: Diags
-      env:
-        ${{ each item in parameters.MigrationData }}:
-          ${{ if eq(item.repo.action, 'migrate') }}:
-            RENAMED_${{ upper(replace( item.repo.SourceAdoRepo, '-', '_')) }}: '[{ "${{ item.repo.SourceAdoRepo }}": "${{ parameters.RenamePrefix }}${{ item.repo.SourceAdoRepo }}" }]'
-
 #  - ${{ each item in parameters.MigrationData }}:
 #    - ${{ if eq(item.repo.action, 'migrate') }}:
 #      - template: templates/job-renamerepo.yaml
