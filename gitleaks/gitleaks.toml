@@ -5,3 +5,23 @@ title = "gitleaks config"
 useDefault = true
 
 # Custom detection rules
+[[rules]]
+id = "azure-messaging-connection-string-shared-access-key"
+description = "Azure Messaging Connection String Containing Shared Access Key"
+regex = '''(?i)SharedAccessKey=[^;"\s]+'''
+secretGroup = 0
+keywords = []
+
+[[rules]]
+id = "azure-database-connection-string-account-key"
+description = "Azure Messaging Connection String Containing Account Key"
+regex = '''(?i)AccountKey=[^;"\s]+'''
+secretGroup = 0
+keywords = []
+
+[[rules]]
+id = "azure-client-secret"
+description = "Azure Client Secret"
+regex = '''(?i)"?ClientSecret"?\s?[:=]\s?"?[^;"\s]{40}[;"\s]'''
+secretGroup = 0
+keywords = []
