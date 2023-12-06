@@ -184,6 +184,43 @@ function ConvertTo-AdoAcesDictionary {
   }
 }
 
+
+function Get-AdoBuild {
+  param(
+    [Parameter()]
+    [string]$OrganizationUri,
+    [Parameter()]
+    [string]$Project,
+    [Parameter(ValueFromPipeline)]
+    [int]$Id
+  )  
+
+  begin {
+    [string]$functionName = $MyInvocation.MyCommand
+    Write-Debug "${functionName}:begin:start"
+    Write-Debug "${functionName}:begin:OrganizationUri=$OrganizationUri"
+    Write-Debug "${functionName}:begin:Project=$Project"
+    Write-Debug "${functionName}:begin:end"
+  }
+
+  process {
+    Write-Debug "${functionName}:process:start"
+    Write-Debug "${functionName}:process:Id=$Id"
+
+    [string]$command = "az pipelines build show --id $Id"
+    Write-Debug "${functionName}:process:command=$command"
+
+    Invoke-CommandLine -Command $command | ConvertFrom-Json -Depth $MAX_JSON_DEPTH | Write-Output
+    
+    Write-Debug "${functionName}:process:end"
+  }
+
+  end {
+    Write-Debug "${functionName}:end:start"
+    Write-Debug "${functionName}:end:end"
+  }
+}
+
 function Get-AdoEndpoint {
   param(
     [Parameter(ValueFromPipeline)]
@@ -847,8 +884,8 @@ function Invoke-AdoPipeline {
     $Pipeline,
     [Parameter()]
     [string]$Branch,
-    #[switch]$Wait,
-    #[int]$WaitPollInterval = 10
+    [switch]$Wait,
+    [int]$WaitPollInterval = 10,
     [hashtable]$PipelineParameters
   )  
 
@@ -857,9 +894,10 @@ function Invoke-AdoPipeline {
     Write-Debug "${functionName}:begin:start"
     Write-Debug "${functionName}:begin:OrganizationUri=$OrganizationUri"
     Write-Debug "${functionName}:begin:Project=$Project"
-#    Write-Debug "${functionName}:begin:Wait=$Wait"
-#    Write-Debug "${functionName}:begin:WaitPollInterval=$WaitPollInterval"
+    Write-Debug "${functionName}:begin:Wait=$Wait"
+    Write-Debug "${functionName}:begin:WaitPollInterval=$WaitPollInterval"
 
+    [int]$id = 0
     [string]$params = $null
     [string]$identityPart = $null
 
@@ -918,7 +956,18 @@ function Invoke-AdoPipeline {
     if ($PSCmdlet.ShouldProcess($command)) {
       [string]$runJson = Invoke-CommandLine -Command $command 
       Write-Debug "${functionName}:process:runJson=$runJson"
-      Write-Output $runJson
+      $build = $runJson | ConvertFrom-Json -Depth $MAX_JSON_DEPTH
+      $id = $build.id
+      Write-Debug "${functionName}:process:id=$id"
+      Write-Verbose "build $id started"
+
+      if ($Wait) {
+        Write-Debug "${functionName}:process:will wait for build $id"
+      }
+      else { 
+        Write-Debug "${functionName}:process:started build $id"
+        Write-Output $build
+      }
     }
 
     Write-Debug "${functionName}:process:end"
@@ -926,6 +975,37 @@ function Invoke-AdoPipeline {
 
   end {
     Write-Debug "${functionName}:end:start"
+    if ($Wait -and $id -gt 0) {
+
+      [bool]$done = $false
+      while(-not $done) {
+        Start-Sleep -Seconds $WaitPollInterval
+        $build = Get-AdoBuild -Id $id
+        Write-Verbose "build $id status $($build.status)"
+        Write-Debug "${functionName}:process:build $id status $($build.status)"
+
+        switch ($build.status) {
+          "notStarted" {  
+            break
+          }
+
+          "inProgress" {  
+            break
+          }
+
+          "completed" {  
+            $done = $true
+            Write-Output $build
+            break
+          }
+  
+          default { 
+            $done = $true
+            throw "Build failed"
+          }
+        }
+      }
+    }
     Write-Debug "${functionName}:end:end"
   }
 }

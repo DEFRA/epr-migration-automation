@@ -28,9 +28,9 @@ variables:
 
 resources: 
   repositories:
-  # epr-migration-test2
-  - repository: epr-migration-test2
-    name: RWD-CPR-EPR4P-ADO/epr-migration-test2
+  # ZZZ-Archive-epr-migration-test2
+  - repository: ZZZ-Archive-epr-migration-test2
+    name: RWD-CPR-EPR4P-ADO/ZZZ-Archive-epr-migration-test2
     type: git
 
 stages:

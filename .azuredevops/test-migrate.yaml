@@ -171,31 +171,40 @@ stages:
         - ${{ if eq(item.repo.action, 'migrate') }}:
           - ${{ item.repo.SourceAdoRepo }}
       WhatIf: false
-      
-#  - ${{ each item in parameters.MigrationData }}:
-#    - ${{ if eq(item.repo.action, 'migrate') }}:
-#      - template: templates/job-renamerepo.yaml
-#        parameters:
-#          JobName: RestoreRepoNameJob${{ replace( item.repo.SourceAdoRepo, '-', '') }}
-#          DependsOn: ''
-#          AdoOrganizationUrl: ${{ parameters.AdoOrganizationUrl }}
-#          AdoTeamProject: ${{ parameters.AdoTeamProject }}
-#          AdoAccessToken: ${{ parameters.AdoAccessToken }}
-#          HostedAgentPool: ${{ parameters.ubuntuHostedAgentPool }}
-#          OldRepoName: '${{ parameters.RenamePrefix }}${{ item.repo.SourceAdoRepo }}'
-#          NewRepoName: '${{ item.repo.SourceAdoRepo }}'
-#          WhatIf: false
-#
-#      - template: templates/job-setbranchstate.yaml
-#        parameters:
-#          JobName: RestoreBranchesJob${{ replace( item.repo.SourceAdoRepo, '-', '') }}
-#          DependsOn: RestoreRepoNameJob${{ replace( item.repo.SourceAdoRepo, '-', '') }}
-#          HostedAgentPool: ${{ parameters.ubuntuHostedAgentPool }}
-#          AdoOrganizationUrl: ${{ parameters.AdoOrganizationUrl }}
-#          AdoTeamProject: ${{ parameters.AdoTeamProject }}
-#          AdoAccessToken: ${{ parameters.AdoAccessToken }}
-#          Repo: ${{ item.repo.SourceAdoRepo }}
-#          State: 'unlocked'
-#          Branch: ''
-#          WhatIf: false
-#
+
+  - template: templates/job-updatestatefile.yaml
+    parameters:
+      JobName: RestoreStateFileJob
+      DependsOn: UpdateStateFileJob
+      HostedAgentPool: ${{ parameters.UbuntuHostedAgentPool }}
+      Repos:
+      - ${{ each item in parameters.MigrationData }}:
+        - ${{ if eq(item.repo.action, 'migrate') }}:
+          - ${{ item.repo.SourceAdoRepo }}
+      WhatIf: false
+      NewAction: migrate
+      NewMemo: restored
+
+  - job: RestoreTestRepoJob
+    displayName: Restore test repo
+    dependsOn: ''
+    pool: 
+      vmImage: ${{ parameters.UbuntuHostedAgentPool }}
+    variables: 
+    - name: Pipeline
+      value: 5304
+    steps:
+    - checkout: self
+      clean: true
+    - task: PowerShell@2
+      displayName: 'Queue Pipeline ${{ variables.Pipeline }}'
+      inputs:
+        targetType: filePath
+        filePath: $(Build.Repository.LocalPath)/pwsh/invoke-pipeline.ps1
+        pwsh: true
+        arguments: >
+          -OrganizationUrl ${{ parameters.AdoOrganizationUrl }}
+          -Project ${{ parameters.AdoTeamProject }}
+          -AccessToken ${{ parameters.AdoAccessToken }}
+          -Pipeline ${{ variables.Pipeline }}
+          -Wait
