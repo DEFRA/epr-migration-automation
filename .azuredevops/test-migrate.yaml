@@ -170,7 +170,6 @@ stages:
       - ${{ each item in parameters.MigrationData }}:
         - ${{ if eq(item.repo.action, 'migrate') }}:
           - ${{ item.repo.SourceAdoRepo }}
-      WhatIf: true
 
 #  - ${{ each item in parameters.MigrationData }}:
 #    - ${{ if eq(item.repo.action, 'migrate') }}:
