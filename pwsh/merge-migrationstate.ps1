@@ -24,8 +24,8 @@ if ($enableDebug) {
     Set-Variable -Name InformationPreference -Value Continue -Scope global -Whatif:$false
 }
 
-Write-Debug "${functionName}:OrganizationUri=$Path"
-Write-Debug "${functionName}:Project=$EnvVarPrefix"
+Write-Debug "${functionName}:Path=$Path"
+Write-Debug "${functionName}:EnvVarPrefix=$EnvVarPrefix"
 
 [System.IO.DirectoryInfo]$scriptDir = $PSCommandPath | Split-Path -Parent
 Write-Debug "${functionName}:scriptDir.FullName=$($scriptDir.FullName)"

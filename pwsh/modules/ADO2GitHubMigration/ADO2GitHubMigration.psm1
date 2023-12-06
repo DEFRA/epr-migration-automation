@@ -837,18 +837,19 @@ function Initialize-AdoCli {
 
 
 function Invoke-AdoPipeline {
+  [CmdletBinding(SupportsShouldProcess)]
   param(
     [Parameter()]
     [string]$OrganizationUri,
     [Parameter()]
     [string]$Project,
     [Parameter(Mandatory)]
-    [string]$Name,
+    $Pipeline,
     [Parameter()]
     [string]$Branch,
-    [hashtable]$PipelineParameters,
-    [switch]$Wait,
-    [int]$WaitPollInterval = 10
+    #[switch]$Wait,
+    #[int]$WaitPollInterval = 10
+    [hashtable]$PipelineParameters
   )  
 
   begin {
@@ -856,10 +857,11 @@ function Invoke-AdoPipeline {
     Write-Debug "${functionName}:begin:start"
     Write-Debug "${functionName}:begin:OrganizationUri=$OrganizationUri"
     Write-Debug "${functionName}:begin:Project=$Project"
-    Write-Debug "${functionName}:begin:Wait=$Wait"
-    Write-Debug "${functionName}:begin:WaitPollInterval=$WaitPollInterval"
+#    Write-Debug "${functionName}:begin:Wait=$Wait"
+#    Write-Debug "${functionName}:begin:WaitPollInterval=$WaitPollInterval"
 
     [string]$params = $null
+    [string]$identityPart = $null
 
     if ($null -ne $PipelineParameters) {
       [System.Text.StringBuilder]$paramsBuilder = [System.Text.StringBuilder]::new()
@@ -875,17 +877,34 @@ function Invoke-AdoPipeline {
       $params = $paramsBuilder.ToString()
     }
 
+    if ($Pipeline -is [int]) {
+      Write-Debug "${functionName}:process:Pipeline is [int] - will use --id"
+      $identityPart = " --id $Pipeline "
+    }
+    elseif ($Pipeline -is [string]) {
+      Write-Debug "${functionName}:process:Pipeline is [string] "
+      [int]$id = 0
+      if ([int]::TryParse($Pipeline, [ref]$id)) {
+        Write-Debug "${functionName}:process:Pipeline is [string] containing number, will use --id"
+        $identityPart = " --id $Pipeline "
+      }
+      else {
+        Write-Debug "${functionName}:process:Pipeline is [string] will use --name"
+        $identityPart = " --name '$Pipeline' "
+      }
+    }
+
+    Write-Debug "${functionName}:begin:identityPart=$identityPart"
     Write-Debug "${functionName}:begin:params=$params"
     Write-Debug "${functionName}:begin:end"
   }
 
   process {
     Write-Debug "${functionName}:process:start"
-    Write-Debug "${functionName}:process:Name=$Name"
+    Write-Debug "${functionName}:process:Pipeline=$Pipeline"
     Write-Debug "${functionName}:process:Branch=$Branch"
 
-    [System.Text.StringBuilder]$commandBuilder = [System.Text.StringBuilder]::new('az pipelines run ')
-    [void]$commandBuilder.Append(" --name '$Name' ")
+    [System.Text.StringBuilder]$commandBuilder = [System.Text.StringBuilder]::new("az pipelines run  $identityPart ")
     if (-not [string]::IsNullOrWhiteSpace($Branch)) {
       [void]$commandBuilder.Append(" --branch '$Branch' ")
     }
@@ -895,10 +914,12 @@ function Invoke-AdoPipeline {
 
     [string]$command = $commandBuilder.ToString()
     Write-Debug "${functionName}:process:command=$command"
-    [string]$runJson = Invoke-CommandLine -Command $command -AsJson
-    Write-Debug "${functionName}:process:runJson=$runJson"
 
-    Write-Output $runJson
+    if ($PSCmdlet.ShouldProcess($command)) {
+      [string]$runJson = Invoke-CommandLine -Command $command 
+      Write-Debug "${functionName}:process:runJson=$runJson"
+      Write-Output $runJson
+    }
 
     Write-Debug "${functionName}:process:end"
   }

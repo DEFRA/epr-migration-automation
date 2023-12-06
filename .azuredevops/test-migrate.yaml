@@ -158,7 +158,7 @@ stages:
   displayName: Post Migration Stage
   dependsOn: 
   - ${{ each item in parameters.MigrationData }}:
-    - ${{ if eq(item.repo.action, 'migrate') }}:
+    - ${{ if ne(item.repo.action, 'synchronize') }}:
       - Migrate${{ replace( item.repo.SourceAdoRepo, '-', '') }}Stage  
   jobs:
   - template: templates/job-updatestatefile.yaml
@@ -170,7 +170,8 @@ stages:
       - ${{ each item in parameters.MigrationData }}:
         - ${{ if eq(item.repo.action, 'migrate') }}:
           - ${{ item.repo.SourceAdoRepo }}
-
+      WhatIf: false
+      
 #  - ${{ each item in parameters.MigrationData }}:
 #    - ${{ if eq(item.repo.action, 'migrate') }}:
 #      - template: templates/job-renamerepo.yaml
