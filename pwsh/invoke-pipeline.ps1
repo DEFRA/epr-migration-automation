@@ -46,16 +46,11 @@ try {
   [System.IO.DirectoryInfo]$moduleDir = Join-Path -Path $scriptDir.FullName -ChildPath "modules/ADO2GitHubMigration"
   Write-Debug "${functionName}:moduleDir.FullName=$($moduleDir.FullName)"
 
-  if ([string]::IsNullOrWhiteSpace($InputJson)) {
-    Write-Warning "There is no input data to process"
-  }
-  else {
-    Import-Module $moduleDir.FullName -Force
+  Import-Module $moduleDir.FullName -Force
 
-    Initialize-AdoCli -OrganizationUri $OrganizationUri -Project $Project -AccessToken $AccessToken
+  Initialize-AdoCli -OrganizationUri $OrganizationUri -Project $Project -AccessToken $AccessToken
 
-    Invoke-AdoPipeline -Pipeline $Pipeline -Wait:$Wait -WaitPollInterval $WaitPollInterval | Write-Output
-  }
+  Invoke-AdoPipeline -Pipeline $Pipeline -Wait:$Wait -WaitPollInterval $WaitPollInterval | Write-Output
 
   $exitCode = 0
 }
