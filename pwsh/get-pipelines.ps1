@@ -51,7 +51,7 @@ Write-Debug "${functionName}:Type2Only=$Type2Only"
 Write-Debug "${functionName}:ExclusionFilter=$ExclusionFilter"
 
 [System.IO.DirectoryInfo]$scriptDir = $PSCommandPath | Split-Path -Parent
-Write-Debug "${functionName}:scriptDir.FullName=$scriptDir.FullName"
+Write-Debug "${functionName}:scriptDir.FullName=$($scriptDir.FullName)"
 
 if (-not $SuppressInterimFileGeneration) {
   Write-Debug "${functionName}:Creating debug dir $($debugDir.FullName)"

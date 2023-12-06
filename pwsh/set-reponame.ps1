@@ -36,7 +36,7 @@ Write-Debug "${functionName}:Repo=$Repo"
 Write-Debug "${functionName}:NewName=$NewName"
 
 [System.IO.DirectoryInfo]$scriptDir = $PSCommandPath | Split-Path -Parent
-Write-Debug "${functionName}:scriptDir.FullName=$scriptDir.FullName"
+Write-Debug "${functionName}:scriptDir.FullName=$($scriptDir.FullName)"
 
 try {
   [System.IO.DirectoryInfo]$moduleDir = Join-Path -Path $scriptDir.FullName -ChildPath "modules/ADO2GitHubMigration"

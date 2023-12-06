@@ -154,13 +154,24 @@ stages:
         GitLeaksFailureAsWarning: ${{ parameters.GitLeaksFailureAsWarning }}
         Mode: ${{ item.repo.Action }}
 
-- stage: PostTestStage
-  displayName: Post Test Stage
+- stage: PostMigrationStage
+  displayName: Post Migration Stage
   dependsOn: 
   - ${{ each item in parameters.MigrationData }}:
     - ${{ if eq(item.repo.action, 'migrate') }}:
       - Migrate${{ replace( item.repo.SourceAdoRepo, '-', '') }}Stage  
   jobs:
+  - template: templates/job-updatestatefile.yaml
+    parameters:
+      JobName: UpdateStateFileJob
+      DependsOn: ''
+      HostedAgentPool: ${{ parameters.UbuntuHostedAgentPool }}
+      Repos:
+      - ${{ each item in parameters.MigrationData }}:
+        - ${{ if eq(item.repo.action, 'migrate') }}:
+          - ${{ item.repo.SourceAdoRepo }}
+      WhatIf: true
+
   - job: PostDiagJob
     displayName: Post Test Diagnostics
     pool: 
@@ -173,9 +184,7 @@ stages:
       env:
         ${{ each item in parameters.MigrationData }}:
           ${{ if eq(item.repo.action, 'migrate') }}:
-            RENAMED_${{ replace( item.repo.SourceAdoRepo, '-', '_') }}: '[ "${{ item.repo.SourceAdoRepo }}": "${{ parameters.RenamePrefix }}${{ item.repo.SourceAdoRepo }}"]'
-
-#            RENAMED_${{ replace( item.repo.SourceAdoRepo, '-', '_') }}: '[ "${{ item.repo.SourceAdoRepo }}": "${{ parameters.RenamePrefix }}${{ item.repo.SourceAdoRepo }}"]'
+            RENAMED_${{ upper(replace( item.repo.SourceAdoRepo, '-', '_')) }}: '[{ "${{ item.repo.SourceAdoRepo }}": "${{ parameters.RenamePrefix }}${{ item.repo.SourceAdoRepo }}" }]'
 
 #  - ${{ each item in parameters.MigrationData }}:
 #    - ${{ if eq(item.repo.action, 'migrate') }}:

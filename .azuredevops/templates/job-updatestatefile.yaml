@@ -1,0 +1,132 @@
+
+parameters:
+- name: JobName
+  type: string
+  default: UpdateStateFileJob
+- name: HostedAgentPool
+  displayName: Hosted agent pool to run on
+  type: string
+  default: ubuntu-latest
+- name: DependsOn 
+  type: object
+  default: ''
+- name: PipelineYamlFile
+  type: string
+  default: $(Build.Repository.LocalPath)/.azuredevops/migrate-generated.yaml
+- name: TemplatePipelineYamlFile
+  type: string
+  default: $(Build.Repository.LocalPath)/.azuredevops/migrate.yaml.template
+- name: StateFile
+  type: string
+  default: $(Build.Repository.LocalPath)/migration-state.json
+- name: StateFileArtifactName
+  type: string
+  default: StateFile
+- name: BuildPipelineArtifactName
+  type: string
+  default: BuildPipelineFile
+- name: Repos
+  type: object
+  default: ''
+- name: WhatIf
+  displayName: What If
+  type: boolean
+  default: true
+
+jobs:
+- job: ${{ parameters.JobName }}
+  displayName: Update state file
+  dependsOn: ${{ parameters.DependsOn }}
+  pool: 
+    vmImage: ${{ parameters.HostedAgentPool }}
+
+  variables:
+  - name: EnvVarPrefix
+    value: MIGRATIONSTATE_
+
+  steps: 
+  - checkout: self
+    clean: true
+    persistCredentials: true
+
+  - pwsh: | 
+      dir ENV:
+      dir ENV: | ForEach-Object -Process { Write-Host "$($_.Key)='$($_.Value)'" }
+    displayName: diags
+    env:
+      ${{ each repo in parameters.Repos }}:
+        ${{ variables.EnvVarPrefix }}${{ upper(repo) }}: '[ { "SourceAdoRepo": "${{ repo }}", "Action": "ignore", "Memo": "Migrated" } ]'
+
+  - pwsh: |
+      Push-Location -Path $(Build.Repository.LocalPath)
+      git fetch
+      git checkout $(Build.SourceBranchName)
+      git pull
+      Pop-Location
+    displayName: Connect repo
+
+  - task: PowerShell@2
+    displayName: 'Update state file'
+    inputs:
+      targetType: filePath
+      filePath: $(Build.Repository.LocalPath)/$(Build.Repository.Name)/pwsh/merge-migrationstate.ps1
+      pwsh: true
+      arguments: >
+        -Path '${{ parameters.StateFile }}'
+        -EnvVarPrefix '${{ variables.EnvVarPrefix }}'
+    env:
+      ${{ each repo in parameters.Repos }}:
+        ${{ variables.EnvVarPrefix }}${{ upper(repo) }}: '[ "SourceAdoRepo": "${{ repo }}", "Action": "ignore", "Memo": "Migrated" ]'
+
+  - publish: ${{ parameters.StateFile }}
+    artifact: ${{ parameters.StateFileArtifactName }}
+    displayName: Publishing ${{ parameters.StateFileArtifactName }}
+
+  - task: PowerShell@2
+    displayName: 'Regenerate pipeline'
+    inputs:
+      targetType: filePath
+      filePath: $(Build.Repository.LocalPath)/$(Build.Repository.Name)/pwsh/new-migrationpipeline.ps1
+      pwsh: true
+      arguments: >
+        -TemplatePath '${{ parameters.TemplatePipelineYamlFile }}'
+        -OutputPath '${{ parameters.PipelineYamlFile }}'
+        -StatePath '${{ parameters.StateFile }}'
+        -Force
+
+  - publish: ${{ parameters.PipelineYamlFile }}
+    artifact: ${{ parameters.BuildPipelineArtifactName }}
+    displayName: Publishing ${{ parameters.BuildPipelineArtifactName }}
+
+  - ${{ if ne( parameters.WhatIf, false) }}:
+    - pwsh: | 
+        Write-Host "WhatIf: would push to repo"
+      displayName: "WhatIf: Push to $(Build.Repository.Name)"
+  - ${{ else }}:
+    - pwsh: | 
+        Write-Host "Pushing to repo $(Build.Repository.Name)"
+        Push-Location -Path $(Build.Repository.LocalPath)
+        git config --global user.email "buildservice@dev.azure.com"
+        git config --global user.name "Build Service"
+        git stage ${{ parameters.StateFile }}
+        if ($LASTEXITCODE -ne 0) {
+          Write-Host "git stage returned error code $LASTEXITCODE"
+          Write-Host "Assuming no changes to stage"
+        }
+        else {
+          git commit -m "Updated statefile"
+          if ($LASTEXITCODE -eq 0) {
+            git push
+            if ($LASTEXITCODE -ne 0) {
+              throw "git push returned error code $LASTEXITCODE"
+            }
+          }
+          else {
+            Write-Host "git commit returned error code $LASTEXITCODE"
+            Write-Host "Assuming no changes to push"
+          }
+        }
+        Pop-Location
+        Write-Host "Done"
+        exit 0
+      displayName: Push to ${{ parameters.TargetGitHubRepo }}

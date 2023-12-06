@@ -33,7 +33,7 @@ Write-Debug "${functionName}:OutputPath=$OutputPath"
 Write-Debug "${functionName}:Force=$Force"
 
 [System.IO.DirectoryInfo]$scriptDir = $PSCommandPath | Split-Path -Parent
-Write-Debug "${functionName}:scriptDir.FullName=$scriptDir.FullName"
+Write-Debug "${functionName}:scriptDir.FullName=$($scriptDir.FullName)"
 
 
 function ConvertTo-MigrationData {
