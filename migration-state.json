@@ -6,80 +6,92 @@
     {
       "SourceAdoRepo": "epr-anti-virus-function-app",
       "TargetGitHubRepo": "epr-anti-virus-function-app",
-      "Action": "simulate",
-      "Memo": "Prepare"
+      "Action": "synchronize",
+      "Memo": "Preparing"
     },
     {
       "SourceAdoRepo": "epr-app-config-settings",
       "TargetGitHubRepo": "epr-app-config-settings",
       "Action": "simulate",
-      "Memo": "Prepare"
+      "Memo": "Simulate"
     },
     {
       "SourceAdoRepo": "backend-account-microservice",
       "TargetGitHubRepo": "epr-backend-account-microservice",
       "Action": "simulate",
-      "Memo": "Prepare"
+      "Memo": "Simulate"
     },
     {
       "SourceAdoRepo": "epr_common",
       "TargetGitHubRepo": "epr-common",
       "Action": "simulate",
-      "Memo": "Prepare"
+      "Memo": "Simulate"
     },
     {
       "SourceAdoRepo": "epr-common-data-api",
       "TargetGitHubRepo": "epr-common-data-api",
       "Action": "simulate",
-      "Memo": "Prepare"
+      "Memo": "Simulate"
+    },
+    {
+      "SourceAdoRepo": "epr-data",
+      "TargetGitHubRepo": "epr-data",
+      "Action": "simulate",
+      "Memo": "Simulate"
     },
     {
       "SourceAdoRepo": "epr-data-pbix-files",
       "TargetGitHubRepo": "epr-data-pbix-files",
       "Action": "simulate",
-      "Memo": "Prepare"
+      "Memo": "Simulate"
     },
     {
       "SourceAdoRepo": "epr-data-sqldb",
       "TargetGitHubRepo": "epr-data-sqldb",
       "Action": "simulate",
-      "Memo": "Prepare"
+      "Memo": "Simulate"
     },
     {
       "SourceAdoRepo": "epr-document-schema-job-runner-function-app",
       "TargetGitHubRepo": "epr-document-schema-job-runner-function-app",
       "Action": "simulate",
-      "Memo": "Prepare"
+      "Memo": "Simulate"
     },
     {
       "SourceAdoRepo": "epr-event-dispatcher-function-app",
       "TargetGitHubRepo": "epr-event-dispatcher-function-app",
-      "Action": "simulate",
-      "Memo": "Prepare"
+      "Action": "synchronize",
+      "Memo": "Preparing"
     },
     {
       "SourceAdoRepo": "facade-account-microservice",
       "TargetGitHubRepo": "epr-facade-account-microservice",
       "Action": "simulate",
-      "Memo": "Prepare"
+      "Memo": "Simulate"
     },
     {
       "SourceAdoRepo": "frontend-accountcreation-microservice",
       "TargetGitHubRepo": "epr-frontend-accountcreation-microservice",
       "Action": "simulate",
-      "Memo": "Prepare"
+      "Memo": "Simulate"
     },
     {
       "SourceAdoRepo": "frontend-accountmanagement-microservice",
       "TargetGitHubRepo": "epr-frontend-accountmanagement-microservice",
       "Action": "simulate",
-      "Memo": "Prepare"
+      "Memo": "Simulate"
+    },
+    {
+      "SourceAdoRepo": "identity-provider-proxy",
+      "TargetGitHubRepo": "epr-identity-provider-proxy",
+      "Action": "simulate",
+      "Memo": "Simulate"
     },
     {
       "SourceAdoRepo": "epr-logging-api",
       "TargetGitHubRepo": "epr-logging-api",
       "Action": "simulate",
-      "Memo": "Prepare"
+      "Memo": "Simulate"
     },
     {
       "SourceAdoRepo": "epr-migration-automation",
@@ -103,97 +115,103 @@
       "SourceAdoRepo": "epr-obligationchecker-frontend",
       "TargetGitHubRepo": "epr-obligationchecker-frontend",
       "Action": "simulate",
-      "Memo": "Prepare"
+      "Memo": "Simulate"
     },
     {
       "SourceAdoRepo": "epr_ops",
       "TargetGitHubRepo": "epr-ops",
       "Action": "simulate",
-      "Memo": "Prepare"
+      "Memo": "Simulate"
     },
     {
       "SourceAdoRepo": "epr_packaging_frontend",
       "TargetGitHubRepo": "epr-packaging-frontend",
       "Action": "simulate",
-      "Memo": "Prepare"
+      "Memo": "Simulate"
     },
     {
       "SourceAdoRepo": "epr_pom_api_submission_status",
       "TargetGitHubRepo": "epr-pom-api-submission-status",
       "Action": "simulate",
-      "Memo": "Prepare"
+      "Memo": "Simulate"
     },
     {
       "SourceAdoRepo": "epr_pom_api_web",
       "TargetGitHubRepo": "epr-pom-api-web",
       "Action": "simulate",
-      "Memo": "Prepare"
+      "Memo": "Simulate"
     },
     {
       "SourceAdoRepo": "epr_pom_func_producer_validation",
       "TargetGitHubRepo": "epr-pom-func-producer-validation",
       "Action": "simulate",
-      "Memo": "Prepare"
+      "Memo": "Simulate"
     },
     {
-      "SourceAdoRepo": "epr_pom_func_submission_check_splitter",
-      "TargetGitHubRepo": "epr-pom-func-submission-check-splitter",
+      "SourceAdoRepo": "pom-testdata-generator",
+      "TargetGitHubRepo": "epr-pom-testdata-generator",
       "Action": "simulate",
-      "Memo": "Prepare"
+      "Memo": "Simulate"
     },
     {
       "SourceAdoRepo": "epr-registration-validation-function-app",
       "TargetGitHubRepo": "epr-registration-validation-function-app",
-      "Action": "simulate",
-      "Memo": "Prepare"
+      "Action": "synchronize",
+      "Memo": "Preparing"
     },
     {
       "SourceAdoRepo": "epr-regulator-enrolment-frontend",
       "TargetGitHubRepo": "epr-regulator-enrolment-frontend",
       "Action": "simulate",
-      "Memo": "Prepare"
+      "Memo": "Simulate"
     },
     {
       "SourceAdoRepo": "epr_regulator_service",
       "TargetGitHubRepo": "epr-regulator-service",
       "Action": "simulate",
-      "Memo": "Prepare"
+      "Memo": "Simulate"
     },
     {
       "SourceAdoRepo": "epr_regulator_service_facade",
       "TargetGitHubRepo": "epr-regulator-service-facade",
       "Action": "simulate",
-      "Memo": "Prepare"
+      "Memo": "Simulate"
     },
     {
       "SourceAdoRepo": "epr-rpd-azure-ad-b2c-styling",
       "TargetGitHubRepo": "epr-rpd-azure-ad-b2c-styling",
       "Action": "simulate",
-      "Memo": "Prepare"
+      "Memo": "Simulate"
+    },
+    {
+      "SourceAdoRepo": "epr-rpd-performance-tests",
+      "TargetGitHubRepo": "epr-rpd-performance-tests",
+      "Action": "simulate",
+      "Memo": "Simulate"
     },
     {
       "SourceAdoRepo": "epr_ui_wdio",
       "TargetGitHubRepo": "epr-ui-wdio",
       "Action": "simulate",
-      "Memo": "Prepare"
+      "Memo": "Simulate"
     },
     {
       "SourceAdoRepo": "epr-web-shutter-screen-pages",
       "TargetGitHubRepo": "epr-web-shutter-screen-pages",
       "Action": "simulate",
-      "Memo": "Prepare"
+      "Memo": "Simulate"
     },
     {
       "SourceAdoRepo": "epr-webapps-code-deploy-pipelines",
       "TargetGitHubRepo": "epr-webapps-code-deploy-pipelines",
       "Action": "simulate",
-      "Memo": "Prepare"
+      "Memo": "Simulate"
     },
     {
       "SourceAdoRepo": "epr-webapps-code-deploy-templates",
       "TargetGitHubRepo": "epr-webapps-code-deploy-templates",
       "Action": "simulate",
-      "Memo": "Prepare"
+      "Memo": "Simulate"
     }
   ]
 }

@@ -28,6 +28,7 @@ For "Project Collection Build Service (org name)", allow the following
 - Edit build quality
 - Manage build queue
 - Override check-in validation by build
+- Queue builds
 - Update build information
 - View build pipeline
 - View builds
