@@ -105,5 +105,5 @@ jobs:
   - publish: '${{ variables.PipelineSecretsReportFile }}'
     artifact: ${{ parameters.PipelineSecretsArtifactName }}
     displayName: Publish ${{ parameters.PipelineSecretsArtifactName }}
-    condition: ne($[variables['ConfigurePipelines.SecretsCount']],'0')
+    condition: and(succeeded(), ne(variables['ConfigurePipelines.SecretsCount'],'0'))
     
