@@ -80,11 +80,6 @@ jobs:
     env:
       AZURE_DEVOPS_EXT_PAT: ${{ parameters.AdoAccessToken }}
 
-  - pwsh: | 
-      dir $(Pipeline.Workspace) -Recurse | Sort-Object -Property FullName | ForEach-Object { Write-Host $_.FullName }
-      dir ENV:
-    displayName: diags
-
   - task: PowerShell@2
     displayName: 'Configure Pipelines - ${{ parameters.TargetGitHubRepo }}'
     name: ConfigurePipelines
@@ -102,7 +97,13 @@ jobs:
     env:
       AZURE_DEVOPS_EXT_PAT: ${{ parameters.AdoAccessToken }}
 
+  - pwsh: | 
+      dir $(Pipeline.Workspace) -Recurse | Sort-Object -Property FullName | ForEach-Object { Write-Host $_.FullName }
+      dir ENV:
+    displayName: diags
+
   - publish: '${{ variables.PipelineSecretsReportFile }}'
     artifact: ${{ parameters.PipelineSecretsArtifactName }}
     displayName: Publish ${{ parameters.PipelineSecretsArtifactName }}
-    condition: ne('$(ConfigurePipelines.SecretsCount)','0')
+    condition: ne($[variables['ConfigurePipelines.SecretsCount']],'0')
+    
