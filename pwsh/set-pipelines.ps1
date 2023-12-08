@@ -9,6 +9,8 @@ param(
     [Parameter()]
     [string]$OutputPath,
     [Parameter()]
+    [string]$SecretsCountAdoVariableName,
+    [Parameter()]
     [string]$SecretsReportPath,
     [Parameter()]
     [switch]$Force,
@@ -118,6 +120,11 @@ try {
                    | Sort-Object -Property PipelineName `
                    | ConvertTo-Csv `
                    | Set-Content -Path $secretsReportFile.FullName -Force:$Force
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($SecretsCountAdoVariableName)) {
+          Write-Debug "${functionName}:Updating $SecretsCountAdoVariableName"
+          Write-Host "##vso[task.setvariable variable=$SecretsCountAdoVariableName;isoutput=true]$($secrets.Count)"
         }
       }
       else {

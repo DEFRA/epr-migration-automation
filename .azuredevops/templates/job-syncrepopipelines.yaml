@@ -87,6 +87,7 @@ jobs:
 
   - task: PowerShell@2
     displayName: 'Configure Pipelines - ${{ parameters.TargetGitHubRepo }}'
+    name: ConfigurePipelines
     inputs:
       targetType: filePath
       filePath: $(Build.SourcesDirectory)/pwsh/set-pipelines.ps1
@@ -96,6 +97,7 @@ jobs:
         -Project '${{ parameters.AdoTeamProject }}'
         -InputJson '$(ResolvePipelinesStep.GitHubPipelinesJson)'
         -SecretsReportPath '${{ variables.PipelineSecretsReportFile }}'
+        -SecretsCountAdoVariableName 'SecretsCount'
         -WhatIf:${{ variables.WhatIfForPwsh }}
     env:
       AZURE_DEVOPS_EXT_PAT: ${{ parameters.AdoAccessToken }}
@@ -103,3 +105,4 @@ jobs:
   - publish: '${{ variables.PipelineSecretsReportFile }}'
     artifact: ${{ parameters.PipelineSecretsArtifactName }}
     displayName: Publish ${{ parameters.PipelineSecretsArtifactName }}
+    condition: ne('$(ConfigurePipelines.SecretsCount)','0')

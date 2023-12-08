@@ -1315,7 +1315,7 @@ function New-AdoPipelineVariable {
     [string]$command = $builder.ToString()
     Write-Debug "${functionName}:process:command=$command"
     if ($PSCmdlet.ShouldProcess($command)) {
-      [string]$jsonResponse = Invoke-CommandLine -Command $command -ReturnExitCode
+      [string]$jsonResponse = Invoke-CommandLine -Command $command
       Write-Debug "${functionName}:process:jsonResponse=$jsonResponse"
 
       if ($PassThru) {
@@ -1955,7 +1955,7 @@ function Set-AdoPipelineVariable {
     [string]$command = $builder.ToString()
     Write-Debug "${functionName}:process:command=$command"
     if ($PSCmdlet.ShouldProcess($command)) {
-      [string]$jsonResponse = Invoke-CommandLine -Command $command -ReturnExitCode
+      [string]$jsonResponse = Invoke-CommandLine -Command $command
       Write-Debug "${functionName}:process:jsonResponse=$jsonResponse"
 
       if ($PassThru) {
