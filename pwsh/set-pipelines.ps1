@@ -49,6 +49,8 @@ try {
   [System.IO.DirectoryInfo]$moduleDir = Join-Path -Path $scriptDir.FullName -ChildPath "modules/ADO2GitHubMigration"
   Write-Debug "${functionName}:moduleDir.FullName=$($moduleDir.FullName)"
 
+  [int]$secretsCount = 0
+
   if ([string]::IsNullOrWhiteSpace($InputJson)) {
     Write-Warning "There is no input data to process"
   }
@@ -112,7 +114,9 @@ try {
         }
 
         [array]$secrets = @($processedVariables | Where-Object -FilterScript { $_.IsSecret })
-        Write-Debug "${functionName}:There are $($secrets.Count) pipeline secret pipeline variables."
+        $secretsCount = $secrets.Count
+        Write-Debug "${functionName}:There are $($secretsCount) pipeline secret pipeline variables."
+        
         
         if ($secrets.Count -gt 0) {
           Write-Debug "${functionName}:Generating report file $($secretsReportFile.FullName)"
@@ -121,16 +125,17 @@ try {
                    | ConvertTo-Csv `
                    | Set-Content -Path $secretsReportFile.FullName -Force:$Force
         }
-
-        if (-not [string]::IsNullOrWhiteSpace($SecretsCountAdoVariableName)) {
-          Write-Debug "${functionName}:Updating $SecretsCountAdoVariableName"
-          Write-Host "##vso[task.setvariable variable=$SecretsCountAdoVariableName;isoutput=true]$($secrets.Count)"
-        }
       }
       else {
         Write-Debug "${functionName}:Not reporting on pipeline secrets"
       }
     }
+
+  }
+
+  if (-not [string]::IsNullOrWhiteSpace($SecretsCountAdoVariableName)) {
+    Write-Debug "${functionName}:Updating $SecretsCountAdoVariableName"
+    Write-Host "##vso[task.setvariable variable=$SecretsCountAdoVariableName;isoutput=true]$secretsCount"
   }
 
   $exitCode = 0

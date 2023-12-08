@@ -21,13 +21,13 @@
   GUID = '{6E88AC32-1F0D-4B29-BB07-28CF378D5B68}'
   
   # Author of this module
-  Author = 'daughey'
+  Author = 'Defra'
   
   # Company or vendor of this module
   CompanyName = ''
   
   # Copyright statement for this module
-  Copyright = '(c). All rights reserved.'
+  Copyright = '(c) DEFRA. All rights reserved.'
   
   # Description of the functionality provided by this module
   # Description = ''
