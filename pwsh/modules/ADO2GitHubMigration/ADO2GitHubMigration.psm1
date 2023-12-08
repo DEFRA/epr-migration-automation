@@ -75,7 +75,7 @@ function ConvertTo-Boolean (
 
   Write-Debug "${functionName}:returning $result"
   Write-Output $result
-  Write-Debug "${functionName}:start"
+  Write-Debug "${functionName}:end"
 }
 
 function ConvertTo-PipelineInfo {
@@ -466,6 +466,7 @@ function Get-PipelineVariable {
           $entry = $adoVariablesDictionary[$Name]
   
           [PipelineVariableInfo]$variableInfo = [PipelineVariableInfo]::new()
+          $variableInfo.PipelineName = $PipelineName
           $variableInfo.Name = $Name
           $variableInfo.AllowOverride = ConvertTo-Boolean -InputObject $entry.allowOverride
           $variableInfo.IsSecret = ConvertTo-Boolean -InputObject $entry.isSecret
@@ -486,6 +487,7 @@ function Get-PipelineVariable {
           $entry = $adoVariablesDictionary[$key]
   
           [PipelineVariableInfo]$variableInfo = [PipelineVariableInfo]::new()
+          $variableInfo.PipelineName = $PipelineName
           $variableInfo.Name = $key
           $variableInfo.AllowOverride = ConvertTo-Boolean -InputObject $entry['allowOverride']
           $variableInfo.IsSecret = ConvertTo-Boolean -InputObject $entry['isSecret']
@@ -1278,13 +1280,15 @@ function New-AdoPipelineVariable {
     $Pipeline,
     [Parameter(ValueFromPipeline, Mandatory)]
     [PipelineVariableInfo]$VariableInfo,
-    [switch]$SuppressSecret
+    [switch]$SuppressSecret,
+    [switch]$PassThru
   )  
 
   begin {
     [string]$functionName = $MyInvocation.MyCommand
     Write-Debug "${functionName}:begin:start"
     Write-Debug "${functionName}:begin:SuppressSecret=$SuppressSecret"
+    Write-Debug "${functionName}:begin:PassThru=$PassThru"
     [string]$pipelineParam = New-PipelineParamPart -Pipeline $Pipeline
     Write-Debug "${functionName}:begin:pipelineParam=$pipelineParam"
     Write-Debug "${functionName}:begin:end"
@@ -1314,7 +1318,14 @@ function New-AdoPipelineVariable {
       [string]$jsonResponse = Invoke-CommandLine -Command $command -ReturnExitCode
       Write-Debug "${functionName}:process:jsonResponse=$jsonResponse"
 
-      $jsonResponse | ConvertFrom-Json -Depth $MAX_JSON_DEPTH | Write-Output
+      if ($PassThru) {
+        Write-Debug "${functionName}:process:PassThru:outputting VariableInfo"
+        Write-Output $VariableInfo
+      }
+      else {
+        Write-Debug "${functionName}:process:outputting response"
+        $jsonResponse | ConvertFrom-Json -Depth $MAX_JSON_DEPTH | Write-Output
+      }
     }
 
     Write-Debug "${functionName}:process:end"
@@ -1908,13 +1919,15 @@ function Set-AdoPipelineVariable {
     $Pipeline,
     [Parameter(ValueFromPipeline, Mandatory)]
     [PipelineVariableInfo]$VariableInfo,
-    [switch]$SuppressSecret
+    [switch]$SuppressSecret,
+    [switch]$PassThru
   )  
 
   begin {
     [string]$functionName = $MyInvocation.MyCommand
     Write-Debug "${functionName}:begin:start"
     Write-Debug "${functionName}:begin:SuppressSecret=$SuppressSecret"
+    Write-Debug "${functionName}:begin:PassThru=$PassThru"
     [string]$pipelineParam = New-PipelineParamPart -Pipeline $Pipeline
     Write-Debug "${functionName}:begin:pipelineParam=$pipelineParam"
     Write-Debug "${functionName}:begin:end"
@@ -1936,7 +1949,7 @@ function Set-AdoPipelineVariable {
       Write-Debug "${functionName}:process:SuppressSecret switch is active.  Value will be null."
     }
     else {
-      [void]$builder.Append(" --value '$value' ")
+      [void]$builder.Append(" --value '`"$value`"' ")
     }
 
     [string]$command = $builder.ToString()
@@ -1945,7 +1958,14 @@ function Set-AdoPipelineVariable {
       [string]$jsonResponse = Invoke-CommandLine -Command $command -ReturnExitCode
       Write-Debug "${functionName}:process:jsonResponse=$jsonResponse"
 
-      $jsonResponse | ConvertFrom-Json -Depth $MAX_JSON_DEPTH | Write-Output
+      if ($PassThru) {
+        Write-Debug "${functionName}:process:PassThru:outputting VariableInfo"
+        Write-Output $VariableInfo
+      }
+      else {
+        Write-Debug "${functionName}:process:outputting response"
+        $jsonResponse | ConvertFrom-Json -Depth $MAX_JSON_DEPTH | Write-Output
+      }
     }
 
     Write-Debug "${functionName}:process:end"
@@ -2154,8 +2174,8 @@ function Sync-AdoPipelineVariables {
       if ($variablesToUpdate.Count -gt 0 -or $variablesToCreate.Count -gt 0 -or $variablesToDelete.Count -gt 0) {
         $pipelineModel = Get-AdoPipelineModel -Pipeline $Pipeline.Name
 
-        $variablesToUpdate | Set-AdoPipelineVariable -Pipeline $pipelineModel -SuppressSecret | Write-Output
-        $variablesToCreate | New-AdoPipelineVariable -Pipeline $pipelineModel -SuppressSecret | Write-Output
+        $variablesToUpdate | Set-AdoPipelineVariable -Pipeline $pipelineModel -SuppressSecret -PassThru | Write-Output
+        $variablesToCreate | New-AdoPipelineVariable -Pipeline $pipelineModel -SuppressSecret -PassThru | Write-Output
         $variablesToDelete | Remove-AdoPipelineVariable -Pipeline $pipelineModel | Out-Null
       }
     }

@@ -108,18 +108,12 @@
     {
       "SourceAdoRepo": "epr-migration-test2",
       "TargetGitHubRepo": "epr-migration-test2",
-      "Action": "migrate",
-      "Memo": "restored"
-    },
-    {
-      "SourceAdoRepo": "epr-obligationchecker-frontend",
-      "TargetGitHubRepo": "epr-obligationchecker-frontend",
       "Action": "simulate",
       "Memo": "Simulate"
     },
     {
-      "SourceAdoRepo": "epr_ops",
-      "TargetGitHubRepo": "epr-ops",
+      "SourceAdoRepo": "epr-obligationchecker-frontend",
+      "TargetGitHubRepo": "epr-obligationchecker-frontend",
       "Action": "simulate",
       "Memo": "Simulate"
     },

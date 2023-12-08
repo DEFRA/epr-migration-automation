@@ -7,6 +7,9 @@ parameters:
 - name: TargetGitHubRepo
   type: string
   default: epr-migration-test2
+- name: PipelineSecretsArtifactName
+  type: string
+  default: PipelineSecrets
 - name: WhatIf
   displayName: WhatIf
   type: boolean
@@ -14,7 +17,7 @@ parameters:
 
 variables:
 - name: HostedAgentPool 
-  value: windows-latest
+  value: ubuntu-latest
 - name: AdoOrganizationUrl
   value: '$(System.CollectionUri)'
 - name: AdoTeamProject
@@ -40,8 +43,8 @@ resources:
     endpoint: defra
 
 stages:
-- stage: SyncContentsStage  
-  displayName: Sync repo contents
+- stage: SyncPipelinesStage  
+  displayName: Sync Pipelines
   dependsOn: ''
   jobs: 
   - template: templates/job-getpipelines.yaml
@@ -71,4 +74,5 @@ stages:
       GitHubServiceConnection: ${{ variables.GitHubServiceConnection }}
       SourceAdoRepo: ${{ parameters.SourceAdoRepo }}
       TargetGitHubRepo: ${{ parameters.TargetGitHubRepo }}
+      PipelineSecretsArtifactName: ${{ parameters.PipelineSecretsArtifactName }}
       WhatIf: ${{ parameters.WhatIf }}

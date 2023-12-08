@@ -13,3 +13,7 @@
 1. Renaming repos requires the repo to be referenced as a resource as well as doing a "checkout" for that repo.  Otherwise the build account isn't allowed to see it in order to rename it.  This is contrary to the expected behaviour based on the permissions granted to the "Project Collection Build Service (org)" so it's more of a workaround.
 
 1. Cannot use "Project Valid Users" for assigning the Deny permissions to the repo post-migration.
+
+1. Due to [issue 1020](https://github.com/Azure/azure-devops-cli-extension/issues/1020), updating Pipeline Variables needs to use double quotes within single quotes for the value or it will fail.  e.g. `--value '"this is fine"'`.  
+
+1. az pipelines cli does not support disabling pipelines so cannot disable old pipelines.  Delete seems a bit final making rollback much harder so not touching old pipelines.

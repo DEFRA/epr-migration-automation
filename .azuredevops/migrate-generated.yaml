@@ -68,14 +68,10 @@ parameters:
   - repo:
       SourceAdoRepo: epr-migration-test2
       TargetGitHubRepo: epr-migration-test2
-      Action: migrate
+      Action: simulate
   - repo:
       SourceAdoRepo: epr-obligationchecker-frontend
       TargetGitHubRepo: epr-obligationchecker-frontend
-      Action: simulate
-  - repo:
-      SourceAdoRepo: epr_ops
-      TargetGitHubRepo: epr-ops
       Action: simulate
   - repo:
       SourceAdoRepo: epr_packaging_frontend
@@ -283,13 +279,6 @@ resources:
     type: git
   - repository: github-epr-obligationchecker-frontend
     name: defra/epr-obligationchecker-frontend
-    type: github
-    endpoint: defra
-  - repository: epr_ops
-    name: RWD-CPR-EPR4P-ADO/epr_ops
-    type: git
-  - repository: github-epr-ops
-    name: defra/epr-ops
     type: github
     endpoint: defra
   - repository: epr_packaging_frontend

@@ -9,6 +9,10 @@ param(
     [Parameter()]
     [string]$OutputPath,
     [Parameter()]
+    [string]$SecretsReportPath,
+    [Parameter()]
+    [switch]$Force,
+    [Parameter()]
     [string]$AccessToken
 )
 
@@ -33,6 +37,8 @@ if ($enableDebug) {
 Write-Debug "${functionName}:OrganizationUri=$OrganizationUri"
 Write-Debug "${functionName}:Project=$Project"
 Write-Debug "${functionName}:InputJson=$InputJson"
+Write-Debug "${functionName}:OutputPath=$OutputPath"
+Write-Debug "${functionName}:SecretsReportPath=$SecretsReportPath"
 
 [System.IO.DirectoryInfo]$scriptDir = $PSCommandPath | Split-Path -Parent
 Write-Debug "${functionName}:scriptDir.FullName=$($scriptDir.FullName)"
@@ -57,27 +63,65 @@ try {
       Write-Warning "There are no pipelines to process"
     }
     else {
+      Write-Debug "${functionName}:Resolving endpoints"
       [hashtable]$endpoints = Get-AdoEndpoint -AsHashtable
+      Write-Debug "${functionName}:Updating pipelines"
       [array]$processedPipelines = @($pipelinesToProcess | Set-AdoPipeline -EndpointDictionary $endpoints)
+      Write-Debug "${functionName}:Updating pipeline variables"
       [array]$processedVariables = @($pipelinesToProcess | Sync-AdoPipelineVariables)
 
       [array]$outputs = @()
-      $outputs += @($processedPipelines)
-      $outputs += @($processedVariables)
+      if ($processedPipelines.Count -gt 0) {
+        $outputs += @($processedPipelines)
+      }
+      if ($processedVariables.Count -gt 0) {
+        $outputs += @($processedVariables)
+      }
 
       if ($null -ne $outputs -and $outputs.Count -gt 0) {
+        Write-Debug "${functionName}:Setting outputs ($($outputs.Count))"
 
         if (-not [string]::IsNullOrWhiteSpace($OutputPath)) {
+          Write-Debug "${functionName}:Outputting to $($outputFile.FullName)"
           [System.IO.FileInfo]$outputFile = $OutputPath
           $outputs | ConvertTo-Json -Depth $MAX_JSON_DEPTH | Set-Content -Path $outputFile.FullName -Force 
           Write-Host "Output file $($outputFile.FullName) created."
         }
         else {
+          Write-Debug "${functionName}:Outputting to Write-Output"
           $outputs | ConvertTo-Json -Depth $MAX_JSON_DEPTH | Write-Output
         }
       }
       else {
         Write-Warning "no updates performed"
+      }
+
+      if (-not [string]::IsNullOrWhiteSpace($SecretsReportPath)) {
+        Write-Debug "${functionName}:Pipeline variable secret report requested"
+        [System.IO.FileInfo]$secretsReportFile = $SecretsReportPath
+
+        if ($secretsReportFile.Exists -and -not $Force) {
+          throw "$($secretsReportFile.FullName) already exists and -Force was not specified."
+        }
+
+        if (-not $secretsReportFile.Directory.Exists) {
+          Write-Debug "${functionName}:Creating directory $($secretsReportFile.Directory.FullName)"
+          $secretsReportFile.Directory.Create()
+        }
+
+        [array]$secrets = @($processedVariables | Where-Object -FilterScript { $_.IsSecret })
+        Write-Debug "${functionName}:There are $($secrets.Count) pipeline secret pipeline variables."
+        
+        if ($secrets.Count -gt 0) {
+          Write-Debug "${functionName}:Generating report file $($secretsReportFile.FullName)"
+          $secrets | Select-Object -Property @('PipelineName', 'Name') `
+                   | Sort-Object -Property PipelineName `
+                   | ConvertTo-Csv `
+                   | Set-Content -Path $secretsReportFile.FullName -Force:$Force
+        }
+      }
+      else {
+        Write-Debug "${functionName}:Not reporting on pipeline secrets"
       }
     }
   }

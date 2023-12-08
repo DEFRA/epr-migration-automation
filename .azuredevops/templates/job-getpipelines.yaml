@@ -80,15 +80,7 @@ jobs:
     env:
       AZURE_DEVOPS_EXT_PAT: ${{ parameters.AdoAccessToken }}
 
-  - pwsh: | 
-      dir $(Pipeline.Workspace) -Recurse | Sort-Object -Property FullName | ForEach-Object { Write-Host $_.FullName }
-    displayName: diags
-
   - publish: ${{ variables.PipelinesOutputPath }}
     artifact: ${{ parameters.PipelinesJsonArtifactName }}
     displayName: Publish generated files
     condition: always()
-
-  - pwsh: | 
-      dir ENV:
-    displayName: diags

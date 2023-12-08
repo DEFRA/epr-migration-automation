@@ -122,6 +122,7 @@ stages:
       AdoTeamProject: ${{ parameters.AdoTeamProject }}
       AdoAccessToken: ${{ parameters.AdoAccessToken }}
       PipelinesJsonArtifactName: ${{ parameters.AllPipelinesJsonArtifactName }}
+      PipelineSecretsArtifactName: PipelineVarSecrets-${{ parameters.TargetGitHubRepo }}
       GitHubOrganizationName: ${{ parameters.GitHubOrganizationName }}
       GitHubServiceConnection: ${{ parameters.GitHubServiceConnection }}
       SourceAdoRepo: ${{ parameters.SourceAdoRepo }}

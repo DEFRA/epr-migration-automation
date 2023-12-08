@@ -16,6 +16,9 @@ parameters:
   type: string
 - name: PipelinesJsonArtifactName
   type: string
+- name: PipelineSecretsArtifactName
+  type: string
+  default: PipelineSecrets
 - name: WhatIf
   type: boolean
   default: true
@@ -42,6 +45,8 @@ jobs:
   variables: 
   - name: AllPipelinesJsonFile
     value: $(Pipeline.Workspace)/${{ parameters.PipelinesJsonArtifactName }}/pipelines.json
+  - name: PipelineSecretsReportFile
+    value: $(Pipeline.Workspace)/${{ parameters.PipelineSecretsArtifactName }}/pipeline-secrets.csv
   - ${{ if eq( parameters.WhatIf, true )}}:
     - name: WhatIfForPwsh
       value: '$true'
@@ -53,16 +58,8 @@ jobs:
   - checkout: self
     clean: true
 
-  - pwsh: | 
-      dir $(Pipeline.Workspace) -Recurse | Sort-Object -Property FullName | ForEach-Object { Write-Host $_.FullName }
-    displayName: diags
-
   - download: current
     artifact: ${{ parameters.PipelinesJsonArtifactName }}
-
-  - pwsh: | 
-      dir $(Pipeline.Workspace) -Recurse | Sort-Object -Property FullName | ForEach-Object { Write-Host $_.FullName }
-    displayName: diags
 
   - task: PowerShell@2
     displayName: 'Resolve required pipelines - ${{ parameters.SourceAdoRepo }}'
@@ -98,6 +95,11 @@ jobs:
         -OrganizationUri '${{ parameters.AdoOrganizationUrl }}'
         -Project '${{ parameters.AdoTeamProject }}'
         -InputJson '$(ResolvePipelinesStep.GitHubPipelinesJson)'
+        -SecretsReportPath '${{ variables.PipelineSecretsReportFile }}'
         -WhatIf:${{ variables.WhatIfForPwsh }}
     env:
       AZURE_DEVOPS_EXT_PAT: ${{ parameters.AdoAccessToken }}
+
+  - publish: '${{ variables.PipelineSecretsReportFile }}'
+    artifact: ${{ parameters.PipelineSecretsArtifactName }}
+    displayName: Publish ${{ parameters.PipelineSecretsArtifactName }}

@@ -17,6 +17,7 @@ class PipelineInfo {
 }
 
 class PipelineVariableInfo {
+  [string]$PipelineName
   [string]$Name
   [bool]$AllowOverride
   [bool]$IsSecret
