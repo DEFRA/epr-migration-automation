@@ -198,8 +198,8 @@
     {
       "SourceAdoRepo": "epr-webapps-code-deploy-templates",
       "TargetGitHubRepo": "epr-webapps-code-deploy-templates",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Migrate last."
     }
   ]
 }
