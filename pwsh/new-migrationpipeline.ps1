@@ -1,11 +1,11 @@
 [CmdletBinding(SupportsShouldProcess)]
 param(
-    [Parameter(Mandatory)]
-    [string]$TemplatePath,
-    [Parameter(Mandatory)]
-    [string]$StatePath,
-    [Parameter(Mandatory)]
-    [string]$OutputPath,
+    [Parameter()]
+    [string]$TemplatePath = (Join-Path -Path $PSScriptRoot -ChildPath '../.azuredevops/migrate.yaml.template'),
+    [Parameter()]
+    [string]$StatePath = (Join-Path -Path $PSScriptRoot -ChildPath '../migration-state.json'),
+    [Parameter()]
+    [string]$OutputPath = (Join-Path -Path $PSScriptRoot -ChildPath '../.azuredevops/migrate-generated.yaml'),
     [switch]$Force
 )
 
@@ -50,6 +50,7 @@ function ConvertTo-MigrationData {
 
   process {
     Write-Debug "${functionName}:process:start"
+    Write-Debug "${functionName}:process:InputObject.Action=$($InputObject.Action)"
 
     if ($InputObject.Action -ne "ignore") {
 
@@ -126,6 +127,91 @@ function ConvertTo-RepositoryEntry {
 }
 
 
+function ConvertTo-Parameter {
+  param(
+    [Parameter(Mandatory,ValueFromPipeline)]
+    [hashtable]$InputObject
+  )  
+
+  begin {
+    [string]$functionName = $MyInvocation.MyCommand
+    Write-Debug "${functionName}:begin:start"
+    [System.Collections.ArrayList]$paramEntryOrder = @('name', 'displayName', 'type', 'default')
+    Write-Debug "${functionName}:begin:end"
+  }
+
+  process {
+    Write-Debug "${functionName}:process:start"
+    [string]$inputType = $InputObject.GetType().Name
+    Write-Debug "${functionName}:process:inputType=$inputType"
+    Write-Debug "${functionName}:process:InputObject.name=$($InputObject.name)"
+
+    [hashtable]$paramDictionary = @{}
+    foreach($key in $InputObject.Keys) {
+      Write-Debug "${functionName}:process:key=$key"
+      $paramDictionary.Add($key, $InputObject[$key])
+    }
+
+    [System.Collections.Specialized.OrderedDictionary]$parameter = @{}
+    foreach($entryName in $paramEntryOrder) {
+      Write-Debug "${functionName}:process:entryName=$entryName"
+      if ($paramDictionary.ContainsKey($entryName)) {
+        $parameter[$entryName] = $paramDictionary[$entryName]
+        $paramDictionary.Remove($entryName)
+      }
+    }
+
+    foreach($key in $paramDictionary.Keys) {
+      Write-Debug "${functionName}:process:key=$key"
+      $parameter[$key] = $paramDictionary[$key]
+    }
+
+    Write-Debug "${functionName}:process:parameter.Count=$($parameter.Count)"
+    
+    Write-Output $parameter
+  
+    Write-Debug "${functionName}:process:end"
+  }
+
+  end {
+    Write-Debug "${functionName}:end:start"
+    Write-Debug "${functionName}:end:end"
+  }
+}
+
+function ConvertTo-Variable {
+  param(
+    [Parameter(Mandatory,ValueFromPipeline)]
+    $InputObject
+  )  
+
+  begin {
+    [string]$functionName = $MyInvocation.MyCommand
+    Write-Debug "${functionName}:begin:start"
+    Write-Debug "${functionName}:begin:end"
+  }
+
+  process {
+    Write-Debug "${functionName}:process:start"
+    Write-Debug "${functionName}:process:InputObject.name=$($InputObject.name)"
+    Write-Debug "${functionName}:process:InputObject.value=$($InputObject.value)"
+
+    [System.Collections.Specialized.OrderedDictionary]$variable = @{}
+    $variable['name'] = $InputObject.name
+    $variable['value'] = $InputObject.value
+
+    Write-Output $variable
+  
+    Write-Debug "${functionName}:process:end"
+  }
+
+  end {
+    Write-Debug "${functionName}:end:start"
+    Write-Debug "${functionName}:end:end"
+  }
+}
+
+
 try {
   if (@(Get-InstalledModule -Name powershell-yaml -ErrorAction Ignore).Length -eq 0) {
     Write-Debug "${functionName}:Installing powershell-yaml"
@@ -147,7 +233,7 @@ try {
   }
 
   if (-not $stateFile.Exists) {
-    throw [System.IO.FileNotFoundException]::new($templateFile.FullName)
+    throw [System.IO.FileNotFoundException]::new($stateFile.FullName)
   }
 
   if (-not $outputFile.Directory.Exists) {
@@ -162,15 +248,24 @@ try {
   $model = Get-Content -Path $templateFile.FullName | ConvertFrom-Yaml
   $state = Get-Content -Path $stateFile.FullName | ConvertFrom-Json
 
-  [hashtable]$migrationDataParam = $model.parameters | Where-Object -FilterScript { $_.name -eq "MigrationData" }
-  $migrationDataParam['default'] = @($state.repos | ConvertTo-MigrationData)
-  $model.resources.repositories = @($state.repos | ConvertTo-RepositoryEntry -GitHubServiceConnection $state.GitHubServiceConnection -GitHubOrganization $state.GitHubOrganization -TeamProject $state.TeamProject)
 
-  [array]$reservedKeys = @('parameters', 'variables', 'resources', 'extends')
-
+  [array]$reservedKeys = @('trigger','parameters', 'variables', 'resources', 'extends')
   [System.Collections.Specialized.OrderedDictionary]$newModel = [System.Collections.Specialized.OrderedDictionary]@{}
-  $newModel['parameters'] = $model.parameters
-  $newModel['variables'] = $model.variables
+  $newModel['trigger'] = $model.trigger
+
+  Write-Debug "${functionName}:Building parameters"
+  [array]$parameters = $model.parameters | ConvertTo-Parameter
+  $newModel['parameters'] = $parameters
+  $migrationDataParam = $parameters | Where-Object -FilterScript { $_['name'] -eq "MigrationData" }
+
+  Write-Debug "${functionName}:Building migration data"
+
+  $migrationDataParam['default'] = @($state.repos | ConvertTo-MigrationData)
+
+  Write-Debug "${functionName}:Building variables"
+  $newModel['variables'] = $model.variables | ConvertTo-Variable
+
+  Write-Debug "${functionName}:Processing 'other' entries"
 
   foreach($key in $model.keys) {
     if ($key -notin $reservedKeys) {
@@ -178,8 +273,13 @@ try {
     }
   }
 
+  Write-Debug "${functionName}:Processing resources"
+
+  $model.resources.repositories = @($state.repos | ConvertTo-RepositoryEntry -GitHubServiceConnection $state.GitHubServiceConnection -GitHubOrganization $state.GitHubOrganization -TeamProject $state.TeamProject)
   $newModel['resources'] = $model.resources
   $newModel['extends'] = $model.extends
+
+  Write-Debug "${functionName}:Outputting"
 
   $newModel | ConvertTo-Yaml | Set-Content -Path $outputFile.FullName -Force:$Force -PassThru | Write-Output 
 

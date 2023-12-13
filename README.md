@@ -14,16 +14,32 @@ The migration automation does not support Type 1 (xaml based) pipelines.
   - PowerShell
   - YAML
   - Azure CLI Tools
-  
+  - Markdown All in One
+  - markdownlint
+
 ## Setup
+
+### ADO
+
+Before the automation can work, certain permissions need assigned to the "Collection Build Service (org)" account.  Details are in the [ADO Configuration guide](./docs/adoconfiguration.md).
+
+### GitHub
+
+Before the automation can work, the "Azure DevOps Pipelines" app needs installed on the GitHub repo.  Details are in the [GitHub Configuration guide](./docs/githubconfiguration.md).
 
 ### Development
 
+Local development of pipelines is nigh impossible because the pipeline yaml cannot be validated nor run locally.  Use standard branching and pull requests and run the most appropriate test pipelines for the changes being made.
+
+Pwsh scripts can be developed locally.  Make sure to create an ADO PAT with suitable permissions and set the `AZURE_DEVOPS_EXT_PAT` environment variable.
+
+```pwsh
+$ENV:AZURE_DEVOPS_EXT_PAT='your-pat'
+```
+
 ### Test
 
-## Running in development
-
-## Running tests
+With the main pipeline being pretty heavy, there are multiple test pipelines available to use.  The yaml files for these are in the `.azuredevops` folder.  Simply create the pipeline in ADO and use the existing yaml file.
 
 ## Licence
 

@@ -12,54 +12,38 @@ Before updating the pipeline, the source and target repos must already exist.  T
 
 The pipeline yaml file needs updated to know about the source and target repos and the pipeline will need granted permission to access the new GitHub repo.
 
-### Pipeline Params/object data
+### State File
 
-The repo name needs added to the Repos parameter.
+In the root of the repo is a state file `migration-state.json` which holds a json representation of the migration to be performed.  This file is used to generate the pipeline yaml file.
 
-```yaml
-parameters:
-- name: Repos
-  displayName: Repos to sync
-  type: object
-  default: 
-    - epr-migration-test1
-    - epr-migration-test2
-    - epr-migration-automation
+```json
+    {
+      "SourceAdoRepo": "<Source Repo In Azure DevOps>",
+      "TargetGitHubRepo": "<Target Repo In GitHub>",
+      "Action": "<ignore|simulate|synchronize|migrate>",
+      "Memo": "(Free text note to self - not processed)"
+    },
 ```
 
-### Pipeline Resources section
+#### Action
 
-The source and target repos need added to the resources section.
+| Action      | Description |
+| ------      | ----------- |
+| ignore      | Ignore the entry.  This value is assigned automatically by the automation after it has run in `migrate` mode |
+| simulate    | Simulate the migration.  Performs all actions possible without making changes. |
+| synchronize | Mirrors the content of the ADO source repo to the GitHub repo and creates ADO pipelines against the GitHub repo |
+| migrate     | Performs the one-way trip of migrating the ADO repo to GitHub.  It will lock all branches, sync the contents and pipelines, abandon all pull requests and rename the source repo.  Finally, it will update the state file to mark the repo as "ignore" with a memo of "migrated" |
 
-```yaml
-resources: 
-  repositories:
-  # epr-migration-test1
-  - repository: ado-epr-migration-test1
-    name: RWD-CPR-EPR4P-ADO/epr-migration-test1
-    type: git
-  - repository: github-epr-migration-test1
-    name: defra/epr-migration-test1
-    type: github
-    endpoint: defra
+### Generated Pipeline
 
-  # epr-migration-test2
-  - repository: ado-epr-migration-test2
-    name: RWD-CPR-EPR4P-ADO/epr-migration-test2
-    type: git
-  - repository: github-epr-migration-test2
-    name: defra/epr-migration-test2
-    type: github
-    endpoint: defra
+After updating the state file, the pipeline yaml needs regenerated.  This is performed by running the `new-migrationpipeline.ps1` script.  The default values to the parameters are set for ease of use but `-Force` is required to make it overwrite an existing file.
 
-  # epr-migration-automation
-  - repository: ado-epr-migration-automation
-    name: RWD-CPR-EPR4P-ADO/epr-migration-automation
-    type: git
-  - repository: github-epr-migration-automation
-    name: defra/epr-migration-automation
-    type: github
-    endpoint: defra
+1. Open pwsh
+1. Change directory to the repo's `pwsh` directory
+1. Run the script:
+
+```pwsh
+./new-migrationpipeline.ps1 -Force
 ```
 
 ### Resource Permissions

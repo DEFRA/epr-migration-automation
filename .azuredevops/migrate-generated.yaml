@@ -1,5 +1,8 @@
+trigger: none
 parameters:
 - name: MigrationData
+  displayName: Migration Data
+  type: object
   default:
   - repo:
       SourceAdoRepo: epr-anti-virus-function-app
@@ -52,10 +55,6 @@ parameters:
   - repo:
       SourceAdoRepo: frontend-accountmanagement-microservice
       TargetGitHubRepo: epr-frontend-accountmanagement-microservice
-      Action: simulate
-  - repo:
-      SourceAdoRepo: identity-provider-proxy
-      TargetGitHubRepo: epr-identity-provider-proxy
       Action: simulate
   - repo:
       SourceAdoRepo: epr-logging-api
@@ -133,12 +132,10 @@ parameters:
       SourceAdoRepo: epr-webapps-code-deploy-templates
       TargetGitHubRepo: epr-webapps-code-deploy-templates
       Action: simulate
-  displayName: Migration Data
-  type: object
 - name: GitLeaksFailureAsWarning
-  default: false
   displayName: Treat Gitleaks failure as partial success
   type: boolean
+  default: false
 variables:
 - name: GitHubOrganizationName
   value: defra
@@ -152,7 +149,6 @@ variables:
   value: AllPipelinesJson
 - name: RenamePrefix
   value: ZZZ-Archive-
-trigger: none
 resources:
   repositories:
   - repository: epr-anti-virus-function-app
@@ -244,13 +240,6 @@ resources:
     type: git
   - repository: github-epr-frontend-accountmanagement-microservice
     name: defra/epr-frontend-accountmanagement-microservice
-    type: github
-    endpoint: defra
-  - repository: identity-provider-proxy
-    name: RWD-CPR-EPR4P-ADO/identity-provider-proxy
-    type: git
-  - repository: github-epr-identity-provider-proxy
-    name: defra/epr-identity-provider-proxy
     type: github
     endpoint: defra
   - repository: epr-logging-api
@@ -387,17 +376,17 @@ resources:
     type: github
     endpoint: defra
 extends:
-  template: templates/pipeline-migration.yaml
   parameters:
-    AdoTeamProject: $(System.TeamProject)
-    AdoAccessToken: $(System.AccessToken)
-    GitLeaksFailureAsWarning: ${{ parameters.GitLeaksFailureAsWarning }}
-    GitHubServiceConnection: ${{ variables.GitHubServiceConnection }}
-    MigrationData: ${{ parameters.MigrationData }}
     AllPipelinesJsonArtifactName: ${{ variables.AllPipelinesJsonArtifactName }}
+    GitLeaksFailureAsWarning: ${{ parameters.GitLeaksFailureAsWarning }}
     WindowsHostedAgentPool: ${{ variables.WindowsHostedAgentPool }}
-    UbuntuHostedAgentPool: ${{ variables.UbuntuHostedAgentPool }}
-    RenamePrefix: ${{ variables.RenamePrefix }}
-    AdoOrganizationUrl: $(System.CollectionUri)
     GitHubOrganizationName: ${{ variables.GitHubOrganizationName }}
+    RenamePrefix: ${{ variables.RenamePrefix }}
+    UbuntuHostedAgentPool: ${{ variables.UbuntuHostedAgentPool }}
+    AdoTeamProject: $(System.TeamProject)
+    GitHubServiceConnection: ${{ variables.GitHubServiceConnection }}
+    AdoOrganizationUrl: $(System.CollectionUri)
+    AdoAccessToken: $(System.AccessToken)
+    MigrationData: ${{ parameters.MigrationData }}
+  template: templates/pipeline-migration.yaml
 
