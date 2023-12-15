@@ -7,7 +7,7 @@
       "SourceAdoRepo": "epr-anti-virus-function-app",
       "TargetGitHubRepo": "epr-anti-virus-function-app",
       "Action": "synchronize",
-      "Memo": "Preparing"
+      "Memo": "Ready"
     },
     {
       "SourceAdoRepo": "epr-app-config-settings",
@@ -36,20 +36,20 @@
     {
       "SourceAdoRepo": "epr-data",
       "TargetGitHubRepo": "epr-data",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Pending - contributors need licences first"
     },
     {
       "SourceAdoRepo": "epr-data-pbix-files",
       "TargetGitHubRepo": "epr-data-pbix-files",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Pending - contributors need licences first"
     },
     {
       "SourceAdoRepo": "epr-data-sqldb",
       "TargetGitHubRepo": "epr-data-sqldb",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Pending - contributors need licences first"
     },
     {
       "SourceAdoRepo": "epr-document-schema-job-runner-function-app",
@@ -199,7 +199,7 @@
       "SourceAdoRepo": "epr-webapps-code-deploy-templates",
       "TargetGitHubRepo": "epr-webapps-code-deploy-templates",
       "Action": "synchronize",
-      "Memo": "Migrate last."
+      "Memo": "Keep Sync'd and migrate last"
     }
   ]
 }

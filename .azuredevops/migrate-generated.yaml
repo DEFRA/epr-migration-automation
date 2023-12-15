@@ -1,4 +1,5 @@
 trigger: none
+pr: none
 parameters:
 - name: MigrationData
   displayName: Migration Data
@@ -27,15 +28,15 @@ parameters:
   - repo:
       SourceAdoRepo: epr-data
       TargetGitHubRepo: epr-data
-      Action: simulate
+      Action: synchronize
   - repo:
       SourceAdoRepo: epr-data-pbix-files
       TargetGitHubRepo: epr-data-pbix-files
-      Action: simulate
+      Action: synchronize
   - repo:
       SourceAdoRepo: epr-data-sqldb
       TargetGitHubRepo: epr-data-sqldb
-      Action: simulate
+      Action: synchronize
   - repo:
       SourceAdoRepo: epr-document-schema-job-runner-function-app
       TargetGitHubRepo: epr-document-schema-job-runner-function-app
@@ -131,7 +132,7 @@ parameters:
   - repo:
       SourceAdoRepo: epr-webapps-code-deploy-templates
       TargetGitHubRepo: epr-webapps-code-deploy-templates
-      Action: simulate
+      Action: synchronize
 - name: GitLeaksFailureAsWarning
   displayName: Treat Gitleaks failure as partial success
   type: boolean
@@ -376,17 +377,17 @@ resources:
     type: github
     endpoint: defra
 extends:
-  parameters:
-    AllPipelinesJsonArtifactName: ${{ variables.AllPipelinesJsonArtifactName }}
-    GitLeaksFailureAsWarning: ${{ parameters.GitLeaksFailureAsWarning }}
-    WindowsHostedAgentPool: ${{ variables.WindowsHostedAgentPool }}
-    GitHubOrganizationName: ${{ variables.GitHubOrganizationName }}
-    RenamePrefix: ${{ variables.RenamePrefix }}
-    UbuntuHostedAgentPool: ${{ variables.UbuntuHostedAgentPool }}
-    AdoTeamProject: $(System.TeamProject)
-    GitHubServiceConnection: ${{ variables.GitHubServiceConnection }}
-    AdoOrganizationUrl: $(System.CollectionUri)
-    AdoAccessToken: $(System.AccessToken)
-    MigrationData: ${{ parameters.MigrationData }}
   template: templates/pipeline-migration.yaml
+  parameters:
+    MigrationData: ${{ parameters.MigrationData }}
+    RenamePrefix: ${{ variables.RenamePrefix }}
+    AdoOrganizationUrl: $(System.CollectionUri)
+    AllPipelinesJsonArtifactName: ${{ variables.AllPipelinesJsonArtifactName }}
+    AdoAccessToken: $(System.AccessToken)
+    AdoTeamProject: $(System.TeamProject)
+    GitLeaksFailureAsWarning: ${{ parameters.GitLeaksFailureAsWarning }}
+    GitHubOrganizationName: ${{ variables.GitHubOrganizationName }}
+    WindowsHostedAgentPool: ${{ variables.WindowsHostedAgentPool }}
+    GitHubServiceConnection: ${{ variables.GitHubServiceConnection }}
+    UbuntuHostedAgentPool: ${{ variables.UbuntuHostedAgentPool }}
 

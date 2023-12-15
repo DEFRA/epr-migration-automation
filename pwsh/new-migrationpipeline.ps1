@@ -249,9 +249,10 @@ try {
   $state = Get-Content -Path $stateFile.FullName | ConvertFrom-Json
 
 
-  [array]$reservedKeys = @('trigger','parameters', 'variables', 'resources', 'extends')
+  [array]$reservedKeys = @('trigger', 'pr', 'parameters', 'variables', 'resources', 'extends')
   [System.Collections.Specialized.OrderedDictionary]$newModel = [System.Collections.Specialized.OrderedDictionary]@{}
   $newModel['trigger'] = $model.trigger
+  $newModel['pr'] = $model.pr
 
   Write-Debug "${functionName}:Building parameters"
   [array]$parameters = $model.parameters | ConvertTo-Parameter

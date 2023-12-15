@@ -49,27 +49,47 @@ jobs:
     value: $(Pipeline.Workspace)/${{ variables.sourceRepoSubDir }}
   - name: targetRepoRoot
     value: $(Pipeline.Workspace)/${{ variables.targetRepoSubDir }}
-  - name: ReportFile
-    value: $(Build.StagingDirectory)/reports/${{ parameters.SourceAdoRepo }}.json
+  - ${{ if eq( parameters.GitLeaksSuppressHistoryCheck, true) }}:
+    - name: fetchDepth
+      value: 1
+    - name: gitLeaksScanMode
+      value: nogit
+  - ${{ else }}:
+    - name: fetchDepth
+      value: 0
+    - name: gitLeaksScanMode
+      value: all
 
   steps: 
   - checkout: ${{ parameters.SourceAdoRepo }}
     path: ${{ variables.sourceRepoSubDir }}
     clean: true
     persistCredentials: true
+    fetchDepth: ${{ variables.fetchDepth }}
 
   - checkout: self
     clean: true
 
-  - template: steps-gitleaksscan.yaml
-    parameters: 
-      GitLeaksReportArtifactName: gitleaks-${{ parameters.SourceAdoRepo }}
-      ReportFile: $(Build.StagingDirectory)/reports/${{ parameters.SourceAdoRepo }}.json
-      PublishOnlyOnFail: ${{ parameters.GitLeaksReportPublishOnlyOnFail }}
-      TreatFailureAsWarning: ${{ parameters.GitLeaksFailureAsWarning }}
-      ScanRootDir: ${{ variables.sourceRepoRoot }}
-      SuppressHistoryCheck: ${{ parameters.GitLeaksSuppressHistoryCheck }}
-      GitLeaksConfigFile: ${{ variables.sourceRepoRoot}}/.gitleaks/config.toml
+  - task: Gitleaks@2
+    displayName: Gitleaks Scan
+    inputs:
+      scanmode: ${{ variables.gitLeaksScanMode }}
+      scanlocation: ${{ variables.sourceRepoRoot }}
+      configtype: custom
+      configfile: $(Build.Repository.LocalPath)/$(Build.Repository.Name)/gitleaks/gitleaks.toml
+      reportname: ${{ parameters.SourceAdoRepo }}
+      redact: false
+      verbose: true
+      taskfail: ${{ not(parameters.GitLeaksFailureAsWarning) }}
+      uploadresults: false
+
+  - publish: $(Agent.TempDirectory)/${{ parameters.SourceAdoRepo }}.sarif
+    artifact: gitleaks-${{ parameters.SourceAdoRepo }}
+    displayName: Publish ${{ parameters.GitLeaksReportArtifactName }}
+    ${{ if and( eq(parameters.GitLeaksReportPublishOnlyOnFail, true), eq(parameters.GitLeaksFailureAsWarning, false) ) }}:
+      condition: failed()
+    ${{ else }}:
+      condition: always()
 
   - checkout: github-${{ parameters.TargetGitHubRepo }}
     path: ${{ variables.targetRepoSubDir }}
@@ -86,7 +106,7 @@ jobs:
 
   - pwsh: | 
       Write-Host "Syncing changes from ${{ variables.sourceRepoRoot }} to ${{ variables.targetRepoRoot }}"
-      robocopy ${{ variables.sourceRepoRoot }} ${{ variables.targetRepoRoot }} /mir /xd .git /xd .github 
+      robocopy ${{ variables.sourceRepoRoot }} ${{ variables.targetRepoRoot }} /mir /xd .git 
       [int]$exitCode = $LASTEXITCODE
       Write-Host "robocopy exit code $exitCode"
       if ($exitCode -ge 8) {
