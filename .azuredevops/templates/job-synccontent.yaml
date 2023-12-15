@@ -20,6 +20,14 @@ parameters:
 - name: GitLeaksReportArtifactName
   type: string
   default: Report
+- name: GitLeaksReportFormat
+  type: string
+  default: json
+  values:
+  - sarif
+  - json
+  - csv
+  - junit
 - name: GitLeaksSuppressHistoryCheck
   type: boolean
   default: false
@@ -78,12 +86,13 @@ jobs:
       configtype: custom
       configfile: $(Build.Repository.LocalPath)/$(Build.Repository.Name)/gitleaks/gitleaks.toml
       reportname: ${{ parameters.SourceAdoRepo }}
+      reportformat: ${{ parameters.GitLeaksReportFormat }}
       redact: false
       verbose: true
       taskfail: ${{ not(parameters.GitLeaksFailureAsWarning) }}
       uploadresults: false
 
-  - publish: $(Agent.TempDirectory)/${{ parameters.SourceAdoRepo }}.sarif
+  - publish: $(Agent.TempDirectory)/${{ parameters.SourceAdoRepo }}.${{ parameters.GitLeaksReportFormat }}
     artifact: gitleaks-${{ parameters.SourceAdoRepo }}
     displayName: Publish ${{ parameters.GitLeaksReportArtifactName }}
     ${{ if and( eq(parameters.GitLeaksReportPublishOnlyOnFail, true), eq(parameters.GitLeaksFailureAsWarning, false) ) }}:

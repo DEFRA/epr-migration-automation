@@ -103,6 +103,7 @@ stages:
       HostedAgentPool: ${{ parameters.windowsHostedAgentPool }}
       GitLeaksReportArtifactName: GitLeaks-${{ parameters.SourceAdoRepo }}
       GitLeaksFailureAsWarning: ${{ parameters.GitLeaksFailureAsWarning }}
+      GitLeaksReportFormat: json
       GitLeaksSuppressHistoryCheck: true
       GitLeaksReportPublishOnlyOnFail: true
       SourceAdoRepo: ${{ parameters.SourceAdoRepo }}
