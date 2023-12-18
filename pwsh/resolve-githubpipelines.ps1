@@ -80,6 +80,7 @@ try {
     $_.Id = 0
     $_.Name = $_.Name + ' (GitHub)'
     $_.RepoType = "GitHub"
+    $_.RepoName = $TargetGitHubRepo
     $_.RepoUrl = "https://github.com/$GitHubOrganizationName/$($TargetGitHubRepo).git"
     $_.ServiceConnection = $GitHubServiceConnection
     return $_
