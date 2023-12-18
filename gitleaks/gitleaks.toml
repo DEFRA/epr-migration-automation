@@ -9,14 +9,14 @@ useDefault = true
 [[rules]]
 id = "azure-messaging-connection-string-shared-access-key"
 description = "Azure Messaging Connection String Containing Shared Access Key"
-regex = '''(?i)SharedAccessKey=[^;"\s]+'''
+regex = '''(?i)SharedAccessKey\s*=\s*[^;"\s]+'''
 secretGroup = 0
 keywords = []
 
 [[rules]]
 id = "azure-database-connection-string-account-key"
 description = "Azure Messaging Connection String Containing Account Key"
-regex = '''(?i)AccountKey=[^;"\s]+'''
+regex = '''(?i)AccountKey\s*=\s*[^;"\s]+'''
 secretGroup = 0
 keywords = []
 
@@ -326,11 +326,11 @@ path = '''\.(?:ps1|psm1|js|json|coffee|xml|js|md|html|py|php|java|ipynb|rb)$|hub
 [allowlist]
 description = "Allowlisted files"
 files = ['''(.*?)(png|jpg|gif|tif|tiff|doc|docx|pdf|bin|xls|pyc|zip)$''',
-'''buildsearchers.xml''',
-'''^\.?gitleaks.toml$''',
-'''^\.?UDMSecretChecks.toml$''',
-'''^\.?UDMSecretChecksv8.toml$''',
-'''^\.?GitleaksUdmCombo.toml$''']
+    '''buildsearchers.xml''',
+    '''^\.?gitleaks.toml$''',
+    '''^\.?UDMSecretChecks.toml$''',
+    '''^\.?UDMSecretChecksv8.toml$''',
+    '''^\.?GitleaksUdmCombo.toml$''']
 commits = []
 paths = []
 repos = []
