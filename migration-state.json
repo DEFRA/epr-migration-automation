@@ -12,188 +12,188 @@
     {
       "SourceAdoRepo": "epr-app-config-settings",
       "TargetGitHubRepo": "epr-app-config-settings",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Ready"
     },
     {
       "SourceAdoRepo": "backend-account-microservice",
       "TargetGitHubRepo": "epr-backend-account-microservice",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr_common",
       "TargetGitHubRepo": "epr-common",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr-common-data-api",
       "TargetGitHubRepo": "epr-common-data-api",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr-data",
       "TargetGitHubRepo": "epr-data",
       "Action": "synchronize",
-      "Memo": "Pending - contributors need licences first"
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr-data-pbix-files",
       "TargetGitHubRepo": "epr-data-pbix-files",
       "Action": "synchronize",
-      "Memo": "Pending - contributors need licences first"
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr-data-sqldb",
       "TargetGitHubRepo": "epr-data-sqldb",
       "Action": "synchronize",
-      "Memo": "Pending - contributors need licences first"
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr-document-schema-job-runner-function-app",
       "TargetGitHubRepo": "epr-document-schema-job-runner-function-app",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr-event-dispatcher-function-app",
       "TargetGitHubRepo": "epr-event-dispatcher-function-app",
       "Action": "synchronize",
-      "Memo": "Preparing"
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "facade-account-microservice",
       "TargetGitHubRepo": "epr-facade-account-microservice",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "frontend-accountcreation-microservice",
       "TargetGitHubRepo": "epr-frontend-accountcreation-microservice",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "frontend-accountmanagement-microservice",
       "TargetGitHubRepo": "epr-frontend-accountmanagement-microservice",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr-logging-api",
       "TargetGitHubRepo": "epr-logging-api",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr-migration-automation",
       "TargetGitHubRepo": "epr-migration-automation",
       "Action": "synchronize",
-      "Memo": "Not ready to migrate yet"
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr-migration-test1",
       "TargetGitHubRepo": "epr-migration-test1",
       "Action": "ignore",
-      "Memo": "In use for R&D - do not sync or migrate"
+      "Memo": "ignore"
     },
     {
       "SourceAdoRepo": "epr-migration-test2",
       "TargetGitHubRepo": "epr-migration-test2",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr-obligationchecker-frontend",
       "TargetGitHubRepo": "epr-obligationchecker-frontend",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr_packaging_frontend",
       "TargetGitHubRepo": "epr-packaging-frontend",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr_pom_api_submission_status",
       "TargetGitHubRepo": "epr-pom-api-submission-status",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr_pom_api_web",
       "TargetGitHubRepo": "epr-pom-api-web",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr_pom_func_producer_validation",
       "TargetGitHubRepo": "epr-pom-func-producer-validation",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "pom-testdata-generator",
       "TargetGitHubRepo": "epr-pom-testdata-generator",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr-registration-validation-function-app",
       "TargetGitHubRepo": "epr-registration-validation-function-app",
       "Action": "synchronize",
-      "Memo": "Preparing"
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr-regulator-enrolment-frontend",
       "TargetGitHubRepo": "epr-regulator-enrolment-frontend",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr_regulator_service",
       "TargetGitHubRepo": "epr-regulator-service",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr_regulator_service_facade",
       "TargetGitHubRepo": "epr-regulator-service-facade",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr-rpd-azure-ad-b2c-styling",
       "TargetGitHubRepo": "epr-rpd-azure-ad-b2c-styling",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr-rpd-performance-tests",
       "TargetGitHubRepo": "epr-rpd-performance-tests",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr_ui_wdio",
       "TargetGitHubRepo": "epr-ui-wdio",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr-web-shutter-screen-pages",
       "TargetGitHubRepo": "epr-web-shutter-screen-pages",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr-webapps-code-deploy-pipelines",
       "TargetGitHubRepo": "epr-webapps-code-deploy-pipelines",
-      "Action": "simulate",
-      "Memo": "Simulate"
+      "Action": "synchronize",
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr-webapps-code-deploy-templates",
