@@ -341,5 +341,6 @@ regexes = [
     '''(?i)DEV(RWD|EPL)INFKV(\d{4})''',
     '''(?i)(dev|tst|pre|prd)rwdweb(f|w)a(\d{4})''',
     '''(?i)SHARED_ACCESS_KEY''',
-    '''(?i)b77a5c561934e089'''
+    '''(?i)b77a5c561934e089''',
+    '''(?i)"?ClientId"?\s*[:=]\s*"?[\d\w]{8}-([\d\w]{4}-){3}[\d\w]{12}"?'''
 ]

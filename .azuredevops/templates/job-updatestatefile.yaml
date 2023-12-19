@@ -56,9 +56,15 @@ jobs:
     persistCredentials: true
 
   - pwsh: |
+      Write-Host "Build.SourceBranchName=$(Build.SourceBranchName)"
+      Write-Host "Build.SourceBranch=$(Build.SourceBranch)"
+      Write-Host "Build.Repository.LocalPath=$(Build.Repository.LocalPath)"
+      [string]$branch = "$(Build.SourceBranchName)".Substring(11)
+      Write-Host "branch=$branch"
+
       Push-Location -Path $(Build.Repository.LocalPath)
       git fetch
-      git checkout $(Build.SourceBranchName)
+      git checkout $branch
       git pull
       Pop-Location
     displayName: Connect repo
