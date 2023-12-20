@@ -137,11 +137,33 @@ parameters:
   displayName: Treat Gitleaks failure as partial success
   type: boolean
   default: false
+- name: GitHubRepoSettings
+  type: object
+  default:
+  - name: allow-update-branch
+    value: true
+  - name: default-branch
+    value: main
+  - name: delete-branch-on-merge
+    value: true
+  - name: enable-auto-merge
+    value: true
+  - name: enable-discussions
+    value: false
+  - name: enable-issues
+    value: true
+  - name: enable-merge-commit
+    value: false
+  - name: enable-projects
+    value: true
+  - name: enable-rebase-merge
+    value: false
+  - name: enable-squash-merge
+    value: true
+  - name: enable-wiki
+    value: true
 variables:
-- name: GitHubOrganizationName
-  value: defra
-- name: GitHubServiceConnection
-  value: defra
+- group: DefraGitHub
 - name: WindowsHostedAgentPool
   value: windows-latest
 - name: UbuntuHostedAgentPool
@@ -379,15 +401,17 @@ resources:
 extends:
   template: templates/pipeline-migration.yaml
   parameters:
-    AllPipelinesJsonArtifactName: ${{ variables.AllPipelinesJsonArtifactName }}
-    AdoTeamProject: $(System.TeamProject)
-    AdoOrganizationUrl: $(System.CollectionUri)
     AdoAccessToken: $(System.AccessToken)
+    AdoOrganizationUrl: $(System.CollectionUri)
+    AdoTeamProject: $(System.TeamProject)
+    AllPipelinesJsonArtifactName: ${{ variables.AllPipelinesJsonArtifactName }}
+    GitHubAccessToken: $(GitHubAccessToken)
+    GitHubOrganizationName: $(GitHubOrganizationName)
+    GitHubRepoSettings: ${{ parameters.GitHubRepoSettings }}
+    GitHubServiceConnection: $(GitHubServiceConnection)
     GitLeaksFailureAsWarning: ${{ parameters.GitLeaksFailureAsWarning }}
-    GitHubOrganizationName: ${{ variables.GitHubOrganizationName }}
-    UbuntuHostedAgentPool: ${{ variables.UbuntuHostedAgentPool }}
-    RenamePrefix: ${{ variables.RenamePrefix }}
-    WindowsHostedAgentPool: ${{ variables.WindowsHostedAgentPool }}
-    GitHubServiceConnection: ${{ variables.GitHubServiceConnection }}
     MigrationData: ${{ parameters.MigrationData }}
+    RenamePrefix: ${{ variables.RenamePrefix }}
+    UbuntuHostedAgentPool: ${{ variables.UbuntuHostedAgentPool }}
+    WindowsHostedAgentPool: ${{ variables.WindowsHostedAgentPool }}
 

@@ -1,0 +1,90 @@
+
+parameters:
+- name: JobName
+  type: string
+  default: ConfigureRepoJob
+- name: HostedAgentPool
+  displayName: Hosted agent pool to run on
+  type: string
+  default: ubuntu-latest
+- name: DependsOn 
+  type: object
+  default: ''
+- name: Repo
+  type: string
+- name: WhatIf
+  displayName: What If
+  type: boolean
+  default: true
+- name: GitHubAccessToken
+  type: string
+- name: Settings
+  type: object
+
+jobs:
+- job: ${{ parameters.JobName }}
+  displayName: Configure GitHub repo ${{ parameters.Repo }}
+  dependsOn: ${{ parameters.DependsOn }}
+  pool: 
+    vmImage: ${{ parameters.HostedAgentPool }}
+
+  variables:
+  - name: targetRepoSubDir
+    value: s/github-target
+  - name: targetRepoRoot
+    value: $(Pipeline.Workspace)/${{ variables.targetRepoSubDir }}
+  - ${{ if eq( parameters.WhatIf, true )}}:
+    - name: WhatIfForPwsh
+      value: '$true'
+  - ${{ else }}:
+    - name: WhatIfForPwsh
+      value: '$false'
+
+  steps: 
+  - checkout: github-${{ parameters.Repo }}
+    path: ${{ variables.targetRepoSubDir }}
+    clean: true
+    persistCredentials: true
+
+  - pwsh: |
+      Set-Variable -Name ErrorActionPreference -Value Continue -scope global -Whatif:$false
+      Set-Variable -Name VerbosePreference -Value Continue -Scope global -Whatif:$false
+
+      if ((Test-Path -Path ENV:SYSTEM_DEBUG) -and ($ENV:SYSTEM_DEBUG -eq "true")){
+        Set-Variable -Name DebugPreference -Value Continue -Scope global -Whatif:$false
+        Set-Variable -Name InformationPreference -Value Continue -Scope global -Whatif:$false
+        dir ENV: | ForEach-Object -Process { Write-Debug "ENV:$($_.name)=$($_.value)" }
+      }
+
+      [string]$settingsJson = '${{ convertToJson(parameters.Settings) }}'
+      [string]$targetRepoRoot = '${{ variables.targetRepoRoot }}'
+      Write-Debug "targetRepoRoot=$targetRepoRoot"
+      Write-Debug "settingsJson=$settingsJson"
+
+      Push-Location $targetRepoRoot
+
+      [System.Text.StringBuilder]$builder = [System.Text.StringBuilder]::new("gh repo edit ")
+
+      $settingsModel = $settingsJson | ConvertFrom-Json -Depth 99
+      foreach($entry in $settingsModel) {
+        [string]$newParam = " --$($entry.name)=$($entry.value) "
+        Write-Debug "newParam=$newParam"
+        [void]$builder.Append($newParam)
+      }
+
+      [string]$command = $builder.ToString()
+      Write-Host $command
+      if (${{ variables.WhatIfForPwsh }}) {
+        Write-Host "WhatIf:$command"
+      }
+      else {
+        Invoke-Expression -Command $command
+        if ($LASTEXITCODE -ne 0) {
+          throw "gh repo edit returned non-zero exit code $LASTEXITCODE"
+        }
+      }
+
+      Pop-Location
+    displayName: 'Configure Repo ${{ parameters.Repo }}'
+    env:
+      GH_TOKEN: ${{ parameters.GitHubAccessToken }}

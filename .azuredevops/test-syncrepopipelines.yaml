@@ -17,6 +17,7 @@ parameters:
   default: true
 
 variables:
+- group: DefraGitHub
 - name: HostedAgentPool 
   value: ubuntu-latest
 - name: AdoOrganizationUrl
@@ -27,10 +28,6 @@ variables:
   value: '$(System.AccessToken)'
 - name: AllPipelinesJsonArtifactName
   value: AllPipelinesJson
-- name: GitHubOrganizationName
-  value: defra
-- name: GitHubServiceConnection
-  value: defra
 
 resources: 
   repositories:
@@ -71,8 +68,8 @@ stages:
       AdoTeamProject: ${{ variables.AdoTeamProject }}
       AdoAccessToken: ${{ variables.AdoAccessToken }}
       PipelinesJsonArtifactName: ${{ variables.AllPipelinesJsonArtifactName }}
-      GitHubOrganizationName: ${{ variables.GitHubOrganizationName }}
-      GitHubServiceConnection: ${{ variables.GitHubServiceConnection }}
+      GitHubOrganizationName: $(GitHubOrganizationName)
+      GitHubServiceConnection: $(GitHubServiceConnection)
       SourceAdoRepo: ${{ parameters.SourceAdoRepo }}
       TargetGitHubRepo: ${{ parameters.TargetGitHubRepo }}
       PipelineSecretsArtifactName: ${{ parameters.PipelineSecretsArtifactName }}

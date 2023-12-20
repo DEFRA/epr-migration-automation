@@ -25,6 +25,10 @@ parameters:
   displayName: Service Connection to GitHub
   type: string
 
+- name: GitHubAccessToken
+  displayName: Access Token for GitHub extended permissions
+  type: string
+
 - name: Trunk
   displayName: Trunk name
   type: string
@@ -53,6 +57,9 @@ parameters:
   displayName: Treat GitLeaks Failure as Warning
   type: boolean
   default: false
+
+- name: GitHubRepoSettings
+  type: object
 
 - name: AdoOrganizationUrl
   type: string
@@ -121,6 +128,8 @@ stages:
         RenamePrefix: ${{ parameters.RenamePrefix }}
         GitHubOrganizationName: ${{ parameters.GitHubOrganizationName }}
         GitHubServiceConnection: ${{ parameters.GitHubServiceConnection }}
+        GitHubAccessToken: ${{ parameters.GitHubAccessToken }}
+        GitHubRepoSettings: ${{ parameters.GitHubRepoSettings }}
         AdoOrganizationUrl: ${{ parameters.AdoOrganizationUrl }}
         AdoTeamProject: ${{ parameters.AdoTeamProject }}
         AdoAccessToken: ${{ parameters.AdoAccessToken }}

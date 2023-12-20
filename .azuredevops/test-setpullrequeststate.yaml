@@ -4,6 +4,8 @@ pr: none
 parameters:
 - name: Repo
   type: string
+  values:
+  - epr-migration-test2
   default: epr-migration-test2
 - name: State
   type: string

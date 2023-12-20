@@ -14,7 +14,7 @@ parameters:
   - repo: 
       SourceAdoRepo: epr-migration-test2
       TargetGitHubRepo: epr-migration-test2
-      Action: migrate
+      Action: synchronize
       Memo: Test bed
   - repo: 
       SourceAdoRepo: epr-migration-automation
@@ -26,16 +26,6 @@ parameters:
   displayName: Pefix to use when renaming repos
   type: string
   default: 'ZZZ-Archive-'
-
-- name: GitHubOrganizationName
-  displayName: Target GitHub organisation
-  type: string
-  default: 'defra'
-
-- name: GitHubServiceConnection
-  displayName: Service Connection to GitHub
-  type: string
-  default: 'defra'
 
 - name: Trunk
   displayName: Trunk name
@@ -78,6 +68,12 @@ parameters:
   type: string
   default: '$(System.AccessToken)'
 
+- name: GitHubRepoSettings
+  type: object
+  default:
+  - name: default-branch
+    value: main
+
 resources: 
   repositories:
   # epr-migration-test1
@@ -106,6 +102,9 @@ resources:
     name: defra/epr-migration-automation
     type: github
     endpoint: defra
+
+variables:
+  group: DefraGitHub
 
 stages:
 - stage: GetPipelineInfoStage
@@ -145,8 +144,9 @@ stages:
         SourceAdoRepo: ${{ item.repo.SourceAdoRepo }}
         TargetGitHubRepo: ${{ item.repo.TargetGitHubRepo }}
         RenamePrefix: ${{ parameters.RenamePrefix }}
-        GitHubOrganizationName: ${{ parameters.GitHubOrganizationName }}
-        GitHubServiceConnection: ${{ parameters.GitHubServiceConnection }}
+        GitHubOrganizationName: $(GitHubOrganizationName)
+        GitHubServiceConnection: $(GitHubServiceConnection)
+        GitHubAccessToken: $(GitHubAccessToken)
         AdoOrganizationUrl: ${{ parameters.AdoOrganizationUrl }}
         AdoTeamProject: ${{ parameters.AdoTeamProject }}
         AdoAccessToken: ${{ parameters.AdoAccessToken }}

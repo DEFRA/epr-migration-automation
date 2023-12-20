@@ -1,0 +1,65 @@
+trigger: none
+pr: none
+
+parameters:
+- name: Repo
+  type: string
+  values: 
+  - epr-migration-test2
+  - epr-anti-virus-function-app
+  default: epr-migration-test2
+- name: WhatIf
+  displayName: What If
+  type: boolean
+  default: true
+- name: Settings
+  type: object
+  default:
+  - name: allow-update-branch
+    value: true
+  - name: default-branch
+    value: main
+  - name: delete-branch-on-merge
+    value: true
+  - name: enable-auto-merge
+    value: true
+  - name: enable-discussions
+    value: false
+  - name: enable-merge-commit
+    value: false
+  - name: enable-rebase-merge
+    value: false
+  - name: enable-squash-merge
+    value: true
+
+
+variables:
+- group: DefraGitHub
+- name: HostedAgentPool 
+  value: ubuntu-latest
+
+resources: 
+  repositories:
+  - repository: github-epr-anti-virus-function-app
+    name: defra/epr-anti-virus-function-app
+    type: github
+    endpoint: defra
+  - repository: github-epr-migration-test2
+    name: defra/epr-migration-test2
+    type: github
+    endpoint: defra
+
+stages:
+- stage: ConfigureGitHubRepoStage  
+  displayName: Configure GitHub Repo
+  dependsOn: ''
+  jobs: 
+  - template: templates/job-configuregithubrepo.yaml
+    parameters:
+      JobName: ConfigureGitHubRepoJob
+      DependsOn: ''
+      HostedAgentPool: ${{ variables.HostedAgentPool }}
+      Repo: ${{ parameters.Repo }}
+      WhatIf: ${{ parameters.WhatIf }}
+      GitHubAccessToken: $(GitHubAccessToken)
+      Settings: ${{ parameters.Settings }}

@@ -59,7 +59,7 @@ jobs:
       Write-Host "Build.SourceBranchName=$(Build.SourceBranchName)"
       Write-Host "Build.SourceBranch=$(Build.SourceBranch)"
       Write-Host "Build.Repository.LocalPath=$(Build.Repository.LocalPath)"
-      [string]$branch = "$(Build.SourceBranchName)".Substring(11)
+      [string]$branch = "$(Build.SourceBranch)".Substring(11)
       Write-Host "branch=$branch"
 
       Push-Location -Path $(Build.Repository.LocalPath)

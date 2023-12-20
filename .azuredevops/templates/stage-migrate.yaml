@@ -33,6 +33,14 @@ parameters:
   displayName: Service Connection to GitHub
   type: string
 
+- name: GitHubAccessToken
+  displayName: Access Token to GitHub
+  type: string
+
+- name: GitHubRepoSettings
+  displayName: GetHub Repo Settings
+  type: object
+
 - name: Trunk
   displayName: Trunk name
   type: string
@@ -92,6 +100,16 @@ stages:
         State: 'locked'
         Branch: ''
         WhatIf: ${{ eq(parameters.Mode, 'simulate') }}
+
+  - template: job-configuregithubrepo.yaml
+    parameters:
+      JobName: ConfigureGitHubRepoJob${{ replace( parameters.TargetGitHubRepo, '-', '') }}
+      DependsOn: ''
+      HostedAgentPool: ${{ parameters.ubuntuHostedAgentPool }}
+      Repo: ${{ parameters.TargetGitHubRepo }}
+      WhatIf: ${{ eq(parameters.Mode, 'simulate') }}
+      GitHubAccessToken: ${{ parameters.GitHubAccessToken }}
+      Settings: ${{ parameters.GitHubRepoSettings }}
 
   - template: job-synccontent.yaml
     parameters:

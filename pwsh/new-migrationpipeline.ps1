@@ -182,7 +182,7 @@ function ConvertTo-Parameter {
 function ConvertTo-Variable {
   param(
     [Parameter(Mandatory,ValueFromPipeline)]
-    $InputObject
+    [hashtable]$InputObject
   )  
 
   begin {
@@ -193,12 +193,22 @@ function ConvertTo-Variable {
 
   process {
     Write-Debug "${functionName}:process:start"
-    Write-Debug "${functionName}:process:InputObject.name=$($InputObject.name)"
-    Write-Debug "${functionName}:process:InputObject.value=$($InputObject.value)"
+    [string]$inputType = $InputObject.GetType().Name
+    Write-Debug "${functionName}:process:inputType=$inputType"
 
     [System.Collections.Specialized.OrderedDictionary]$variable = @{}
-    $variable['name'] = $InputObject.name
-    $variable['value'] = $InputObject.value
+
+    if ($InputObject.ContainsKey('group') -or $InputObject.ContainsKey('template')) {
+      [string]$key = $InputObject.Keys[0]
+      Write-Debug "${functionName}:process:key=$key"
+      $variable[$key] = $InputObject[$key]
+    }
+    else {
+      Write-Debug "${functionName}:process:InputObject.name=$($InputObject.name)"
+      Write-Debug "${functionName}:process:InputObject.value=$($InputObject.value)"
+      $variable['name'] = $InputObject['name']
+      $variable['value'] = $InputObject['value']
+    }
 
     Write-Output $variable
   
@@ -211,6 +221,54 @@ function ConvertTo-Variable {
   }
 }
 
+
+function ConvertTo-Extends {
+  param(
+    [Parameter(Mandatory,ValueFromPipeline)]
+    [hashtable]$InputObject
+  )  
+
+  begin {
+    [string]$functionName = $MyInvocation.MyCommand
+    Write-Debug "${functionName}:begin:start"
+    Write-Debug "${functionName}:begin:end"
+  }
+
+  process {
+    Write-Debug "${functionName}:process:start"
+    [string]$inputType = $InputObject.GetType().Name
+    Write-Debug "${functionName}:process:inputType=$inputType"
+
+    [System.Collections.Specialized.OrderedDictionary]$extends = @{}
+    [System.Collections.Specialized.OrderedDictionary]$targetParameters = @{}
+
+    $extends.Add("template", $InputObject['template'])
+    $extends.Add("parameters", $targetParameters)
+
+    foreach($key in $InputObject.Keys) {
+      Write-Debug "${functionName}:process:key=$key"
+      if (-not $extends.Keys.Contains($key)) {
+        $extends.Add($key, $InputObject[$key])
+      }
+    }
+
+    [hashtable]$sourceParameters = $InputObject['parameters']
+
+    $sourceParameters.Keys | Sort-Object | ForEach-Object -Process {
+      Write-Debug "${functionName}:process:iterator=$_"
+      $targetParameters.Add($_, $sourceParameters[$_])
+    }
+
+    Write-Output $extends
+  
+    Write-Debug "${functionName}:process:end"
+  }
+
+  end {
+    Write-Debug "${functionName}:end:start"
+    Write-Debug "${functionName}:end:end"
+  }
+}
 
 try {
   if (@(Get-InstalledModule -Name powershell-yaml -ErrorAction Ignore).Length -eq 0) {
@@ -278,7 +336,7 @@ try {
 
   $model.resources.repositories = @($state.repos | ConvertTo-RepositoryEntry -GitHubServiceConnection $state.GitHubServiceConnection -GitHubOrganization $state.GitHubOrganization -TeamProject $state.TeamProject)
   $newModel['resources'] = $model.resources
-  $newModel['extends'] = $model.extends
+  $newModel['extends'] = $model.extends | ConvertTo-Extends
 
   Write-Debug "${functionName}:Outputting"
 
