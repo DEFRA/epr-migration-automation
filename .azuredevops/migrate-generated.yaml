@@ -90,6 +90,10 @@ parameters:
       TargetGitHubRepo: epr-pom-func-producer-validation
       Action: synchronize
   - repo:
+      SourceAdoRepo: epr_pom_func_submission_check_splitter
+      TargetGitHubRepo: epr-pom-func-submission-check-splitter
+      Action: synchronize
+  - repo:
       SourceAdoRepo: pom-testdata-generator
       TargetGitHubRepo: epr-pom-testdata-generator
       Action: synchronize
@@ -319,6 +323,13 @@ resources:
     type: git
   - repository: github-epr-pom-func-producer-validation
     name: defra/epr-pom-func-producer-validation
+    type: github
+    endpoint: defra
+  - repository: epr_pom_func_submission_check_splitter
+    name: RWD-CPR-EPR4P-ADO/epr_pom_func_submission_check_splitter
+    type: git
+  - repository: github-epr-pom-func-submission-check-splitter
+    name: defra/epr-pom-func-submission-check-splitter
     type: github
     endpoint: defra
   - repository: pom-testdata-generator

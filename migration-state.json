@@ -136,6 +136,12 @@
       "Memo": "Pending"
     },
     {
+      "SourceAdoRepo": "epr_pom_func_submission_check_splitter",
+      "TargetGitHubRepo": "epr-pom-func-submission-check-splitter",
+      "Action": "synchronize",
+      "Memo": "Pending"
+    },
+    {
       "SourceAdoRepo": "pom-testdata-generator",
       "TargetGitHubRepo": "epr-pom-testdata-generator",
       "Action": "synchronize",
