@@ -78,6 +78,58 @@ jobs:
   - checkout: self
     clean: true
 
+  - pwsh: |
+      [System.IO.DirectoryInfo]$repoRootDir = '${{ variables.sourceRepoRoot }}'
+      [string]$ignoreFilename = '.gitleaksignore'
+      Write-Host "Searching for $ignoreFilename under $($repoRootDir.FullName)"
+
+      [array]$gitleaksIgnoreFiles = @(dir $repoRootDir.FullName -Recurse | Where-Object -FilterScript { $_.Name -eq $ignoreFilename })
+
+      if ($gitleaksIgnoreFiles.Count -eq 0) {
+        Write-Host "Found no $ignoreFilename files"
+      } else {
+        if ($gitleaksIgnoreFiles.Count -eq 1) {
+          Write-Host "Found 1 $ignoreFilename file:"
+        } else {
+          Write-Warning "Found $($gitleaksIgnoreFiles.Count) $ignoreFilename files when at most 1 was expected."
+        }
+
+        $gitLeaksIgnoreFiles | ForEach-Object -Process { 
+          Write-Host $_.FullName 
+        }
+
+        $gitLeaksIgnoreFiles | ForEach-Object -Process { 
+          [array]$output = @()
+          [array]$lines = Get-Content -Path $_.FullName
+
+          Write-Host "Original contents of $($_.FullName):"
+          $lines | ForEach-Object -Process { Write-Host $_ }
+
+          Write-Host "New contents of $($_.FullName):"
+
+          foreach($line in $lines) {
+            [string]$trimmed = $line.Trim()
+            [string]$outputLine = ''
+            if ($trimmed.StartsWith('#')) {
+              $outputLine = $line
+            } elseif ([string]::IsNullOrWhitespace($trimmed)) {
+              $outputLine = $line
+            } else {
+              [array]$parts = $line.Split(':')
+              $parts[0] = Join-Path -Path $repoRootDir -ChildPath $parts[0]
+              $outputLine = $parts -Join ':'
+            }
+            Write-Host $outputLine
+            $output += $outputLine
+          }
+
+          $output | Set-Content -Path $_.FullName -Force
+
+          Write-Host "$($_.FullName) updated."
+        }
+      }
+    displayName: Update ignore files
+
   - task: Gitleaks@2
     displayName: Gitleaks Scan
     inputs:
