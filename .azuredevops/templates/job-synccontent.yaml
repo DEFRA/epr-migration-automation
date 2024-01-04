@@ -83,7 +83,7 @@ jobs:
       [string]$ignoreFilename = '.gitleaksignore'
       Write-Host "Searching for $ignoreFilename under $($repoRootDir.FullName)"
 
-      [array]$gitleaksIgnoreFiles = @(dir $repoRootDir.FullName -Recurse | Where-Object -FilterScript { $_.Name -eq $ignoreFilename })
+      [array]$gitleaksIgnoreFiles = @(dir $repoRootDir.FullName -Recurse -Force | Where-Object -FilterScript { $_.Name -eq $ignoreFilename })
 
       if ($gitleaksIgnoreFiles.Count -eq 0) {
         Write-Host "Found no $ignoreFilename files"
