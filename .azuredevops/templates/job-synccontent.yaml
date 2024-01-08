@@ -76,6 +76,7 @@ jobs:
     fetchDepth: ${{ variables.fetchDepth }}
 
   - checkout: self
+    path: s/local
     clean: true
 
   - pwsh: |
@@ -136,7 +137,7 @@ jobs:
       scanmode: ${{ variables.gitLeaksScanMode }}
       scanlocation: ${{ variables.sourceRepoRoot }}
       configtype: custom
-      configfile: $(Build.Repository.LocalPath)/$(Build.Repository.Name)/gitleaks/gitleaks.toml
+      configfile: $(Build.Repository.LocalPath)/gitleaks/gitleaks.toml
       reportname: ${{ parameters.SourceAdoRepo }}
       reportformat: ${{ parameters.GitLeaksReportFormat }}
       redact: false
@@ -151,6 +152,12 @@ jobs:
       condition: failed()
     ${{ else }}:
       condition: always()
+
+  - pwsh: |
+      Push-Location -Path ${{ variables.sourceRepoRoot }}
+      git reset --hard
+      Pop-Location
+    displayName: Undo gitleaks ignore change
 
   - checkout: github-${{ parameters.TargetGitHubRepo }}
     path: ${{ variables.targetRepoSubDir }}

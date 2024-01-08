@@ -59,13 +59,14 @@ jobs:
     clean: true
 
   - checkout: self
+    path: s/local
     clean: true
 
   - task: PowerShell@2
     displayName: 'Set Branches in ${{ parameters.Repo }} to ${{ parameters.State }}'
     inputs:
       targetType: filePath
-      filePath: $(Build.Repository.LocalPath)/$(Build.Repository.Name)/pwsh/set-repobranchstate.ps1
+      filePath: $(Build.Repository.LocalPath)/pwsh/set-repobranchstate.ps1
       pwsh: true
       arguments: >
         -OrganizationUri '${{ parameters.AdoOrganizationUrl }}'

@@ -86,7 +86,22 @@ try {
 
     [array]$pipelines = @($pipelineSummaries | Select-Object -ExpandProperty id `
                                              | Sort-Object -Unique `
-                                             | Get-AdoPipelineModel -OrganizationUri $OrganizationUri -Project $Project `
+                                             | ForEach-Object -ThrottleLimit $pipelineSummaries.Count -Parallel {
+        try {
+          Import-Module $using:moduleDir.FullName -Force
+          Set-Variable -Name ErrorActionPreference -Value Continue -scope global
+          Set-Variable -Name VerbosePreference -Value Continue -Scope global
+          if ($using:enableDebug) {
+            Set-Variable -Name DebugPreference -Value Continue -Scope global
+            Set-Variable -Name InformationPreference -Value Continue -Scope global
+          }
+          Get-AdoPipelineModel -Pipeline $_ -OrganizationUri $using:OrganizationUri -Project $using:Project 
+        } 
+        catch {
+          Write-Error $_.Exception.ToString()
+          throw $_.Exception
+        }
+      }
     )
 
     Write-Host "Obtained details for $($pipelines.Length) pipelines"

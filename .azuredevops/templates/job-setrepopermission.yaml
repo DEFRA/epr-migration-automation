@@ -59,13 +59,14 @@ jobs:
     clean: true
 
   - checkout: self
+    path: s/local
     clean: true
 
   - task: PowerShell@2
     displayName: 'Lock Repo ${{ parameters.Repo }}'
     inputs:
       targetType: filePath
-      filePath: $(Build.Repository.LocalPath)/$(Build.Repository.Name)/pwsh/set-repopermission.ps1
+      filePath: $(Build.Repository.LocalPath)/pwsh/set-repopermission.ps1
       pwsh: true
       arguments: >
         -OrganizationUri '${{ parameters.AdoOrganizationUrl }}'

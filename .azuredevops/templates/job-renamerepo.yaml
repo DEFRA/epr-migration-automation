@@ -50,6 +50,7 @@ jobs:
     #persistCredentials: true
 
   - checkout: self
+    path: s/local
     clean: true
 
   - pwsh: | 
@@ -61,12 +62,11 @@ jobs:
       dir $(Pipeline.Workspace) -Recurse | Sort-Object -Property FullName | ForEach-Object { Write-Host $_.FullName }
     displayName: diags
 
-
   - task: PowerShell@2
     displayName: 'Rename Repo ${{ parameters.OldRepoName }}'
     inputs:
       targetType: filePath
-      filePath: $(Build.Repository.LocalPath)/$(Build.Repository.Name)/pwsh/set-reponame.ps1
+      filePath: $(Build.Repository.LocalPath)/pwsh/set-reponame.ps1
       pwsh: true
       arguments: >
         -OrganizationUri '${{ parameters.AdoOrganizationUrl }}'

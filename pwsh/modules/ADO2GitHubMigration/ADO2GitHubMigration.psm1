@@ -317,11 +317,12 @@ function Get-AdoPipelineModel {
 
   begin {
     [string]$functionName = $MyInvocation.MyCommand
-    Write-Debug "${functionName}:begin:start"
-    Write-Debug "${functionName}:begin:OrganizationUri=$OrganizationUri"
-    Write-Debug "${functionName}:begin:Project=$Project"
-    Write-Debug "${functionName}:begin:AsJson=$AsJson"
-    Write-Debug "${functionName}:begin:Summary=$Summary"
+    [int]$threadId = [System.Threading.Thread]::CurrentThread.ManagedThreadId
+    Write-Debug "${functionName}:${threadId}:begin:start"
+    Write-Debug "${functionName}:${threadId}:begin:OrganizationUri=$OrganizationUri"
+    Write-Debug "${functionName}:${threadId}:begin:Project=$Project"
+    Write-Debug "${functionName}:${threadId}:begin:AsJson=$AsJson"
+    Write-Debug "${functionName}:${threadId}:begin:Summary=$Summary"
 
     [bool]$getAll = $true
 
@@ -337,18 +338,18 @@ function Get-AdoPipelineModel {
       throw [System.ArgumentNullException]::new("Either pass values for both OrganizationUri and Project or neither of them.", "OrganizationUri")
     }
     else {
-      Write-Debug "${functionName}:Not setting default organization and project."
+      Write-Debug "${functionName}:${threadId}:begin:Not setting default organization and project."
     }
     
-    Write-Debug "${functionName}:begin:end"
+    Write-Debug "${functionName}:${threadId}:begin:end"
   }
 
   process {
-    Write-Debug "${functionName}:process:start"
-    Write-Debug "${functionName}:process:Pipeline=$Pipeline"
+    Write-Debug "${functionName}:${threadId}:process:start"
+    Write-Debug "${functionName}:${threadId}:process:Pipeline=$Pipeline"
 
     if ([string]::IsNullOrWhiteSpace($Pipeline)) {
-      Write-Debug "${functionName}:process:No pipeline(s) specified - will fetch all."
+      Write-Debug "${functionName}:${threadId}:process:No pipeline(s) specified - will fetch all."
       $getAll = $true
     }
     else {
@@ -358,11 +359,11 @@ function Get-AdoPipelineModel {
 
       [int]$id = 0
       if ([int]::TryParse($Pipeline, [ref]$id)) {
-        Write-Debug "${functionName}:process:provided identifier is numeric - assuming id"
+        Write-Debug "${functionName}:${threadId}:process:provided identifier is numeric - assuming id"
         [void]$commandBuilder.Append("--id $pipeline ")
       } 
       else {
-        Write-Debug "${functionName}:process:provided identifier is not numeric - assuming name"
+        Write-Debug "${functionName}:${threadId}:process:provided identifier is not numeric - assuming name"
         [void]$commandBuilder.Append("--name '$pipeline' ")
       }
 
@@ -371,27 +372,27 @@ function Get-AdoPipelineModel {
       [string]$pipelinesJson = Invoke-CommandLine -Command $command -SuppressOutputDebug
 
       if ($AsJson) {
-        Write-Debug "${functionName}:process:return json string"
+        Write-Debug "${functionName}:${threadId}:process:return json string"
         Write-Output $pipelinesJson
       }
       else {
-        Write-Debug "${functionName}:process:return objects"
+        Write-Debug "${functionName}:${threadId}:process:return objects"
         $pipelinesJson | ConvertFrom-Json -Depth $MAX_JSON_DEPTH | Write-Output
       }
     }
 
-    Write-Debug "${functionName}:process:end"
+    Write-Debug "${functionName}:${threadId}:process:end"
   }
 
   end {
-    Write-Debug "${functionName}:end:start"
+    Write-Debug "${functionName}:${threadId}:end:start"
 
     if ($getAll) {
       Write-Verbose "Listing all pipelines"
       [string]$command = "az pipelines list $specificOrgAndProjectPart"
       [string]$allPipelinesJson = Invoke-CommandLine -Command $command -SuppressOutputDebug
 
-      Write-Debug "${functionName}:end:allPipelinesJson=$allPipelinesJson"
+      Write-Debug "${functionName}:${threadId}:end:allPipelinesJson=$allPipelinesJson"
       [array]$pipelineSummaries = @($allPipelinesJson | ConvertFrom-Json -Depth $MAX_JSON_DEPTH)
 
       if ($Summary) {
@@ -399,10 +400,10 @@ function Get-AdoPipelineModel {
         Write-Output $pipelineSummaries
       }
       else {
-        Write-Verbose "Fetching details for $($pipelineSummaries.Length) pipelines. "
+        Write-Verbose "Fetching information for $($pipelineSummaries.Length) pipelines. "
         [array]$pipelineDetail = @($pipelineSummaries | Select-Object -ExpandProperty id `
                                                       | Sort-Object -Unique `
-                                                      | Get-AdoPipelineModel -OrganizationUri $OrganizationUri -Project $Project -AsJson:$AsJson
+                                                      | Get-AdoPipelineModel -OrganizationUri $OrganizationUri -Project $Project -AsJson:$AsJson 
         )
         
         if ($AsJson) {
@@ -423,10 +424,10 @@ function Get-AdoPipelineModel {
       Write-Verbose "Information for $($pipelineSummaries.Length) pipelines obtained."
     }
     else {
-      Write-Debug "${functionName}:end:Specific pipeline(s) named - not fetching all"
+      Write-Debug "${functionName}:${threadId}:end:Specific pipeline(s) named - not fetching all"
     }
 
-    Write-Debug "${functionName}:end:end"
+    Write-Debug "${functionName}:${threadId}:end:end"
   }
 }
 
@@ -1023,16 +1024,17 @@ function Invoke-CommandLine {
   )
 
   [string]$functionName = $MyInvocation.MyCommand
-  Write-Debug "${functionName}:start"
-  Write-Debug "${functionName}:IsSensitive=$IsSensitive"
-  Write-Debug "${functionName}:IgnoreErrorCode=$IgnoreErrorCode"
-  Write-Debug "${functionName}:ReturnExitCode=$ReturnExitCode"
+  [int]$threadId = [System.Threading.Thread]::CurrentThread.ManagedThreadId
+  Write-Debug "${functionName}:${threadId}:start"
+  Write-Debug "${functionName}:${threadId}:IsSensitive=$IsSensitive"
+  Write-Debug "${functionName}:${threadId}:IgnoreErrorCode=$IgnoreErrorCode"
+  Write-Debug "${functionName}:${threadId}:ReturnExitCode=$ReturnExitCode"
 
   if ($IsSensitive) {
-      Write-Debug "${functionName}:Command=<hidden>"
+      Write-Debug "${functionName}:${threadId}:Command=<hidden>"
   } 
   else {
-      Write-Debug "${functionName}:Command=$Command"
+      Write-Debug "${functionName}:${threadId}:Command=$Command"
   }
 
   [string]$errorMessage = ""
@@ -1044,27 +1046,27 @@ function Invoke-CommandLine {
   [int]$errCode = $LASTEXITCODE
 
   if (-not $SuppressOutputDebug) {
-    Write-Debug "${functionName}:output=$output"
+    Write-Debug "${functionName}:${threadId}:output=$output"
   }
-  Write-Debug "${functionName}:errCode=$errCode"
+  Write-Debug "${functionName}:${threadId}:errCode=$errCode"
 
   if (-not [string]::IsNullOrWhiteSpace($outputMessage)) { 
-      Write-Debug "${functionName}:outputMessage=$outputMessage"
+      Write-Debug "${functionName}:${threadId}:outputMessage=$outputMessage"
       Write-Verbose $outputMessage 
   }
 
   if (-not [string]::IsNullOrWhiteSpace($informationMessage)) { 
-      Write-Debug "${functionName}:informationMessage=$informationMessage"
+      Write-Debug "${functionName}:${threadId}:informationMessage=$informationMessage"
       Write-Verbose $informationMessage 
   }
 
   if (-not [string]::IsNullOrWhiteSpace($warningMessage)) {
-      Write-Debug "${functionName}:warningMessage=$warningMessage"
+      Write-Debug "${functionName}:${threadId}:warningMessage=$warningMessage"
       Write-Warning $warningMessage 
   }
 
   if (-not [string]::IsNullOrWhiteSpace($errorMessage)) {
-      Write-Debug "${functionName}:errorMessage=$errorMessage"
+      Write-Debug "${functionName}:${threadId}:errorMessage=$errorMessage"
       Write-Verbose $errorMessage
       Write-Error $errorMessage
       throw "$errorMessage"
@@ -1080,7 +1082,7 @@ function Invoke-CommandLine {
   else {
       Write-Output $output
   }
-  Write-Debug "${functionName}:end"
+  Write-Debug "${functionName}:${threadId}:end"
 }
 
 
