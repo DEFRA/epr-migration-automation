@@ -55,18 +55,26 @@ jobs:
       value: '$false'
 
   steps: 
+  - checkout: ${{ parameters.SourceAdoRepo }}
+    path: ${{ variables.sourceRepoSubDir }}
+    clean: true
+    persistCredentials: true
+    fetchDepth: ${{ variables.fetchDepth }}
+
   - checkout: self
+    path: s/local
     clean: true
 
   - download: current
     artifact: ${{ parameters.PipelinesJsonArtifactName }}
+    displayName: Acquire all-pipelines artifact
 
   - task: PowerShell@2
     displayName: 'Resolve required pipelines - ${{ parameters.SourceAdoRepo }}'
     name: ResolvePipelinesStep
     inputs:
       targetType: filePath
-      filePath: $(Build.SourcesDirectory)/pwsh/resolve-githubpipelines.ps1
+      filePath: $(Build.Repository.LocalPath)/pwsh/resolve-githubpipelines.ps1
       pwsh: true
       arguments: >
         -OrganizationUri '${{ parameters.AdoOrganizationUrl }}'
@@ -85,7 +93,7 @@ jobs:
     name: ConfigurePipelines
     inputs:
       targetType: filePath
-      filePath: $(Build.SourcesDirectory)/pwsh/set-pipelines.ps1
+      filePath: $(Build.Repository.LocalPath)/pwsh/set-pipelines.ps1
       pwsh: true
       arguments: >
         -OrganizationUri '${{ parameters.AdoOrganizationUrl }}'

@@ -63,14 +63,20 @@ try {
     Write-Host "Could not find input file $($inputFile.FullName)"
     throw [System.IO.FileNotFoundException]::new($inputFile.FullName)
   }
-  
+
+  Write-Host "Getting repo information for repo $SourceAdoRepo"
+
+  $repoInfo = Get-AdoRepo -RepoName $SourceAdoRepo
+  Write-Debug "${functionName}:repoInfo.id=$($repoInfo.id)"
+  Write-Debug "${functionName}:repoInfo.name=$($repoInfo.name)"
+
   Write-Host "Importing pipeline info from $($inputFile.FullName)"
 
   [array]$pipelines = @(Get-Content -Path $inputFile.FullName | ConvertFrom-Json -Depth 99)
 
   Write-Host "Loaded details of $($pipelines.Count) pipelines"
 
-  [array]$repoPipelines = @($pipelines | Where-Object -FilterScript { $_.repository -ne $null -and $_.repository.name -eq $SourceAdoRepo })
+  [array]$repoPipelines = @($pipelines | Where-Object -FilterScript { $_.repository -ne $null -and $_.repository.id -eq $repoInfo.id })
 
   Write-Host "There are $($repoPipelines.Count) pipelines associated with $SourceAdoRepo"
 

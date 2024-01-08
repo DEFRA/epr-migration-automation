@@ -705,6 +705,7 @@ function Get-AdoRepo {
     [array]$matchedRepos = @()
 
     foreach($repo in $repos) {
+      Write-Debug "${functionName}:begin:repo.name=$($repo.name)"
       $repoDictionary.Add($repo.name, $repo)
     }
 
