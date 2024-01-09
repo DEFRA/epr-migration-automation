@@ -142,12 +142,6 @@
       "Memo": "Pending"
     },
     {
-      "SourceAdoRepo": "pom-testdata-generator",
-      "TargetGitHubRepo": "epr-pom-testdata-generator",
-      "Action": "synchronize",
-      "Memo": "Pending"
-    },
-    {
       "SourceAdoRepo": "epr-registration-validation-function-app",
       "TargetGitHubRepo": "epr-registration-validation-function-app",
       "Action": "synchronize",

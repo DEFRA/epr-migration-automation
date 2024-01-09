@@ -117,8 +117,15 @@ jobs:
               $outputLine = $line
             } else {
               [array]$parts = $line.Split(':')
-              $parts[0] = Join-Path -Path $repoRootDir -ChildPath $parts[0]
-              $outputLine = $parts -Join ':'
+              # if it has 3 parts, it's a nogit entry with a relative path
+              # if it has 4 parts, it's a full scan with a commit hash
+              if ($parts.Length -eq 3) {
+                $parts[0] = Join-Path -Path $repoRootDir -ChildPath $parts[0]
+                $outputLine = $parts -Join ':'
+              }
+              else {
+                $outputLine = $line
+              }
             }
             Write-Host $outputLine
             $output += $outputLine
