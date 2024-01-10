@@ -43,6 +43,8 @@ jobs:
     vmImage: ${{ parameters.HostedAgentPool }}
 
   variables: 
+  - name: sourceRepoSubDir
+    value: s/ado-source
   - name: AllPipelinesJsonFile
     value: $(Pipeline.Workspace)/${{ parameters.PipelinesJsonArtifactName }}/pipelines.json
   - name: PipelineSecretsReportFile
@@ -114,4 +116,5 @@ jobs:
     artifact: ${{ parameters.PipelineSecretsArtifactName }}
     displayName: Publish ${{ parameters.PipelineSecretsArtifactName }}
     condition: and(succeeded(), ne(variables['ConfigurePipelines.SecretsCount'],'0'))
+
     
