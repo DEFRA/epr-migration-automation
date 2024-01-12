@@ -12,8 +12,8 @@
     {
       "SourceAdoRepo": "epr-app-config-settings",
       "TargetGitHubRepo": "epr-app-config-settings",
-      "Action": "synchronize",
-      "Memo": "Ready"
+      "Action": "ignore",
+      "Memo": "Migrated"
     },
     {
       "SourceAdoRepo": "backend-account-microservice",
@@ -102,8 +102,8 @@
     {
       "SourceAdoRepo": "epr-migration-test2",
       "TargetGitHubRepo": "epr-migration-test2",
-      "Action": "synchronize",
-      "Memo": "Pending"
+      "Action": "ignore",
+      "Memo": "Migrated"
     },
     {
       "SourceAdoRepo": "epr-obligationchecker-frontend",
