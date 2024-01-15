@@ -113,12 +113,13 @@ jobs:
         git config --global user.email "buildservice@dev.azure.com"
         git config --global user.name "Build Service"
         git stage ${{ parameters.StateFile }}
+        git stage ${{ parameters.PipelineYamlFile }}
         if ($LASTEXITCODE -ne 0) {
           Write-Host "git stage returned error code $LASTEXITCODE"
           Write-Host "Assuming no changes to stage"
         }
         else {
-          git commit -m "Updated statefile"
+          git commit -m 'Updated statefile & PipelineYamlFile'
           if ($LASTEXITCODE -eq 0) {
             git push
             if ($LASTEXITCODE -ne 0) {
