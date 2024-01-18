@@ -152,7 +152,7 @@ stages:
       HostedAgentPool: ${{ parameters.UbuntuHostedAgentPool }}
       Repos:
       - ${{ each item in parameters.MigrationData }}:
-        - ${{ if ne(item.repo.action, 'synchronize') }}:
+        - ${{ if eq(item.repo.action, 'migrate') }}:
           - ${{ item.repo.SourceAdoRepo }}
       WhatIf: false
 
