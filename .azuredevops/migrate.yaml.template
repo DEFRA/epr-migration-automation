@@ -39,8 +39,6 @@ parameters:
 
 variables:
 - group: DefraGitHub
-- name: GitHubPipelineServiceConnection
-  value: Defra
 - name: WindowsHostedAgentPool
   value: windows-latest
 - name: UbuntuHostedAgentPool
@@ -62,7 +60,6 @@ extends:
     AllPipelinesJsonArtifactName: ${{ variables.AllPipelinesJsonArtifactName }}
     GitHubOrganizationName: $(GitHubOrganizationName)
     GitHubServiceConnection: $(GitHubServiceConnection)
-    GitHubPipelineServiceConnection: $(GitHubPipelineServiceConnection)
     GitHubAccessToken: $(GitHubAccessToken)
     GitHubRepoSettings: ${{ parameters.GitHubRepoSettings }}
     GitLeaksFailureAsWarning: ${{ parameters.GitLeaksFailureAsWarning }}

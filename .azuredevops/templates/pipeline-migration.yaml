@@ -25,10 +25,6 @@ parameters:
   displayName: Service Connection to GitHub
   type: string
 
-- name: GitHubPipelineServiceConnection
-  displayName: Service Connection used by new pipelines to connect to GitHub
-  type: string
-
 - name: GitHubAccessToken
   displayName: Access Token for GitHub extended permissions
   type: string
@@ -132,7 +128,6 @@ stages:
         RenamePrefix: ${{ parameters.RenamePrefix }}
         GitHubOrganizationName: ${{ parameters.GitHubOrganizationName }}
         GitHubServiceConnection: ${{ parameters.GitHubServiceConnection }}
-        GitHubPipelineServiceConnection: ${{ parameters.GitHubPipelineServiceConnection }}
         GitHubAccessToken: ${{ parameters.GitHubAccessToken }}
         GitHubRepoSettings: ${{ parameters.GitHubRepoSettings }}
         AdoOrganizationUrl: ${{ parameters.AdoOrganizationUrl }}

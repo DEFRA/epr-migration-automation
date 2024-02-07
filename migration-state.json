@@ -1,6 +1,6 @@
 {
   "gitHubOrganization": "defra",
-  "githubServiceConnection": "GitHubMigration",
+  "githubServiceConnection": "defra",
   "teamProject": "RWD-CPR-EPR4P-ADO",
   "repos": [
     {

@@ -160,8 +160,6 @@ parameters:
     value: true
 variables:
 - group: DefraGitHub
-- name: GitHubPipelineServiceConnection
-  value: Defra
 - name: WindowsHostedAgentPool
   value: windows-latest
 - name: UbuntuHostedAgentPool
@@ -178,217 +176,217 @@ resources:
   - repository: github-epr-anti-virus-function-app
     name: defra/epr-anti-virus-function-app
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: epr-app-config-settings
     name: RWD-CPR-EPR4P-ADO/epr-app-config-settings
     type: git
   - repository: github-epr-app-config-settings
     name: defra/epr-app-config-settings
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: backend-account-microservice
     name: RWD-CPR-EPR4P-ADO/backend-account-microservice
     type: git
   - repository: github-epr-backend-account-microservice
     name: defra/epr-backend-account-microservice
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: epr_common
     name: RWD-CPR-EPR4P-ADO/epr_common
     type: git
   - repository: github-epr-common
     name: defra/epr-common
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: epr-common-data-api
     name: RWD-CPR-EPR4P-ADO/epr-common-data-api
     type: git
   - repository: github-epr-common-data-api
     name: defra/epr-common-data-api
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: epr-data
     name: RWD-CPR-EPR4P-ADO/epr-data
     type: git
   - repository: github-epr-data
     name: defra/epr-data
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: epr-data-pbix-files
     name: RWD-CPR-EPR4P-ADO/epr-data-pbix-files
     type: git
   - repository: github-epr-data-pbix-files
     name: defra/epr-data-pbix-files
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: epr-data-sqldb
     name: RWD-CPR-EPR4P-ADO/epr-data-sqldb
     type: git
   - repository: github-epr-data-sqldb
     name: defra/epr-data-sqldb
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: epr-document-schema-job-runner-function-app
     name: RWD-CPR-EPR4P-ADO/epr-document-schema-job-runner-function-app
     type: git
   - repository: github-epr-document-schema-job-runner-function-app
     name: defra/epr-document-schema-job-runner-function-app
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: epr-event-dispatcher-function-app
     name: RWD-CPR-EPR4P-ADO/epr-event-dispatcher-function-app
     type: git
   - repository: github-epr-event-dispatcher-function-app
     name: defra/epr-event-dispatcher-function-app
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: facade-account-microservice
     name: RWD-CPR-EPR4P-ADO/facade-account-microservice
     type: git
   - repository: github-epr-facade-account-microservice
     name: defra/epr-facade-account-microservice
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: frontend-accountcreation-microservice
     name: RWD-CPR-EPR4P-ADO/frontend-accountcreation-microservice
     type: git
   - repository: github-epr-frontend-accountcreation-microservice
     name: defra/epr-frontend-accountcreation-microservice
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: frontend-accountmanagement-microservice
     name: RWD-CPR-EPR4P-ADO/frontend-accountmanagement-microservice
     type: git
   - repository: github-epr-frontend-accountmanagement-microservice
     name: defra/epr-frontend-accountmanagement-microservice
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: epr-logging-api
     name: RWD-CPR-EPR4P-ADO/epr-logging-api
     type: git
   - repository: github-epr-logging-api
     name: defra/epr-logging-api
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: epr-migration-automation
     name: RWD-CPR-EPR4P-ADO/epr-migration-automation
     type: git
   - repository: github-epr-migration-automation
     name: defra/epr-migration-automation
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: epr-obligationchecker-frontend
     name: RWD-CPR-EPR4P-ADO/epr-obligationchecker-frontend
     type: git
   - repository: github-epr-obligationchecker-frontend
     name: defra/epr-obligationchecker-frontend
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: epr_packaging_frontend
     name: RWD-CPR-EPR4P-ADO/epr_packaging_frontend
     type: git
   - repository: github-epr-packaging-frontend
     name: defra/epr-packaging-frontend
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: epr_pom_api_submission_status
     name: RWD-CPR-EPR4P-ADO/epr_pom_api_submission_status
     type: git
   - repository: github-epr-pom-api-submission-status
     name: defra/epr-pom-api-submission-status
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: epr_pom_api_web
     name: RWD-CPR-EPR4P-ADO/epr_pom_api_web
     type: git
   - repository: github-epr-pom-api-web
     name: defra/epr-pom-api-web
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: epr_pom_func_producer_validation
     name: RWD-CPR-EPR4P-ADO/epr_pom_func_producer_validation
     type: git
   - repository: github-epr-pom-func-producer-validation
     name: defra/epr-pom-func-producer-validation
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: epr_pom_func_submission_check_splitter
     name: RWD-CPR-EPR4P-ADO/epr_pom_func_submission_check_splitter
     type: git
   - repository: github-epr-pom-func-submission-check-splitter
     name: defra/epr-pom-func-submission-check-splitter
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: epr-registration-validation-function-app
     name: RWD-CPR-EPR4P-ADO/epr-registration-validation-function-app
     type: git
   - repository: github-epr-registration-validation-function-app
     name: defra/epr-registration-validation-function-app
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: epr-regulator-enrolment-frontend
     name: RWD-CPR-EPR4P-ADO/epr-regulator-enrolment-frontend
     type: git
   - repository: github-epr-regulator-enrolment-frontend
     name: defra/epr-regulator-enrolment-frontend
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: epr_regulator_service
     name: RWD-CPR-EPR4P-ADO/epr_regulator_service
     type: git
   - repository: github-epr-regulator-service
     name: defra/epr-regulator-service
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: epr_regulator_service_facade
     name: RWD-CPR-EPR4P-ADO/epr_regulator_service_facade
     type: git
   - repository: github-epr-regulator-service-facade
     name: defra/epr-regulator-service-facade
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: epr-rpd-azure-ad-b2c-styling
     name: RWD-CPR-EPR4P-ADO/epr-rpd-azure-ad-b2c-styling
     type: git
   - repository: github-epr-rpd-azure-ad-b2c-styling
     name: defra/epr-rpd-azure-ad-b2c-styling
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: epr-rpd-performance-tests
     name: RWD-CPR-EPR4P-ADO/epr-rpd-performance-tests
     type: git
   - repository: github-epr-rpd-performance-tests
     name: defra/epr-rpd-performance-tests
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: epr_ui_wdio
     name: RWD-CPR-EPR4P-ADO/epr_ui_wdio
     type: git
   - repository: github-epr-ui-wdio
     name: defra/epr-ui-wdio
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: epr-web-shutter-screen-pages
     name: RWD-CPR-EPR4P-ADO/epr-web-shutter-screen-pages
     type: git
   - repository: github-epr-web-shutter-screen-pages
     name: defra/epr-web-shutter-screen-pages
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: epr-webapps-code-deploy-pipelines
     name: RWD-CPR-EPR4P-ADO/epr-webapps-code-deploy-pipelines
     type: git
   - repository: github-epr-webapps-code-deploy-pipelines
     name: defra/epr-webapps-code-deploy-pipelines
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
   - repository: epr-webapps-code-deploy-templates
     name: RWD-CPR-EPR4P-ADO/epr-webapps-code-deploy-templates
     type: git
   - repository: github-epr-webapps-code-deploy-templates
     name: defra/epr-webapps-code-deploy-templates
     type: github
-    endpoint: GitHubMigration
+    endpoint: defra
 extends:
   template: templates/pipeline-migration.yaml
   parameters:
@@ -398,7 +396,6 @@ extends:
     AllPipelinesJsonArtifactName: ${{ variables.AllPipelinesJsonArtifactName }}
     GitHubAccessToken: $(GitHubAccessToken)
     GitHubOrganizationName: $(GitHubOrganizationName)
-    GitHubPipelineServiceConnection: $(GitHubPipelineServiceConnection)
     GitHubRepoSettings: ${{ parameters.GitHubRepoSettings }}
     GitHubServiceConnection: $(GitHubServiceConnection)
     GitLeaksFailureAsWarning: ${{ parameters.GitLeaksFailureAsWarning }}
