@@ -43,6 +43,7 @@ Settings -> Repositories -> Security
 
 For "Project Collection Build Service (org name)", allow the following
 
+- Bypass Policies when pushing
 - Contribute
 - Pull Request Contribute
 - Manage Permissions
