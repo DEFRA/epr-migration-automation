@@ -83,7 +83,7 @@ jobs:
         ${{ variables.EnvVarPrefix }}${{ upper(repo) }}: '[ { "SourceAdoRepo": "${{ repo }}", "Action": "${{ parameters.NewAction }}", "Memo": "${{ parameters.NewMemo }}" } ]'
 
   - publish: ${{ parameters.StateFile }}
-    artifact: ${{ parameters.StateFileArtifactName }}
+    artifact: ${{ parameters.StateFileArtifactName }}-$(System.JobAttempt)
     displayName: Publish ${{ parameters.StateFileArtifactName }}
 
   - task: PowerShell@2
@@ -99,7 +99,7 @@ jobs:
         -Force
 
   - publish: ${{ parameters.PipelineYamlFile }}
-    artifact: ${{ parameters.BuildPipelineArtifactName }}
+    artifact: ${{ parameters.BuildPipelineArtifactName }}-$(System.JobAttempt)
     displayName: Publish ${{ parameters.BuildPipelineArtifactName }}
 
   - ${{ if ne( parameters.WhatIf, false) }}:

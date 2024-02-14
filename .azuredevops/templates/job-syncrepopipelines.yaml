@@ -113,7 +113,7 @@ jobs:
     displayName: diags
 
   - publish: '${{ variables.PipelineSecretsReportFile }}'
-    artifact: ${{ parameters.PipelineSecretsArtifactName }}
+    artifact: ${{ parameters.PipelineSecretsArtifactName }}-$(System.JobAttempt)
     displayName: Publish ${{ parameters.PipelineSecretsArtifactName }}
     condition: and(succeeded(), ne(variables['ConfigurePipelines.SecretsCount'],'0'))
 

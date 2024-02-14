@@ -16,6 +16,9 @@ parameters:
   displayName: Suppress historic commit scanning
   type: boolean
   default: true
+- name: GitLeaksReportPublishOnlyOnFail
+  type: boolean
+  default: true 
 - name: WhatIf
   displayName: WhatIf
   type: boolean
@@ -24,6 +27,8 @@ parameters:
 variables:
 - name: HostedAgentPool 
   value: windows-latest
+- name: Repo
+  value: epr-migration-test2
 
 resources: 
   repositories:
@@ -49,6 +54,7 @@ stages:
       GitLeaksReportArtifactName: Gitleaks-${{ variables.Repo }}
       GitLeaksFailureAsWarning: ${{ parameters.GitLeaksFailureAsWarning }}
       GitLeaksSuppressHistoryCheck: ${{ parameters.GitLeaksSuppressHistoryCheck }}
+      GitLeaksReportPublishOnlyOnFail: ${{ parameters.GitLeaksReportPublishOnlyOnFail }}
       SourceAdoRepo: ${{ parameters.SourceAdoRepo }}
       TargetGitHubRepo: ${{ parameters.TargetGitHubRepo }}
       WhatIf: ${{ parameters.WhatIf }}

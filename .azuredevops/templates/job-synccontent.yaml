@@ -153,7 +153,7 @@ jobs:
       uploadresults: false
 
   - publish: $(Agent.TempDirectory)/${{ parameters.SourceAdoRepo }}.${{ parameters.GitLeaksReportFormat }}
-    artifact: gitleaks-${{ parameters.SourceAdoRepo }}
+    artifact: ${{ parameters.GitLeaksReportArtifactName }}-$(System.JobAttempt)
     displayName: Publish ${{ parameters.GitLeaksReportArtifactName }}
     ${{ if and( eq(parameters.GitLeaksReportPublishOnlyOnFail, true), eq(parameters.GitLeaksFailureAsWarning, false) ) }}:
       condition: failed()

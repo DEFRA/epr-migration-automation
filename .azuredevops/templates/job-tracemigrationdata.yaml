@@ -37,5 +37,5 @@ jobs:
     displayName: Create Migration Data File 
 
   - publish: ${{ variables.MigrationDataPath }}
-    artifact: ${{ parameters.MigrationDataJsonArtifactName }}
+    artifact: ${{ parameters.MigrationDataJsonArtifactName }}-$(System.JobAttempt)
     displayName: Publish ${{ parameters.MigrationDataJsonArtifactName }}
