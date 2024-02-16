@@ -11,6 +11,9 @@ parameters:
 - name: PipelineSecretsArtifactName
   type: string
   default: PipelineSecrets
+- name: GitHubPipelineServiceConnection
+  type: string
+  default: Defra
 - name: WhatIf
   displayName: WhatIf
   type: boolean
@@ -69,7 +72,7 @@ stages:
       AdoAccessToken: ${{ variables.AdoAccessToken }}
       PipelinesJsonArtifactName: ${{ variables.AllPipelinesJsonArtifactName }}
       GitHubOrganizationName: $(GitHubOrganizationName)
-      GitHubServiceConnection: $(GitHubServiceConnection)
+      GitHubServiceConnection: ${{ parameters.GitHubPipelineServiceConnection }}
       SourceAdoRepo: ${{ parameters.SourceAdoRepo }}
       TargetGitHubRepo: ${{ parameters.TargetGitHubRepo }}
       PipelineSecretsArtifactName: ${{ parameters.PipelineSecretsArtifactName }}

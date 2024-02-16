@@ -104,7 +104,9 @@ resources:
     endpoint: defra
 
 variables:
-  group: DefraGitHub
+- group: DefraGitHub
+- name: GitHubPipelineServiceConnection
+  value: Defra
 
 stages:
 - stage: GetPipelineInfoStage
@@ -146,6 +148,7 @@ stages:
         RenamePrefix: ${{ parameters.RenamePrefix }}
         GitHubOrganizationName: $(GitHubOrganizationName)
         GitHubServiceConnection: $(GitHubServiceConnection)
+        GitHubPipelineServiceConnection: $(GitHubPipelineServiceConnection)
         GitHubAccessToken: $(GitHubAccessToken)
         AdoOrganizationUrl: ${{ parameters.AdoOrganizationUrl }}
         AdoTeamProject: ${{ parameters.AdoTeamProject }}

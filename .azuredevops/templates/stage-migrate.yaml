@@ -29,6 +29,10 @@ parameters:
   displayName: Target GitHub organisation
   type: string
 
+- name: GitHubPipelineServiceConnection
+  displayName: Service Connection used by new pipelines to connect to GitHub
+  type: string
+
 - name: GitHubServiceConnection
   displayName: Service Connection to GitHub
   type: string
@@ -143,7 +147,7 @@ stages:
       PipelinesJsonArtifactName: ${{ parameters.AllPipelinesJsonArtifactName }}
       PipelineSecretsArtifactName: PipelineVarSecrets-${{ parameters.TargetGitHubRepo }}
       GitHubOrganizationName: ${{ parameters.GitHubOrganizationName }}
-      GitHubServiceConnection: ${{ parameters.GitHubServiceConnection }}
+      GitHubServiceConnection: ${{ parameters.GitHubPipelineServiceConnection }}
       SourceAdoRepo: ${{ parameters.SourceAdoRepo }}
       TargetGitHubRepo: ${{ parameters.TargetGitHubRepo }}
       WhatIf: ${{ eq(parameters.Mode, 'simulate') }}

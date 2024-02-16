@@ -316,10 +316,12 @@ try {
   [array]$parameters = $model.parameters | ConvertTo-Parameter
   $newModel['parameters'] = $parameters
   $migrationDataParam = $parameters | Where-Object -FilterScript { $_['name'] -eq "MigrationData" }
+  $githubRepoSettingsParam = $parameters | Where-Object -FilterScript { $_['name'] -eq "GitHubRepoSettings" }
 
   Write-Debug "${functionName}:Building migration data"
 
   $migrationDataParam['default'] = @($state.repos | ConvertTo-MigrationData)
+  $githubRepoSettingsParam['default'] = @($githubRepoSettingsParam['default'] | ConvertTo-Variable)
 
   Write-Debug "${functionName}:Building variables"
   $newModel['variables'] = $model.variables | ConvertTo-Variable
