@@ -136,28 +136,28 @@ parameters:
 - name: GitHubRepoSettings
   type: object
   default:
-  - value: true
-    name: allow-update-branch
-  - value: main
-    name: default-branch
-  - value: true
-    name: delete-branch-on-merge
-  - value: true
-    name: enable-auto-merge
-  - value: false
-    name: enable-discussions
-  - value: true
-    name: enable-issues
-  - value: false
-    name: enable-merge-commit
-  - value: true
-    name: enable-projects
-  - value: false
-    name: enable-rebase-merge
-  - value: true
-    name: enable-squash-merge
-  - value: true
-    name: enable-wiki
+  - name: allow-update-branch
+    value: true
+  - name: default-branch
+    value: main
+  - name: delete-branch-on-merge
+    value: true
+  - name: enable-auto-merge
+    value: true
+  - name: enable-discussions
+    value: false
+  - name: enable-issues
+    value: true
+  - name: enable-merge-commit
+    value: false
+  - name: enable-projects
+    value: true
+  - name: enable-rebase-merge
+    value: false
+  - name: enable-squash-merge
+    value: true
+  - name: enable-wiki
+    value: true
 variables:
 - group: DefraGitHub
 - name: GitHubPipelineServiceConnection
