@@ -66,6 +66,14 @@ parameters:
       TargetGitHubRepo: epr-migration-automation
       Action: synchronize
   - repo:
+      SourceAdoRepo: epr-migration-test1
+      TargetGitHubRepo: epr-migration-test1
+      Action: synchronize
+  - repo:
+      SourceAdoRepo: epr-migration-test2
+      TargetGitHubRepo: epr-migration-test2
+      Action: synchronize
+  - repo:
       SourceAdoRepo: epr-obligationchecker-frontend
       TargetGitHubRepo: epr-obligationchecker-frontend
       Action: synchronize
@@ -275,6 +283,20 @@ resources:
     type: git
   - repository: github-epr-migration-automation
     name: defra/epr-migration-automation
+    type: github
+    endpoint: GitHubMigration
+  - repository: epr-migration-test1
+    name: RWD-CPR-EPR4P-ADO/epr-migration-test1
+    type: git
+  - repository: github-epr-migration-test1
+    name: defra/epr-migration-test1
+    type: github
+    endpoint: GitHubMigration
+  - repository: epr-migration-test2
+    name: RWD-CPR-EPR4P-ADO/epr-migration-test2
+    type: git
+  - repository: github-epr-migration-test2
+    name: defra/epr-migration-test2
     type: github
     endpoint: GitHubMigration
   - repository: epr-obligationchecker-frontend

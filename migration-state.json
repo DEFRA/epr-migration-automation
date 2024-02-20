@@ -96,14 +96,14 @@
     {
       "SourceAdoRepo": "epr-migration-test1",
       "TargetGitHubRepo": "epr-migration-test1",
-      "Action": "ignore",
-      "Memo": "ignore"
+      "Action": "synchronize",
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr-migration-test2",
       "TargetGitHubRepo": "epr-migration-test2",
-      "Action": "ignore",
-      "Memo": "Migrated"
+      "Action": "synchronize",
+      "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr-obligationchecker-frontend",
