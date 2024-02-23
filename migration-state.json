@@ -48,8 +48,8 @@
     {
       "SourceAdoRepo": "epr-data-sqldb",
       "TargetGitHubRepo": "epr-data-sqldb",
-      "Action": "synchronize",
-      "Memo": "Pending"
+      "Action": "ignore",
+      "Memo": "Migrated"
     },
     {
       "SourceAdoRepo": "epr-document-schema-job-runner-function-app",

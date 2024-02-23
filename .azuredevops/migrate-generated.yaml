@@ -34,10 +34,6 @@ parameters:
       TargetGitHubRepo: epr-data-pbix-files
       Action: synchronize
   - repo:
-      SourceAdoRepo: epr-data-sqldb
-      TargetGitHubRepo: epr-data-sqldb
-      Action: synchronize
-  - repo:
       SourceAdoRepo: epr-document-schema-job-runner-function-app
       TargetGitHubRepo: epr-document-schema-job-runner-function-app
       Action: synchronize
@@ -227,13 +223,6 @@ resources:
     type: git
   - repository: github-epr-data-pbix-files
     name: defra/epr-data-pbix-files
-    type: github
-    endpoint: GitHubMigration
-  - repository: epr-data-sqldb
-    name: RWD-CPR-EPR4P-ADO/epr-data-sqldb
-    type: git
-  - repository: github-epr-data-sqldb
-    name: defra/epr-data-sqldb
     type: github
     endpoint: GitHubMigration
   - repository: epr-document-schema-job-runner-function-app
