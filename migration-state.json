@@ -6,8 +6,8 @@
     {
       "SourceAdoRepo": "epr-anti-virus-function-app",
       "TargetGitHubRepo": "epr-anti-virus-function-app",
-      "Action": "synchronize",
-      "Memo": "Ready"
+      "Action": "ignore",
+      "Memo": "Migrated"
     },
     {
       "SourceAdoRepo": "epr-app-config-settings",

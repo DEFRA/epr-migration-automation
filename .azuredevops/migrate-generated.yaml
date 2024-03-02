@@ -6,10 +6,6 @@ parameters:
   type: object
   default:
   - repo:
-      SourceAdoRepo: epr-anti-virus-function-app
-      TargetGitHubRepo: epr-anti-virus-function-app
-      Action: synchronize
-  - repo:
       SourceAdoRepo: epr-app-config-settings
       TargetGitHubRepo: epr-app-config-settings
       Action: synchronize
@@ -176,13 +172,6 @@ variables:
   value: ZZZ-Archive-
 resources:
   repositories:
-  - repository: epr-anti-virus-function-app
-    name: RWD-CPR-EPR4P-ADO/epr-anti-virus-function-app
-    type: git
-  - repository: github-epr-anti-virus-function-app
-    name: defra/epr-anti-virus-function-app
-    type: github
-    endpoint: GitHubMigration
   - repository: epr-app-config-settings
     name: RWD-CPR-EPR4P-ADO/epr-app-config-settings
     type: git
