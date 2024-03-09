@@ -42,8 +42,8 @@
     {
       "SourceAdoRepo": "epr-data-pbix-files",
       "TargetGitHubRepo": "epr-data-pbix-files",
-      "Action": "synchronize",
-      "Memo": "Pending"
+      "Action": "ignore",
+      "Memo": "Migrated"
     },
     {
       "SourceAdoRepo": "epr-data-sqldb",
