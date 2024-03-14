@@ -1952,7 +1952,7 @@ function Set-AdoPipelineVariable {
       Write-Debug "${functionName}:process:SuppressSecret switch is active.  Value will be null."
     }
     else {
-      [void]$builder.Append(" --value '`"$value`"' ")
+      [void]$builder.Append(" --value '$value' ")
     }
 
     [string]$command = $builder.ToString()
