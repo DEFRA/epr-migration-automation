@@ -168,8 +168,8 @@
     {
       "SourceAdoRepo": "epr-rpd-azure-ad-b2c-styling",
       "TargetGitHubRepo": "epr-rpd-azure-ad-b2c-styling",
-      "Action": "synchronize",
-      "Memo": "Pending"
+      "Action": "ignore",
+      "Memo": "Migrated"
     },
     {
       "SourceAdoRepo": "epr-rpd-performance-tests",

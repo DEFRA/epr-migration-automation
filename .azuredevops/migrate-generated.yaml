@@ -102,10 +102,6 @@ parameters:
       TargetGitHubRepo: epr-regulator-service-facade
       Action: synchronize
   - repo:
-      SourceAdoRepo: epr-rpd-azure-ad-b2c-styling
-      TargetGitHubRepo: epr-rpd-azure-ad-b2c-styling
-      Action: synchronize
-  - repo:
       SourceAdoRepo: epr-rpd-performance-tests
       TargetGitHubRepo: epr-rpd-performance-tests
       Action: synchronize
@@ -334,13 +330,6 @@ resources:
     type: git
   - repository: github-epr-regulator-service-facade
     name: defra/epr-regulator-service-facade
-    type: github
-    endpoint: GitHubMigration
-  - repository: epr-rpd-azure-ad-b2c-styling
-    name: RWD-CPR-EPR4P-ADO/epr-rpd-azure-ad-b2c-styling
-    type: git
-  - repository: github-epr-rpd-azure-ad-b2c-styling
-    name: defra/epr-rpd-azure-ad-b2c-styling
     type: github
     endpoint: GitHubMigration
   - repository: epr-rpd-performance-tests
