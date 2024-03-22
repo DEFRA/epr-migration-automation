@@ -186,8 +186,8 @@
     {
       "SourceAdoRepo": "epr-web-shutter-screen-pages",
       "TargetGitHubRepo": "epr-web-shutter-screen-pages",
-      "Action": "synchronize",
-      "Memo": "Pending"
+      "Action": "ignore",
+      "Memo": "Migrated"
     },
     {
       "SourceAdoRepo": "epr-webapps-code-deploy-pipelines",

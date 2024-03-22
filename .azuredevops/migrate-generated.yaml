@@ -110,10 +110,6 @@ parameters:
       TargetGitHubRepo: epr-ui-wdio
       Action: synchronize
   - repo:
-      SourceAdoRepo: epr-web-shutter-screen-pages
-      TargetGitHubRepo: epr-web-shutter-screen-pages
-      Action: synchronize
-  - repo:
       SourceAdoRepo: epr-webapps-code-deploy-pipelines
       TargetGitHubRepo: epr-webapps-code-deploy-pipelines
       Action: synchronize
@@ -344,13 +340,6 @@ resources:
     type: git
   - repository: github-epr-ui-wdio
     name: defra/epr-ui-wdio
-    type: github
-    endpoint: GitHubMigration
-  - repository: epr-web-shutter-screen-pages
-    name: RWD-CPR-EPR4P-ADO/epr-web-shutter-screen-pages
-    type: git
-  - repository: github-epr-web-shutter-screen-pages
-    name: defra/epr-web-shutter-screen-pages
     type: github
     endpoint: GitHubMigration
   - repository: epr-webapps-code-deploy-pipelines
