@@ -54,8 +54,8 @@
     {
       "SourceAdoRepo": "epr-document-schema-job-runner-function-app",
       "TargetGitHubRepo": "epr-document-schema-job-runner-function-app",
-      "Action": "synchronize",
-      "Memo": "Pending"
+      "Action": "ignore",
+      "Memo": "Migrated"
     },
     {
       "SourceAdoRepo": "epr-event-dispatcher-function-app",

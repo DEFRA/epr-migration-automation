@@ -26,10 +26,6 @@ parameters:
       TargetGitHubRepo: epr-data
       Action: synchronize
   - repo:
-      SourceAdoRepo: epr-document-schema-job-runner-function-app
-      TargetGitHubRepo: epr-document-schema-job-runner-function-app
-      Action: synchronize
-  - repo:
       SourceAdoRepo: epr-event-dispatcher-function-app
       TargetGitHubRepo: epr-event-dispatcher-function-app
       Action: synchronize
@@ -193,13 +189,6 @@ resources:
     type: git
   - repository: github-epr-data
     name: defra/epr-data
-    type: github
-    endpoint: GitHubMigration
-  - repository: epr-document-schema-job-runner-function-app
-    name: RWD-CPR-EPR4P-ADO/epr-document-schema-job-runner-function-app
-    type: git
-  - repository: github-epr-document-schema-job-runner-function-app
-    name: defra/epr-document-schema-job-runner-function-app
     type: github
     endpoint: GitHubMigration
   - repository: epr-event-dispatcher-function-app
