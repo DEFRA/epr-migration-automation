@@ -42,10 +42,6 @@ parameters:
       TargetGitHubRepo: epr-frontend-accountmanagement-microservice
       Action: synchronize
   - repo:
-      SourceAdoRepo: epr-logging-api
-      TargetGitHubRepo: epr-logging-api
-      Action: synchronize
-  - repo:
       SourceAdoRepo: epr-migration-automation
       TargetGitHubRepo: epr-migration-automation
       Action: synchronize
@@ -217,13 +213,6 @@ resources:
     type: git
   - repository: github-epr-frontend-accountmanagement-microservice
     name: defra/epr-frontend-accountmanagement-microservice
-    type: github
-    endpoint: GitHubMigration
-  - repository: epr-logging-api
-    name: RWD-CPR-EPR4P-ADO/epr-logging-api
-    type: git
-  - repository: github-epr-logging-api
-    name: defra/epr-logging-api
     type: github
     endpoint: GitHubMigration
   - repository: epr-migration-automation

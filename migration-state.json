@@ -84,8 +84,8 @@
     {
       "SourceAdoRepo": "epr-logging-api",
       "TargetGitHubRepo": "epr-logging-api",
-      "Action": "synchronize",
-      "Memo": "Pending"
+      "Action": "ignore",
+      "Memo": "Migrated"
     },
     {
       "SourceAdoRepo": "epr-migration-automation",
