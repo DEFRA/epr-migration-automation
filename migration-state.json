@@ -60,8 +60,8 @@
     {
       "SourceAdoRepo": "epr-event-dispatcher-function-app",
       "TargetGitHubRepo": "epr-event-dispatcher-function-app",
-      "Action": "synchronize",
-      "Memo": "Pending"
+      "Action": "ignore",
+      "Memo": "Migrated"
     },
     {
       "SourceAdoRepo": "facade-account-microservice",

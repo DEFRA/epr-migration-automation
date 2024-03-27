@@ -26,10 +26,6 @@ parameters:
       TargetGitHubRepo: epr-data
       Action: synchronize
   - repo:
-      SourceAdoRepo: epr-event-dispatcher-function-app
-      TargetGitHubRepo: epr-event-dispatcher-function-app
-      Action: synchronize
-  - repo:
       SourceAdoRepo: facade-account-microservice
       TargetGitHubRepo: epr-facade-account-microservice
       Action: synchronize
@@ -185,13 +181,6 @@ resources:
     type: git
   - repository: github-epr-data
     name: defra/epr-data
-    type: github
-    endpoint: GitHubMigration
-  - repository: epr-event-dispatcher-function-app
-    name: RWD-CPR-EPR4P-ADO/epr-event-dispatcher-function-app
-    type: git
-  - repository: github-epr-event-dispatcher-function-app
-    name: defra/epr-event-dispatcher-function-app
     type: github
     endpoint: GitHubMigration
   - repository: facade-account-microservice
