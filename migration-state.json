@@ -138,8 +138,8 @@
     {
       "SourceAdoRepo": "epr_pom_func_submission_check_splitter",
       "TargetGitHubRepo": "epr-pom-func-submission-check-splitter",
-      "Action": "synchronize",
-      "Memo": "Pending"
+      "Action": "ignore",
+      "Memo": "Migrated"
     },
     {
       "SourceAdoRepo": "epr-registration-validation-function-app",
