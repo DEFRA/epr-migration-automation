@@ -132,8 +132,8 @@
     {
       "SourceAdoRepo": "epr_pom_func_producer_validation",
       "TargetGitHubRepo": "epr-pom-func-producer-validation",
-      "Action": "synchronize",
-      "Memo": "Pending"
+      "Action": "ignore",
+      "Memo": "Migrated"
     },
     {
       "SourceAdoRepo": "epr_pom_func_submission_check_splitter",
