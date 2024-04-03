@@ -24,8 +24,8 @@
     {
       "SourceAdoRepo": "epr_common",
       "TargetGitHubRepo": "epr-common",
-      "Action": "synchronize",
-      "Memo": "Pending"
+      "Action": "ignore",
+      "Memo": "Migrated"
     },
     {
       "SourceAdoRepo": "epr-common-data-api",
