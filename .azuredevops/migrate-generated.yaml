@@ -22,10 +22,6 @@ parameters:
       TargetGitHubRepo: epr-data
       Action: synchronize
   - repo:
-      SourceAdoRepo: facade-account-microservice
-      TargetGitHubRepo: epr-facade-account-microservice
-      Action: synchronize
-  - repo:
       SourceAdoRepo: frontend-accountcreation-microservice
       TargetGitHubRepo: epr-frontend-accountcreation-microservice
       Action: synchronize
@@ -162,13 +158,6 @@ resources:
     type: git
   - repository: github-epr-data
     name: defra/epr-data
-    type: github
-    endpoint: GitHubMigration
-  - repository: facade-account-microservice
-    name: RWD-CPR-EPR4P-ADO/facade-account-microservice
-    type: git
-  - repository: github-epr-facade-account-microservice
-    name: defra/epr-facade-account-microservice
     type: github
     endpoint: GitHubMigration
   - repository: frontend-accountcreation-microservice
