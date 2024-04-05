@@ -22,10 +22,6 @@ parameters:
       TargetGitHubRepo: epr-data
       Action: synchronize
   - repo:
-      SourceAdoRepo: frontend-accountcreation-microservice
-      TargetGitHubRepo: epr-frontend-accountcreation-microservice
-      Action: synchronize
-  - repo:
       SourceAdoRepo: frontend-accountmanagement-microservice
       TargetGitHubRepo: epr-frontend-accountmanagement-microservice
       Action: synchronize
@@ -158,13 +154,6 @@ resources:
     type: git
   - repository: github-epr-data
     name: defra/epr-data
-    type: github
-    endpoint: GitHubMigration
-  - repository: frontend-accountcreation-microservice
-    name: RWD-CPR-EPR4P-ADO/frontend-accountcreation-microservice
-    type: git
-  - repository: github-epr-frontend-accountcreation-microservice
-    name: defra/epr-frontend-accountcreation-microservice
     type: github
     endpoint: GitHubMigration
   - repository: frontend-accountmanagement-microservice

@@ -72,8 +72,8 @@
     {
       "SourceAdoRepo": "frontend-accountcreation-microservice",
       "TargetGitHubRepo": "epr-frontend-accountcreation-microservice",
-      "Action": "synchronize",
-      "Memo": "Pending"
+      "Action": "ignore",
+      "Memo": "Migrated"
     },
     {
       "SourceAdoRepo": "frontend-accountmanagement-microservice",
