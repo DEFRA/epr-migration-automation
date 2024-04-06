@@ -22,20 +22,12 @@ parameters:
       TargetGitHubRepo: epr-data
       Action: synchronize
   - repo:
-      SourceAdoRepo: frontend-accountmanagement-microservice
-      TargetGitHubRepo: epr-frontend-accountmanagement-microservice
-      Action: synchronize
-  - repo:
       SourceAdoRepo: epr-migration-automation
       TargetGitHubRepo: epr-migration-automation
       Action: synchronize
   - repo:
       SourceAdoRepo: epr-migration-test1
       TargetGitHubRepo: epr-migration-test1
-      Action: synchronize
-  - repo:
-      SourceAdoRepo: epr-migration-test2
-      TargetGitHubRepo: epr-migration-test2
       Action: synchronize
   - repo:
       SourceAdoRepo: epr-obligationchecker-frontend
@@ -156,13 +148,6 @@ resources:
     name: defra/epr-data
     type: github
     endpoint: GitHubMigration
-  - repository: frontend-accountmanagement-microservice
-    name: RWD-CPR-EPR4P-ADO/frontend-accountmanagement-microservice
-    type: git
-  - repository: github-epr-frontend-accountmanagement-microservice
-    name: defra/epr-frontend-accountmanagement-microservice
-    type: github
-    endpoint: GitHubMigration
   - repository: epr-migration-automation
     name: RWD-CPR-EPR4P-ADO/epr-migration-automation
     type: git
@@ -175,13 +160,6 @@ resources:
     type: git
   - repository: github-epr-migration-test1
     name: defra/epr-migration-test1
-    type: github
-    endpoint: GitHubMigration
-  - repository: epr-migration-test2
-    name: RWD-CPR-EPR4P-ADO/epr-migration-test2
-    type: git
-  - repository: github-epr-migration-test2
-    name: defra/epr-migration-test2
     type: github
     endpoint: GitHubMigration
   - repository: epr-obligationchecker-frontend
