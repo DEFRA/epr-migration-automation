@@ -50,10 +50,6 @@ parameters:
       TargetGitHubRepo: epr-registration-validation-function-app
       Action: synchronize
   - repo:
-      SourceAdoRepo: epr-regulator-enrolment-frontend
-      TargetGitHubRepo: epr-regulator-enrolment-frontend
-      Action: synchronize
-  - repo:
       SourceAdoRepo: epr_regulator_service
       TargetGitHubRepo: epr-regulator-service
       Action: synchronize
@@ -195,13 +191,6 @@ resources:
     type: git
   - repository: github-epr-registration-validation-function-app
     name: defra/epr-registration-validation-function-app
-    type: github
-    endpoint: GitHubMigration
-  - repository: epr-regulator-enrolment-frontend
-    name: RWD-CPR-EPR4P-ADO/epr-regulator-enrolment-frontend
-    type: git
-  - repository: github-epr-regulator-enrolment-frontend
-    name: defra/epr-regulator-enrolment-frontend
     type: github
     endpoint: GitHubMigration
   - repository: epr_regulator_service

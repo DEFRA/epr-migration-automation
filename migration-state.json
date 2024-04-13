@@ -150,8 +150,8 @@
     {
       "SourceAdoRepo": "epr-regulator-enrolment-frontend",
       "TargetGitHubRepo": "epr-regulator-enrolment-frontend",
-      "Action": "synchronize",
-      "Memo": "Pending"
+      "Action": "ignore",
+      "Memo": "Migrated"
     },
     {
       "SourceAdoRepo": "epr_regulator_service",
