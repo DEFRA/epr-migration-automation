@@ -14,10 +14,6 @@ parameters:
       TargetGitHubRepo: epr-backend-account-microservice
       Action: synchronize
   - repo:
-      SourceAdoRepo: epr-common-data-api
-      TargetGitHubRepo: epr-common-data-api
-      Action: synchronize
-  - repo:
       SourceAdoRepo: epr-data
       TargetGitHubRepo: epr-data
       Action: synchronize
@@ -48,10 +44,6 @@ parameters:
   - repo:
       SourceAdoRepo: epr-registration-validation-function-app
       TargetGitHubRepo: epr-registration-validation-function-app
-      Action: synchronize
-  - repo:
-      SourceAdoRepo: epr_regulator_service_facade
-      TargetGitHubRepo: epr-regulator-service-facade
       Action: synchronize
   - repo:
       SourceAdoRepo: epr-rpd-performance-tests
@@ -126,13 +118,6 @@ resources:
     name: defra/epr-backend-account-microservice
     type: github
     endpoint: GitHubMigration
-  - repository: epr-common-data-api
-    name: RWD-CPR-EPR4P-ADO/epr-common-data-api
-    type: git
-  - repository: github-epr-common-data-api
-    name: defra/epr-common-data-api
-    type: github
-    endpoint: GitHubMigration
   - repository: epr-data
     name: RWD-CPR-EPR4P-ADO/epr-data
     type: git
@@ -187,13 +172,6 @@ resources:
     type: git
   - repository: github-epr-registration-validation-function-app
     name: defra/epr-registration-validation-function-app
-    type: github
-    endpoint: GitHubMigration
-  - repository: epr_regulator_service_facade
-    name: RWD-CPR-EPR4P-ADO/epr_regulator_service_facade
-    type: git
-  - repository: github-epr-regulator-service-facade
-    name: defra/epr-regulator-service-facade
     type: github
     endpoint: GitHubMigration
   - repository: epr-rpd-performance-tests

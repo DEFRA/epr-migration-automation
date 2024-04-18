@@ -30,8 +30,8 @@
     {
       "SourceAdoRepo": "epr-common-data-api",
       "TargetGitHubRepo": "epr-common-data-api",
-      "Action": "synchronize",
-      "Memo": "Pending"
+      "Action": "ignore",
+      "Memo": "Migrated"
     },
     {
       "SourceAdoRepo": "epr-data",
@@ -162,8 +162,8 @@
     {
       "SourceAdoRepo": "epr_regulator_service_facade",
       "TargetGitHubRepo": "epr-regulator-service-facade",
-      "Action": "synchronize",
-      "Memo": "Pending"
+      "Action": "ignore",
+      "Memo": "Migrated"
     },
     {
       "SourceAdoRepo": "epr-rpd-azure-ad-b2c-styling",
