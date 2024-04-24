@@ -102,7 +102,7 @@
     {
       "SourceAdoRepo": "epr-migration-test2",
       "TargetGitHubRepo": "epr-migration-test2",
-      "Action": "ignore",
+      "Action": "synchronize",
       "Memo": "Migrated"
     },
     {
