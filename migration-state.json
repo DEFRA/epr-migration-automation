@@ -156,7 +156,7 @@
     {
       "SourceAdoRepo": "epr_regulator_service",
       "TargetGitHubRepo": "epr-regulator-service",
-      "Action": "synchronize",
+      "Action": "ignore",
       "Memo": "Migrated"
     },
     {

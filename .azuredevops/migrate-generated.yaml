@@ -54,10 +54,6 @@ parameters:
       TargetGitHubRepo: epr-registration-validation-function-app
       Action: synchronize
   - repo:
-      SourceAdoRepo: epr_regulator_service
-      TargetGitHubRepo: epr-regulator-service
-      Action: synchronize
-  - repo:
       SourceAdoRepo: epr-rpd-performance-tests
       TargetGitHubRepo: epr-rpd-performance-tests
       Action: synchronize
@@ -198,13 +194,6 @@ resources:
     type: git
   - repository: github-epr-registration-validation-function-app
     name: defra/epr-registration-validation-function-app
-    type: github
-    endpoint: GitHubMigration
-  - repository: epr_regulator_service
-    name: RWD-CPR-EPR4P-ADO/epr_regulator_service
-    type: git
-  - repository: github-epr-regulator-service
-    name: defra/epr-regulator-service
     type: github
     endpoint: GitHubMigration
   - repository: epr-rpd-performance-tests
