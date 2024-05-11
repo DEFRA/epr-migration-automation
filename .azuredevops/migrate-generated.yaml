@@ -34,10 +34,6 @@ parameters:
       TargetGitHubRepo: epr-migration-test2
       Action: synchronize
   - repo:
-      SourceAdoRepo: epr-obligationchecker-frontend
-      TargetGitHubRepo: epr-obligationchecker-frontend
-      Action: synchronize
-  - repo:
       SourceAdoRepo: epr_packaging_frontend
       TargetGitHubRepo: epr-packaging-frontend
       Action: synchronize
@@ -159,13 +155,6 @@ resources:
     type: git
   - repository: github-epr-migration-test2
     name: defra/epr-migration-test2
-    type: github
-    endpoint: GitHubMigration
-  - repository: epr-obligationchecker-frontend
-    name: RWD-CPR-EPR4P-ADO/epr-obligationchecker-frontend
-    type: git
-  - repository: github-epr-obligationchecker-frontend
-    name: defra/epr-obligationchecker-frontend
     type: github
     endpoint: GitHubMigration
   - repository: epr_packaging_frontend

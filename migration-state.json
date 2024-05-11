@@ -108,8 +108,8 @@
     {
       "SourceAdoRepo": "epr-obligationchecker-frontend",
       "TargetGitHubRepo": "epr-obligationchecker-frontend",
-      "Action": "synchronize",
-      "Memo": "Pending"
+      "Action": "ignore",
+      "Memo": "Migrated"
     },
     {
       "SourceAdoRepo": "epr_packaging_frontend",
