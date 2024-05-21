@@ -30,7 +30,7 @@
     {
       "SourceAdoRepo": "epr-common-data-api",
       "TargetGitHubRepo": "epr-common-data-api",
-      "Action": "synchronize",
+      "Action": "ignore",
       "Memo": "Migrated"
     },
     {

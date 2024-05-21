@@ -14,10 +14,6 @@ parameters:
       TargetGitHubRepo: epr-backend-account-microservice
       Action: synchronize
   - repo:
-      SourceAdoRepo: epr-common-data-api
-      TargetGitHubRepo: epr-common-data-api
-      Action: synchronize
-  - repo:
       SourceAdoRepo: epr-data
       TargetGitHubRepo: epr-data
       Action: synchronize
@@ -120,13 +116,6 @@ resources:
     type: git
   - repository: github-epr-backend-account-microservice
     name: defra/epr-backend-account-microservice
-    type: github
-    endpoint: GitHubMigration
-  - repository: epr-common-data-api
-    name: RWD-CPR-EPR4P-ADO/epr-common-data-api
-    type: git
-  - repository: github-epr-common-data-api
-    name: defra/epr-common-data-api
     type: github
     endpoint: GitHubMigration
   - repository: epr-data
