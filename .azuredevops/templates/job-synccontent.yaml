@@ -151,6 +151,7 @@ jobs:
       verbose: true
       taskfail: ${{ not(parameters.GitLeaksFailureAsWarning) }}
       uploadresults: false
+      version: 8.18.4
 
   - publish: $(Agent.TempDirectory)/${{ parameters.SourceAdoRepo }}.${{ parameters.GitLeaksReportFormat }}
     artifact: ${{ parameters.GitLeaksReportArtifactName }}-$(System.JobAttempt)
