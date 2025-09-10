@@ -61,7 +61,7 @@ jobs:
     - name: fetchDepth
       value: 1
     - name: gitLeaksScanMode
-      value: nogit
+      value: directory
   - ${{ else }}:
     - name: fetchDepth
       value: 0
@@ -138,7 +138,7 @@ jobs:
       }
     displayName: Update ignore files
 
-  - task: Gitleaks@2
+  - task: Gitleaks@3
     displayName: Gitleaks Scan
     inputs:
       scanmode: ${{ variables.gitLeaksScanMode }}

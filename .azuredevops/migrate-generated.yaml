@@ -6,10 +6,6 @@ parameters:
   type: object
   default:
   - repo:
-      SourceAdoRepo: epr-app-config-settings
-      TargetGitHubRepo: epr-app-config-settings
-      Action: synchronize
-  - repo:
       SourceAdoRepo: backend-account-microservice
       TargetGitHubRepo: epr-backend-account-microservice
       Action: synchronize
@@ -44,14 +40,6 @@ parameters:
   - repo:
       SourceAdoRepo: epr-registration-validation-function-app
       TargetGitHubRepo: epr-registration-validation-function-app
-      Action: synchronize
-  - repo:
-      SourceAdoRepo: epr-rpd-performance-tests
-      TargetGitHubRepo: epr-rpd-performance-tests
-      Action: synchronize
-  - repo:
-      SourceAdoRepo: epr_ui_wdio
-      TargetGitHubRepo: epr-ui-wdio
       Action: synchronize
   - repo:
       SourceAdoRepo: epr-webapps-code-deploy-pipelines
@@ -104,13 +92,6 @@ variables:
   value: ZZZ-Archive-
 resources:
   repositories:
-  - repository: epr-app-config-settings
-    name: RWD-CPR-EPR4P-ADO/epr-app-config-settings
-    type: git
-  - repository: github-epr-app-config-settings
-    name: defra/epr-app-config-settings
-    type: github
-    endpoint: GitHubMigration
   - repository: backend-account-microservice
     name: RWD-CPR-EPR4P-ADO/backend-account-microservice
     type: git
@@ -172,20 +153,6 @@ resources:
     type: git
   - repository: github-epr-registration-validation-function-app
     name: defra/epr-registration-validation-function-app
-    type: github
-    endpoint: GitHubMigration
-  - repository: epr-rpd-performance-tests
-    name: RWD-CPR-EPR4P-ADO/epr-rpd-performance-tests
-    type: git
-  - repository: github-epr-rpd-performance-tests
-    name: defra/epr-rpd-performance-tests
-    type: github
-    endpoint: GitHubMigration
-  - repository: epr_ui_wdio
-    name: RWD-CPR-EPR4P-ADO/epr_ui_wdio
-    type: git
-  - repository: github-epr-ui-wdio
-    name: defra/epr-ui-wdio
     type: github
     endpoint: GitHubMigration
   - repository: epr-webapps-code-deploy-pipelines

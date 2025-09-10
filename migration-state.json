@@ -12,7 +12,7 @@
     {
       "SourceAdoRepo": "epr-app-config-settings",
       "TargetGitHubRepo": "epr-app-config-settings",
-      "Action": "synchronize",
+      "Action": "ignore",
       "Memo": "Pending"
     },
     {
@@ -174,13 +174,13 @@
     {
       "SourceAdoRepo": "epr-rpd-performance-tests",
       "TargetGitHubRepo": "epr-rpd-performance-tests",
-      "Action": "synchronize",
+      "Action": "ignore",
       "Memo": "Pending"
     },
     {
       "SourceAdoRepo": "epr_ui_wdio",
       "TargetGitHubRepo": "epr-ui-wdio",
-      "Action": "synchronize",
+      "Action": "ignore",
       "Memo": "Pending"
     },
     {
