@@ -30,10 +30,6 @@ parameters:
       TargetGitHubRepo: epr-packaging-frontend
       Action: synchronize
   - repo:
-      SourceAdoRepo: epr_pom_api_submission_status
-      TargetGitHubRepo: epr-pom-api-submission-status
-      Action: synchronize
-  - repo:
       SourceAdoRepo: epr_pom_api_web
       TargetGitHubRepo: epr-pom-api-web
       Action: synchronize
@@ -132,13 +128,6 @@ resources:
     type: git
   - repository: github-epr-packaging-frontend
     name: defra/epr-packaging-frontend
-    type: github
-    endpoint: GitHubMigration
-  - repository: epr_pom_api_submission_status
-    name: RWD-CPR-EPR4P-ADO/epr_pom_api_submission_status
-    type: git
-  - repository: github-epr-pom-api-submission-status
-    name: defra/epr-pom-api-submission-status
     type: github
     endpoint: GitHubMigration
   - repository: epr_pom_api_web

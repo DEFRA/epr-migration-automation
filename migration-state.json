@@ -120,8 +120,8 @@
     {
       "SourceAdoRepo": "epr_pom_api_submission_status",
       "TargetGitHubRepo": "epr-pom-api-submission-status",
-      "Action": "synchronize",
-      "Memo": "Pending"
+      "Action": "ignore",
+      "Memo": "Migrated"
     },
     {
       "SourceAdoRepo": "epr_pom_api_web",
