@@ -126,8 +126,8 @@
     {
       "SourceAdoRepo": "epr_pom_api_web",
       "TargetGitHubRepo": "epr-pom-api-web",
-      "Action": "synchronize",
-      "Memo": "Pending"
+      "Action": "ignore",
+      "Memo": "Migrated"
     },
     {
       "SourceAdoRepo": "epr_pom_func_producer_validation",
