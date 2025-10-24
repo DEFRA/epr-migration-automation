@@ -144,8 +144,8 @@
     {
       "SourceAdoRepo": "epr-registration-validation-function-app",
       "TargetGitHubRepo": "epr-registration-validation-function-app",
-      "Action": "synchronize",
-      "Memo": "Pending"
+      "Action": "ignore",
+      "Memo": "Migrated"
     },
     {
       "SourceAdoRepo": "epr-regulator-enrolment-frontend",

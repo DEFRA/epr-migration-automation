@@ -30,10 +30,6 @@ parameters:
       TargetGitHubRepo: epr-packaging-frontend
       Action: synchronize
   - repo:
-      SourceAdoRepo: epr-registration-validation-function-app
-      TargetGitHubRepo: epr-registration-validation-function-app
-      Action: synchronize
-  - repo:
       SourceAdoRepo: epr-webapps-code-deploy-pipelines
       TargetGitHubRepo: epr-webapps-code-deploy-pipelines
       Action: synchronize
@@ -124,13 +120,6 @@ resources:
     type: git
   - repository: github-epr-packaging-frontend
     name: defra/epr-packaging-frontend
-    type: github
-    endpoint: GitHubMigration
-  - repository: epr-registration-validation-function-app
-    name: RWD-CPR-EPR4P-ADO/epr-registration-validation-function-app
-    type: git
-  - repository: github-epr-registration-validation-function-app
-    name: defra/epr-registration-validation-function-app
     type: github
     endpoint: GitHubMigration
   - repository: epr-webapps-code-deploy-pipelines
