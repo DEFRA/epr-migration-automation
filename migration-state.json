@@ -18,8 +18,8 @@
     {
       "SourceAdoRepo": "backend-account-microservice",
       "TargetGitHubRepo": "epr-backend-account-microservice",
-      "Action": "synchronize",
-      "Memo": "Pending"
+      "Action": "ignore",
+      "Memo": "Migrated"
     },
     {
       "SourceAdoRepo": "epr_common",
@@ -114,8 +114,8 @@
     {
       "SourceAdoRepo": "epr_packaging_frontend",
       "TargetGitHubRepo": "epr-packaging-frontend",
-      "Action": "synchronize",
-      "Memo": "Pending"
+      "Action": "ignore",
+      "Memo": "Migrated"
     },
     {
       "SourceAdoRepo": "epr_pom_api_submission_status",

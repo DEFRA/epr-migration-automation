@@ -6,10 +6,6 @@ parameters:
   type: object
   default:
   - repo:
-      SourceAdoRepo: backend-account-microservice
-      TargetGitHubRepo: epr-backend-account-microservice
-      Action: synchronize
-  - repo:
       SourceAdoRepo: epr-data
       TargetGitHubRepo: epr-data
       Action: synchronize
@@ -24,10 +20,6 @@ parameters:
   - repo:
       SourceAdoRepo: epr-migration-test2
       TargetGitHubRepo: epr-migration-test2
-      Action: synchronize
-  - repo:
-      SourceAdoRepo: epr_packaging_frontend
-      TargetGitHubRepo: epr-packaging-frontend
       Action: synchronize
   - repo:
       SourceAdoRepo: epr-webapps-code-deploy-pipelines
@@ -80,13 +72,6 @@ variables:
   value: ZZZ-Archive-
 resources:
   repositories:
-  - repository: backend-account-microservice
-    name: RWD-CPR-EPR4P-ADO/backend-account-microservice
-    type: git
-  - repository: github-epr-backend-account-microservice
-    name: defra/epr-backend-account-microservice
-    type: github
-    endpoint: GitHubMigration
   - repository: epr-data
     name: RWD-CPR-EPR4P-ADO/epr-data
     type: git
@@ -113,13 +98,6 @@ resources:
     type: git
   - repository: github-epr-migration-test2
     name: defra/epr-migration-test2
-    type: github
-    endpoint: GitHubMigration
-  - repository: epr_packaging_frontend
-    name: RWD-CPR-EPR4P-ADO/epr_packaging_frontend
-    type: git
-  - repository: github-epr-packaging-frontend
-    name: defra/epr-packaging-frontend
     type: github
     endpoint: GitHubMigration
   - repository: epr-webapps-code-deploy-pipelines
